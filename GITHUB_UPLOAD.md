@@ -1,8 +1,8 @@
-# Subir ControlPro Advisor OS V10 a GitHub
+# Subir ControlPro Advisor OS V11 a GitHub
 
 ## Recomendación para este proyecto
 
-No elimines el repositorio V9 que ya está conectado a Render. Lo correcto es actualizar el mismo repo con un commit V10, para conservar el link público y el historial.
+No elimines el repositorio V9 que ya está conectado a Render. Lo correcto es actualizar el mismo repo con un commit V11, para conservar el link público y el historial.
 
 Repo actual recomendado:
 
@@ -10,7 +10,7 @@ Repo actual recomendado:
 controlpro-advisor-os-v9-pricetrust-closing
 ```
 
-La carpeta local puede llamarse `controlpro_advisor_os_v10_architecture_lock`, pero el repo de Render puede seguir siendo el mismo.
+La carpeta local puede llamarse `controlpro_advisor_os_v11_workshop_lock`, pero el repo de Render puede seguir siendo el mismo.
 
 ## Si vas a actualizar el repo existente
 
@@ -27,7 +27,7 @@ cd C:\AGENTES\controlpro_advisor_os_v9_pricetrust_closing
 
 git status
 git add .
-git commit -m "Actualizar a ControlPro V10 Architecture Lock"
+git commit -m "Actualizar a ControlPro V11 Workshop Lock"
 git push
 ```
 
@@ -36,12 +36,12 @@ Render desplegará automáticamente el nuevo commit si el auto-deploy está acti
 ## Si quieres crear repo nuevo
 
 ```powershell
-cd C:\AGENTES\controlpro_advisor_os_v10_architecture_lock
+cd C:\AGENTES\controlpro_advisor_os_v11_workshop_lock
 
 git init
 git branch -M main
 git add .
-git commit -m "Publicar ControlPro Advisor OS V10 Architecture Lock"
+git commit -m "Publicar ControlPro Advisor OS V11 Workshop Lock"
 
-gh repo create controlpro-advisor-os-v10-architecture-lock --public --source=. --remote=origin --push
+gh repo create controlpro-advisor-os-v10-workshop-lock --public --source=. --remote=origin --push
 ```

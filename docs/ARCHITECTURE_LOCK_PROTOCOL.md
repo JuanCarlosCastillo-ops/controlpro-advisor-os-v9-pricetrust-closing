@@ -1,6 +1,6 @@
-# ControlPro V10 - Architecture Lock Protocol
+# ControlPro V11 - Workshop Lock Protocol
 
-La V10 corrige el error crítico detectado en la exportación: una arquitectura recomendada no puede generar un BOM de otra arquitectura.
+La V11 corrige el error crítico detectado en la exportación: una arquitectura recomendada no puede generar un BOM de otra arquitectura.
 
 ## Regla central
 

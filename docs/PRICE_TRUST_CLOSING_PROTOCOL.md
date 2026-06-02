@@ -1,4 +1,4 @@
-# ControlPro V10 - Architecture Lock Protocol
+# ControlPro V11 - Workshop Lock Protocol
 
 Objetivo: que la app no entregue precios basura en cotizaciones de miles de dólares.
 

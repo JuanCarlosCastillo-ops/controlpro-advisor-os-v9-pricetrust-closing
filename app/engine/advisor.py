@@ -8,8 +8,8 @@ from .pricing import decide_prices, generate_rfq_message, summarize_market, load
 from .cad import single_line_cad_svg, control_ladder_cad_svg, panel_layout_cad_svg, terminal_schedule, wire_schedule, drawio_xml
 from app.integrations.config import integration_status
 
-VERSION = "10.0-architecture-lock"
-PRODUCT = "ControlPro Advisor OS V10 Architecture Lock"
+VERSION = "11.0-workshop-lock"
+PRODUCT = "ControlPro Advisor OS V11 Workshop Lock"
 
 
 def example_intake() -> Dict[str, Any]:
@@ -130,7 +130,7 @@ def _starter_by_id(alternatives: List[Dict[str, Any]], starter_id: str) -> Dict[
 def _select_architecture(i: ProjectIntake, alternatives: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Selecciona arquitectura antes de armar BOM.
 
-    Regla crítica V10: la solución recomendada, el BOM y la propuesta al cliente
+    Regla crítica V11: la solución recomendada, el BOM y la propuesta al cliente
     deben hablar el mismo idioma. Si el caso es izaje, estrella-triángulo no se
     recomienda por defecto porque puede requerir torque y control fino.
     """
@@ -546,7 +546,7 @@ def _engineer_review_board(i: ProjectIntake, release: Dict[str, Any], market_sum
         {"perfil": "Seguridad/supervisor", "lo_que_exigia": "No liberar construcción si hay riesgo crítico.", "respuesta_v10": "Construction gate separado de quote gate; aprobación humana obligatoria.", "estado": "feliz: no promete construcción automática"},
     ]
     return {
-        "veredicto": "La V10 Architecture Lock está lista para prueba piloto cerrada con ingenieros: el humano revisa, no reconstruye.",
+        "veredicto": "La V11 Workshop Lock está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
         "quote_score": quote["score_percent"],
         "personas": personas,
         "regla_de_venta": "Vender ahorro de tiempo y expediente técnico-comercial trazable, no certificación automática.",
@@ -626,7 +626,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
     output_contract = _output_quality_contract(release, quote)
 
     pack = EngineeringPack(
-        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con Architecture Lock"},
+        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con Workshop Lock"},
         intake=i.model_dump(),
         executive_verdict={
             "headline": "Cotización industrial inteligente: menos datos, más expediente, cero certezas falsas.",
@@ -644,7 +644,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
             "summary": market_summary,
             "price_decisions": [d.model_dump() for d in decisions],
             "supplier_count": len(market_summary["suppliers_used"]),
-            "method": "PriceGuard 10 + Architecture Lock: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
+            "method": "PriceGuard 11 + Workshop Lock: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
             "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
             "priceguard_methodology": priceguard_methodology(),
             "architecture_lock": architecture,
@@ -659,12 +659,12 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
             "fallas_comunes": ["No arranca: revisar control, E-Stop, térmico y bobina", "Dispara térmico: medir corriente, carga mecánica y ajuste", "Gira al revés: invertir dos fases con procedimiento seguro", "Freno no libera: verificar tensión/rectificador/secuencia", "Final no actúa: probar continuidad y posición mecánica"],
         },
         diagrams={
-            "single_line_svg": single_line_cad_svg(i, calculations),
-            "control_ladder_svg": control_ladder_cad_svg(i),
-            "panel_preview_svg": panel_layout_cad_svg(i, [r.model_dump() for r in requirements]),
-            "single_line_legacy_svg": _single_line_svg(i, calculations),
-            "control_ladder_legacy_svg": _control_svg(i),
-            "panel_preview_legacy_svg": _panel_svg(),
+            "single_line_svg": single_line_cad_svg(i, calculations, architecture),
+            "control_ladder_svg": control_ladder_cad_svg(i, architecture),
+            "panel_preview_svg": panel_layout_cad_svg(i, [r.model_dump() for r in requirements], architecture),
+            "single_line_legacy_svg": single_line_cad_svg(i, calculations, architecture),
+            "control_ladder_legacy_svg": control_ladder_cad_svg(i, architecture),
+            "panel_preview_legacy_svg": panel_layout_cad_svg(i, [r.model_dump() for r in requirements], architecture),
         },
         statistics={
             "engineering_completeness_percent": completeness,
@@ -730,8 +730,8 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
             "single_line_sheet": "E-001",
             "control_ladder_sheet": "E-002",
             "panel_layout_sheet": "E-003",
-            "terminal_schedule": terminal_schedule(i),
-            "wire_schedule": wire_schedule(i, calculations),
+            "terminal_schedule": terminal_schedule(i, architecture),
+            "wire_schedule": wire_schedule(i, calculations, architecture),
             "drawio_available": True,
             "upgrade_rule": "Antes de fabricar, convertir a CAD final con marcas/modelos reales, numeración congelada, revisión de SCCR/kAIC y firma responsable.",
         },
@@ -783,7 +783,7 @@ def export_pack_markdown(payload: Dict[str, Any] | ProjectIntake) -> str:
     lines.append(pack['recommended_option']['why'])
     if pack.get("starter_intelligence", {}).get("architecture_lock"):
         arch = pack["starter_intelligence"]["architecture_lock"]
-        lines.append(f"Architecture Lock: **{arch.get('architecture_id', arch.get('id',''))}** · {arch.get('architecture_reason','')}")
+        lines.append(f"Workshop Lock: **{arch.get('architecture_id', arch.get('id',''))}** · {arch.get('architecture_reason','')}")
         for w in arch.get('architecture_warnings', []):
             lines.append(f"- Advertencia arquitectura: {w}")
     lines.append("")

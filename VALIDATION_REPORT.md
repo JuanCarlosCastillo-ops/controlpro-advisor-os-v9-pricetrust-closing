@@ -1,50 +1,36 @@
-# Validation Report — ControlPro Advisor OS V10 Architecture Lock
+# Validation Report — ControlPro Advisor OS V11 Workshop Lock
 
 ## Resultado
 
+VALIDATION OK.
+
+## Pruebas ejecutadas
+
 ```text
+PYTHONPATH=. python -m compileall app scripts tests -q
+PYTHONPATH=. python scripts/validate_project.py
+PYTHONPATH=. pytest -q
+```
+
+## Métricas del caso demo
+
 VALIDATION OK
 Engineering completeness: 97.8%
 Market coverage: 100.0%
 RFQ items: 1
 PriceGuard: 83.0%
-Recommended sell price: $5595.20
-9 tests passed
-```
+Recommended sell price: $5595.2
 
-## Corrección crítica V10
+## Corrección crítica V11
 
-La V10 incorpora **Architecture Lock**:
+La V11 incorpora **Workshop Lock**:
 
-- La solución recomendada se define antes del BOM.
-- El BOM se genera desde esa arquitectura.
-- La propuesta cliente y el PDF heredan la misma arquitectura.
-- La auditoría de coherencia bloquea mezclas como `estrella-triángulo + VFD/reactor/resistencia`.
-- Para guinches/izaje, estrella-triángulo no se recomienda por defecto; se orienta a VFD + control inteligente si el caso es profesional, con freno, finales y muchas maniobras.
+- Si la arquitectura recomendada es `vfd_smart`, los diagramas CAD-like, Draw.io, lista de borneras y lista de cables dejan de usar `KM1/KM2` como inversión principal.
+- Para VFD, la fuerza queda como `QF-01 -> K1/VFD-01 -> MTR-01`.
+- Para VFD, el control queda como pulsadores/finales a entradas digitales del VFD y liberación de freno coordinada.
+- Para contactores, se mantiene `KM1/KM2` únicamente cuando la arquitectura principal es `dol_reversing`.
+- Para estrella-triángulo, se usa `KM-L/KM-Y/KM-Δ` únicamente en arquitectura `star_delta`.
 
-## Caso demo guinche
+## PDF
 
-```text
-Solución recomendada: Variador + control inteligente
-Architecture ID: vfd_smart
-BOM incluye: VFD, reactor de línea, resistencia de frenado, contactor de línea/seguridad, freno, finales, E-Stop, monitor de fase y cableado.
-Coherencia arquitectura-BOM: OK
-Construcción automática: NO liberada
-```
-
-## Endpoints cubiertos
-
-- `/api/health`
-- `/api/example`
-- `/api/generate`
-- `/api/export/markdown`
-- `/api/export/client-proposal`
-- `/api/export/bom-csv`
-- `/api/export/bom-xlsx`
-- `/api/export/pdf`
-- `/api/export/cad/*`
-- `/api/integrations/status`
-
-## Límite profesional
-
-ControlPro reduce tiempo, ordena el expediente y baja la carga de corrección; no reemplaza normativa local, verificación de campo, proveedor confirmado ni aprobación humana antes de fabricar o energizar.
+Se renderizó el PDF de muestra a imágenes para confirmar que no estuviera roto o cortado.

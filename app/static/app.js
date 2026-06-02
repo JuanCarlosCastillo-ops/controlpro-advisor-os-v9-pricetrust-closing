@@ -149,7 +149,7 @@ function renderGuidedFlow(pack){
 function renderReviewBoard(pack){
   const board = pack.review_board || {};
   const personas = board.personas || [];
-  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V10 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
+  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V11 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
 }
 
 function renderCalculations(pack){

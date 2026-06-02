@@ -42,7 +42,7 @@ def test_output_contains_traceability_sections():
     assert data['review_board']['veredicto']
     assert data['cad_outputs']['wire_schedule']
     assert data['cad_outputs']['drawio_available'] is True
-    assert data['priceguard']['methodology']['name'] == 'PriceGuard 10'
+    assert data['priceguard']['methodology']['name'] == 'PriceGuard 11'
     assert data['premium_document_contract']['pdf']
 
 
@@ -59,3 +59,19 @@ def test_hoist_architecture_lock_aligns_recommendation_and_bom():
     assert 'star_delta_timer' not in ids
     assert 'star_contactor' not in ids
     assert any(c['name'] == 'Coherencia arquitectura-BOM' and c['status'] == 'ok' for c in data['consistency_audit']['checks'])
+
+
+def test_vfd_workshop_lock_aligns_cad_outputs():
+    payload = client.get('/api/example').json()
+    r = client.post('/api/generate', json=payload)
+    assert r.status_code == 200
+    data = r.json()
+    assert data['recommended_option']['architecture_id'] == 'vfd_smart'
+    terminal_text = ' '.join(str(x) for row in data['cad_outputs']['terminal_schedule'] for x in row.values())
+    wire_text = ' '.join(str(x) for row in data['cad_outputs']['wire_schedule'] for x in row.values())
+    assert 'VFD' in terminal_text
+    assert 'VFD-01' in wire_text
+    assert 'KM1 coil' not in terminal_text
+    assert 'KM2 coil' not in terminal_text
+    assert 'KM1/KM2' not in wire_text
+    assert 'QF-01' in wire_text and 'VFD-01' in wire_text and 'MTR-01' in wire_text

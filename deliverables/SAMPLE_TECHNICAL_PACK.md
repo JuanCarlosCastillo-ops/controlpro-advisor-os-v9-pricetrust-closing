@@ -1,9 +1,9 @@
-# ControlPro Advisor OS V10 Architecture Lock — Expediente técnico-comercial
+# ControlPro Advisor OS V11 Workshop Lock — Expediente técnico-comercial
 
 **Proyecto:** Guinche de izaje — Cotización técnica premium
 **Cliente:** Cliente industrial
 **Ubicación:** Zaruma, El Oro, Ecuador
-**Generado:** 2026-06-02T17:15:10.221653+00:00
+**Generado:** 2026-06-02T18:33:08.211292+00:00
 
 ## Veredicto ejecutivo
 El sistema guía la entrada, genera solución, cálculos, BOM normalizado, precios por confianza, RFQ, presupuesto, riesgos, compuertas de calidad, exportables y acciones pendientes para que el ingeniero revise en vez de reconstruir.
@@ -55,7 +55,7 @@ Liberación construcción: **No liberada para construcción automática**
 ## Solución recomendada
 **Variador + control inteligente** — Premium para rampas, diagnóstico, control, crecimiento y diferenciación técnica.
 Seleccionada por coherencia arquitectura-BOM, seguridad de aplicación, presión de cotización y valor comercial defendible.
-Architecture Lock: **vfd_smart** · Aplicación de izaje detectada: carga suspendida, inversión, freno y finales de carrera elevan el riesgo. Para guinche profesional/premium o muchas maniobras, VFD + control inteligente alinea mejor control, rampa, diagnóstico y protección mecánica.
+Workshop Lock: **vfd_smart** · Aplicación de izaje detectada: carga suspendida, inversión, freno y finales de carrera elevan el riesgo. Para guinche profesional/premium o muchas maniobras, VFD + control inteligente alinea mejor control, rampa, diagnóstico y protección mecánica.
 
 ## BOM cotizable
 - **mccb_main** · Cant. 1.0 · Schneider EasyPact CVS 60A 25kA · ElectroIndustrial Guayaquil · $145.0 · confianza alta · PriceGuard: VERDE (88.0%). Schneider EasyPact CVS 60A 25kA, ElectroIndustrial Guayaquil, Guayaquil.
@@ -118,15 +118,17 @@ Gracias.
 - **TB1-01** · W101 · T1 secondary L+ → S0 STOP NC · Alimentación control
 - **TB1-02** · W102 · S0 STOP NC → S-ESTOP NC · Cadena de paro
 - **TB1-03** · W103 · S-ESTOP NC → CR coil · Permisivo maestro
-- **TB1-04** · W201 · S1 SUBIR → KM1 coil · Orden subir
-- **TB1-05** · W301 · S2 BAJAR → KM2 coil · Orden bajar
-- **TB1-06** · W401 · KM1/KM2 aux → BRK · Liberación freno
-- **TB1-07** · W501 · OL/FM → ALM · Alarma/falla
-- **TB1-08** · W000 · Control common → L- · Retorno control
+- **TB1-04** · W201 · S1 SUBIR → VFD DI1 FWD/UP · Orden subir por entrada digital
+- **TB1-05** · W301 · S2 BAJAR → VFD DI2 REV/DOWN · Orden bajar por entrada digital
+- **TB1-06** · W401 · VFD RO1 RUN/BRK → BRK · Liberación de freno coordinada
+- **TB1-07** · W501 · VFD FAULT / FM → ALM · Alarma/falla variador o fase
+- **TB1-08** · W601 · LS-UP/LS-DN → VFD DI3/DI4 permissive · Finales de carrera a entradas/permisivos
+- **TB1-99** · W000 · Control common → L- · Retorno control
 
 ### Lista preliminar de cables
-- **C-PWR-01** · QF-01 → KM1/KM2 · 3F+PE · #8 AWG Cu · 5.6 m
-- **C-MTR-01** · OL-01 → MTR-01 · 3F+PE · #8 AWG Cu · 53.1 m
+- **C-PWR-01** · QF-01 → K1/VFD-01 · 3F+PE · #8 AWG Cu · 5.6 m
+- **C-MTR-01** · VFD-01 → MTR-01 · 3F+PE · #8 AWG Cu · 53.1 m
+- **C-BRK-01** · VFD/BRK-CTRL → Freno · 2C+PE · #16/#14 AWG según placa · 47.2 m
 - **C-CNT-01** · TB1 → Botonera · 8C · #16 AWG Cu · 8.0 m
 - **C-LS-01** · TB1 → Final carrera sup/inf · 4C · #16 AWG Cu · 12.0 m
 
@@ -139,7 +141,7 @@ Gracias.
 - **Ambiente severo** (Media): Seleccionar gabinete y componentes según ambiente declarado: Interior industrial con polvo.
 
 ## Mesa simulada de ingenieros
-La V10 Architecture Lock está lista para prueba piloto cerrada con ingenieros: el humano revisa, no reconstruye.
+La V11 Workshop Lock está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.
 - **Ingeniero junior**: feliz para piloto · Flujo guiado, modo rápido, semáforo de precisión y compuertas de salida.
 - **Técnico tablerista**: feliz para piloto · BOM normalizado por categoría, tabla cotizable, CSV/XLSX y notas de riesgo por componente.
 - **Mantenimiento industrial**: feliz para piloto · Checklist de taller/campo, plan de verificación y diagnóstico de fallas típicas.
