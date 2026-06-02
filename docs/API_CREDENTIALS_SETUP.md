@@ -1,4 +1,4 @@
-# ControlPro Advisor OS V9 — Activación de credenciales reales
+# ControlPro Advisor OS V10 — Activación de credenciales reales
 
 Esta versión queda lista para activar APIs reales sin tocar el núcleo del producto. Por seguridad, la app funciona por defecto en modo **offline/catálogo interno** y no finge precios en vivo.
 

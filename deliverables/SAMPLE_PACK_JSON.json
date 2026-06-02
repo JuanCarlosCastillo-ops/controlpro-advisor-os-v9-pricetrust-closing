@@ -1,10 +1,10 @@
 {
   "meta": {
-    "product": "ControlPro Advisor OS V9 PriceTrust Closing",
-    "version": "9.0-pricetrust-closing",
-    "generated_at": "2026-06-02T01:00:17.585249+00:00",
+    "product": "ControlPro Advisor OS V10 Architecture Lock",
+    "version": "10.0-architecture-lock",
+    "generated_at": "2026-06-02T17:15:10.195454+00:00",
     "language": "es",
-    "release_type": "pilot release cerrado para mesa de ingenieros"
+    "release_type": "pilot release con Architecture Lock"
   },
   "intake": {
     "project_name": "Guinche de izaje — Cotización técnica premium",
@@ -239,46 +239,65 @@
     {
       "component_id": "contactor_fwd",
       "category": "Fuerza",
-      "item": "Contactor subir",
+      "item": "Contactor de línea / seguridad para VFD",
       "qty": 1.0,
       "unit": "u",
-      "spec": "AC-3, corriente mínima >= 30.4 A, bobina 120 V",
+      "spec": "AC-3, corriente >= 30.4 A, bobina 120 V; no usado para invertir fases",
       "must_have": true,
       "critical_checks": [
         "AC-3",
         "bobina",
-        "corriente"
+        "coordinación con VFD"
       ],
-      "risk_note": "Verificar compatibilidad con enclavamiento."
+      "risk_note": "En VFD la inversión no se hace con dos contactores; se controla por entradas/lógica del variador."
     },
     {
-      "component_id": "contactor_rev",
+      "component_id": "vfd",
       "category": "Fuerza",
-      "item": "Contactor bajar",
+      "item": "Variador de frecuencia",
       "qty": 1.0,
       "unit": "u",
-      "spec": "AC-3, corriente mínima >= 30.4 A, bobina 120 V",
+      "spec": "Para 25 HP, 460 V, heavy duty, con parametrización para izaje si aplica",
       "must_have": true,
       "critical_checks": [
-        "AC-3",
-        "bobina",
-        "corriente"
+        "corriente",
+        "freno",
+        "resistencia",
+        "rampas",
+        "parametrización"
       ],
-      "risk_note": "Verificar compatibilidad con enclavamiento."
+      "risk_note": "No reemplaza freno mecánico ni finales de carrera; requiere comisionamiento."
     },
     {
-      "component_id": "mechanical_interlock",
-      "category": "Seguridad",
-      "item": "Enclavamiento mecánico",
+      "component_id": "line_reactor",
+      "category": "Fuerza",
+      "item": "Reactor de línea",
       "qty": 1.0,
       "unit": "u",
-      "spec": "Compatible con ambos contactores de inversión",
-      "must_have": true,
+      "spec": "3%, 460 V, corriente compatible con 30.4 A",
+      "must_have": false,
       "critical_checks": [
-        "compatibilidad física",
-        "bloqueo real"
+        "corriente",
+        "tensión",
+        "temperatura"
       ],
-      "risk_note": "Obligatorio para evitar inversión simultánea."
+      "risk_note": "Mejora robustez de variador/red; validar necesidad según instalación."
+    },
+    {
+      "component_id": "braking_resistor",
+      "category": "Fuerza",
+      "item": "Resistencia de frenado",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Dimensionar por ciclo de carga, energía de frenado y especificación del VFD",
+      "must_have": false,
+      "critical_checks": [
+        "ohmios",
+        "watts",
+        "ciclo",
+        "ventilación"
+      ],
+      "risk_note": "En izaje no usar genérica sin cálculo térmico y validación del fabricante."
     },
     {
       "component_id": "phase_monitor",
@@ -384,54 +403,6 @@
         "secuencia lógica"
       ],
       "risk_note": "No comprar sin confirmar placa del freno."
-    },
-    {
-      "component_id": "vfd",
-      "category": "Fuerza",
-      "item": "Variador de frecuencia",
-      "qty": 1.0,
-      "unit": "u",
-      "spec": "Para 25 HP, 460 V, heavy duty, con criterio de frenado y seguridad",
-      "must_have": false,
-      "critical_checks": [
-        "corriente",
-        "freno",
-        "resistencia",
-        "seguridad",
-        "parametrización"
-      ],
-      "risk_note": "Opción premium; no reemplaza seguridad de izaje por sí sola."
-    },
-    {
-      "component_id": "line_reactor",
-      "category": "Fuerza",
-      "item": "Reactor de línea",
-      "qty": 1.0,
-      "unit": "u",
-      "spec": "3%, 460 V, corriente compatible con 30.4 A",
-      "must_have": false,
-      "critical_checks": [
-        "corriente",
-        "tensión",
-        "temperatura"
-      ],
-      "risk_note": "Mejora robustez de variador/red; validar necesidad según instalación."
-    },
-    {
-      "component_id": "braking_resistor",
-      "category": "Fuerza",
-      "item": "Resistencia de frenado",
-      "qty": 1.0,
-      "unit": "u",
-      "spec": "Dimensionar por ciclo de carga, energía de frenado y especificación del VFD",
-      "must_have": false,
-      "critical_checks": [
-        "ohmios",
-        "watts",
-        "ciclo",
-        "ventilación"
-      ],
-      "risk_note": "En izaje no usar genérica sin cálculo térmico y validación del fabricante."
     },
     {
       "component_id": "label_package",
@@ -582,27 +553,30 @@
     }
   ],
   "recommended_option": {
-    "id": "star_delta",
-    "name": "Estrella-triángulo",
-    "fit": "Reduce corriente de arranque en motores aptos y cargas con bajo torque inicial.",
-    "how_it_works": "Arranca el motor en estrella para bajar tensión/corriente y luego conmuta a triángulo para operación normal.",
-    "better_when": "Motores con seis terminales accesibles, carga liviana al arranque y red sensible a picos.",
-    "price_impact": "Costo medio por tres contactores, temporizador y más cableado. No sirve si la carga necesita alto torque inicial.",
-    "initial_cost": "Medio",
-    "control_quality": 62,
-    "safety_depth": 64,
-    "complexity": 62,
-    "risk": "Puede fallar si el motor/carga no es apto; conmutación mal ajustada genera golpes eléctricos/mecánicos.",
-    "sell_when": "Cliente pide reducción de corriente sin llegar a soft starter/variador y el motor lo permite.",
-    "why": "Seleccionada por equilibrio entre seguridad, tiempo de cotización, control del riesgo y valor comercial defendible."
+    "id": "vfd_smart",
+    "name": "Variador + control inteligente",
+    "fit": "Premium para rampas, diagnóstico, control, crecimiento y diferenciación técnica.",
+    "how_it_works": "Controla frecuencia/tensión del motor, limita corriente, permite rampas, alarmas y lógica más avanzada. En izaje exige coordinación con freno y seguridad.",
+    "better_when": "Equipo crítico, muchas maniobras, necesidad de control suave o propuesta de alta confiabilidad.",
+    "price_impact": "Mayor costo inicial por VFD, reactor, resistencia, parametrización y pruebas. Puede reducir paradas, reclamos y desgaste.",
+    "initial_cost": "Alto",
+    "control_quality": 95,
+    "safety_depth": 90,
+    "complexity": 78,
+    "risk": "Requiere parametrización, revisión de freno, compatibilidad EMC y pruebas de seguridad.",
+    "sell_when": "Cliente valora confiabilidad, control, diagnóstico y menor riesgo operativo.",
+    "architecture_id": "vfd_smart",
+    "architecture_reason": "Aplicación de izaje detectada: carga suspendida, inversión, freno y finales de carrera elevan el riesgo. Para guinche profesional/premium o muchas maniobras, VFD + control inteligente alinea mejor control, rampa, diagnóstico y protección mecánica.",
+    "architecture_warnings": [],
+    "why": "Seleccionada por coherencia arquitectura-BOM, seguridad de aplicación, presión de cotización y valor comercial defendible."
   },
   "market": {
     "summary": {
-      "materials_cost": 2963.59,
-      "items_with_price": 19,
-      "total_items": 19,
+      "materials_cost": 2854.59,
+      "items_with_price": 17,
+      "total_items": 17,
       "coverage_percent": 100.0,
-      "high_confidence_items": 16,
+      "high_confidence_items": 14,
       "needs_rfq_count": 1,
       "suppliers_used": [
         "Automatización Andina",
@@ -614,16 +588,16 @@
       "quote_needed_components": [
         "braking_resistor"
       ],
-      "priceguard_score_percent": 83.8,
-      "green_count": 17,
+      "priceguard_score_percent": 83.0,
+      "green_count": 15,
       "yellow_count": 1,
       "red_count": 1,
       "outlier_count": 1,
       "auto_corrected_count": 1,
-      "catalog_depth_score_percent": 94.7,
+      "catalog_depth_score_percent": 94.1,
       "candidate_offer_audit": {
-        "total_candidate_offers": 58,
-        "suspicious_low_rejected": 4,
+        "total_candidate_offers": 51,
+        "suspicious_low_rejected": 3,
         "suspicious_high_flagged": 0,
         "expired_rejected": 0,
         "weak_source_flagged": 5,
@@ -651,48 +625,6 @@
             ]
           },
           {
-            "component_id": "contactor_rev",
-            "supplier": "Suministros El Oro",
-            "brand_model": "Chint NC1-3210 120V",
-            "price_usd": 43.0,
-            "market_median": 85.0,
-            "flags": [
-              "precio sospechosamente bajo"
-            ]
-          },
-          {
-            "component_id": "cabinet",
-            "supplier": "Marketplace Referencial",
-            "brand_model": "Genérico GAB-604025",
-            "price_usd": 79.0,
-            "market_median": 135.0,
-            "flags": [
-              "stock no confirmado",
-              "fuente débil"
-            ]
-          },
-          {
-            "component_id": "brake_rectifier",
-            "supplier": "Automatización Andina",
-            "brand_model": "Kendrion BR120-2A",
-            "price_usd": 118.0,
-            "market_median": 118.0,
-            "flags": [
-              "stock no confirmado"
-            ]
-          },
-          {
-            "component_id": "brake_rectifier",
-            "supplier": "Marketplace Referencial",
-            "brand_model": "Genérico BR-120",
-            "price_usd": 48.0,
-            "market_median": 118.0,
-            "flags": [
-              "stock no confirmado",
-              "fuente débil"
-            ]
-          },
-          {
             "component_id": "vfd",
             "supplier": "Automatización Andina",
             "brand_model": "Schneider ATV930D18N4",
@@ -711,11 +643,53 @@
             "flags": [
               "precio sospechosamente bajo"
             ]
+          },
+          {
+            "component_id": "line_reactor",
+            "supplier": "Automatización Andina",
+            "brand_model": "MTE RL-025HP-460",
+            "price_usd": 245.0,
+            "market_median": 206.5,
+            "flags": [
+              "stock no confirmado"
+            ]
+          },
+          {
+            "component_id": "braking_resistor",
+            "supplier": "Automatización Andina",
+            "brand_model": "Danfoss BR-25HP",
+            "price_usd": 310.0,
+            "market_median": 247.5,
+            "flags": [
+              "stock no confirmado"
+            ]
+          },
+          {
+            "component_id": "braking_resistor",
+            "supplier": "Marketplace Referencial",
+            "brand_model": "Genérico industrial DBR-25HP",
+            "price_usd": 185.0,
+            "market_median": 247.5,
+            "flags": [
+              "stock no confirmado",
+              "fuente débil"
+            ]
+          },
+          {
+            "component_id": "cabinet",
+            "supplier": "Marketplace Referencial",
+            "brand_model": "Genérico GAB-604025",
+            "price_usd": 79.0,
+            "market_median": 135.0,
+            "flags": [
+              "stock no confirmado",
+              "fuente débil"
+            ]
           }
         ],
         "policy": "El motor audita también ofertas no seleccionadas para no caer en precio barato falso ni precio inflado fuera de banda."
       },
-      "locked_price_count": 16,
+      "locked_price_count": 14,
       "referential_price_count": 1,
       "blocked_price_count": 1,
       "priceguard_verdict": "Revisable con RFQ",
@@ -1074,232 +1048,299 @@
         "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
         "auto_corrected": false,
         "rfq_priority": "baja",
-        "price_explanation": "Contactor subir: se compara precio unitario contra banda catálogo min 43.0 / mediana 85.0 / max 98.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+        "price_explanation": "Contactor de línea / seguridad para VFD: se compara precio unitario contra banda catálogo min 43.0 / mediana 85.0 / max 98.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
       },
       {
-        "component_id": "contactor_rev",
+        "component_id": "vfd",
         "selected_offer": {
-          "component_id": "contactor_rev",
+          "component_id": "vfd",
           "category": "Fuerza",
-          "description": "Contactor AC-3 32A bobina 120VAC",
-          "brand": "Schneider",
-          "model": "LC1D32G7",
-          "supplier_id": "SUP-001",
-          "supplier_name": "ElectroIndustrial Guayaquil",
-          "city": "Guayaquil",
-          "price_usd": 82.0,
+          "description": "Variador 25HP 460V 3F",
+          "brand": "ABB",
+          "model": "ACS580-01-039A-4",
+          "supplier_id": "SUP-003",
+          "supplier_name": "Cuenca Control Supply",
+          "city": "Cuenca",
+          "price_usd": 1180.0,
           "stock_status": "available",
-          "lead_time_days": 2,
-          "confidence": 0.9,
-          "source_type": "confirmed",
+          "lead_time_days": 5,
+          "confidence": 0.8,
+          "source_type": "reference",
           "valid_until": "2026-08-31",
           "url": "",
-          "notes": "Bajar/reversa",
-          "score": 1.683
+          "notes": "Confirmar brake chopper",
+          "score": 1.348
         },
         "offers": [
           {
-            "component_id": "contactor_rev",
+            "component_id": "vfd",
             "category": "Fuerza",
-            "description": "Contactor AC-3 32A bobina 120VAC",
-            "brand": "Schneider",
-            "model": "LC1D32G7",
-            "supplier_id": "SUP-001",
-            "supplier_name": "ElectroIndustrial Guayaquil",
-            "city": "Guayaquil",
-            "price_usd": 82.0,
+            "description": "Variador 25HP 460V 3F",
+            "brand": "ABB",
+            "model": "ACS580-01-039A-4",
+            "supplier_id": "SUP-003",
+            "supplier_name": "Cuenca Control Supply",
+            "city": "Cuenca",
+            "price_usd": 1180.0,
             "stock_status": "available",
-            "lead_time_days": 2,
-            "confidence": 0.9,
-            "source_type": "confirmed",
+            "lead_time_days": 5,
+            "confidence": 0.8,
+            "source_type": "reference",
             "valid_until": "2026-08-31",
             "url": "",
-            "notes": "Bajar/reversa",
-            "score": 1.683
+            "notes": "Confirmar brake chopper",
+            "score": 1.348
           },
           {
-            "component_id": "contactor_rev",
+            "component_id": "vfd",
             "category": "Fuerza",
-            "description": "Contactor AC-3 32A bobina 120VAC",
+            "description": "Variador 25HP 460V precio alto",
             "brand": "Siemens",
-            "model": "3RT2035-1AP00",
+            "model": "G120C",
             "supplier_id": "SUP-007",
             "supplier_name": "Proveedor Premium Quito",
             "city": "Quito",
-            "price_usd": 98.0,
+            "price_usd": 1860.0,
             "stock_status": "available",
-            "lead_time_days": 5,
-            "confidence": 0.84,
-            "source_type": "reference",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Premium",
-            "score": 1.405
-          },
-          {
-            "component_id": "contactor_rev",
-            "category": "Fuerza",
-            "description": "Contactor AC-3 32A bobina 120VAC",
-            "brand": "ABB",
-            "model": "AF38-30-00-11",
-            "supplier_id": "SUP-003",
-            "supplier_name": "Cuenca Control Supply",
-            "city": "Cuenca",
-            "price_usd": 88.0,
-            "stock_status": "available",
-            "lead_time_days": 4,
-            "confidence": 0.82,
-            "source_type": "reference",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Verificar bobina exacta",
-            "score": 1.389
-          },
-          {
-            "component_id": "contactor_rev",
-            "category": "Fuerza",
-            "description": "Contactor AC-3 32A bobina 120VAC",
-            "brand": "Chint",
-            "model": "NC1-3210 120V",
-            "supplier_id": "SUP-004",
-            "supplier_name": "Suministros El Oro",
-            "city": "Machala",
-            "price_usd": 43.0,
-            "stock_status": "available",
-            "lead_time_days": 1,
-            "confidence": 0.73,
-            "source_type": "reference",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Opción económica",
-            "score": 1.164
-          }
-        ],
-        "qty": 1.0,
-        "unit_cost": 82.0,
-        "extended_cost": 82.0,
-        "price_type": "confirmado",
-        "confidence_label": "alta",
-        "decision_note": "PriceGuard: VERDE (91.4%). Schneider LC1D32G7, ElectroIndustrial Guayaquil, Guayaquil.",
-        "semaphore_color": "verde",
-        "priceguard_score": 91.4,
-        "market_band": {
-          "min": 43.0,
-          "p25": 72.25,
-          "median": 85.0,
-          "p75": 90.5,
-          "max": 98.0,
-          "sample_size": 4,
-          "spread_percent": 64.7
-        },
-        "anomaly_flags": [],
-        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
-        "auto_corrected": false,
-        "rfq_priority": "baja",
-        "price_explanation": "Contactor bajar: se compara precio unitario contra banda catálogo min 43.0 / mediana 85.0 / max 98.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
-      },
-      {
-        "component_id": "mechanical_interlock",
-        "selected_offer": {
-          "component_id": "mechanical_interlock",
-          "category": "Seguridad",
-          "description": "Enclavamiento mecánico compatible LC1D/AF/NC1",
-          "brand": "Schneider",
-          "model": "LAD9R1V",
-          "supplier_id": "SUP-001",
-          "supplier_name": "ElectroIndustrial Guayaquil",
-          "city": "Guayaquil",
-          "price_usd": 27.0,
-          "stock_status": "available",
-          "lead_time_days": 2,
-          "confidence": 0.88,
-          "source_type": "confirmed",
-          "valid_until": "2026-08-31",
-          "url": "",
-          "notes": "Debe coincidir con contactores",
-          "score": 1.643
-        },
-        "offers": [
-          {
-            "component_id": "mechanical_interlock",
-            "category": "Seguridad",
-            "description": "Enclavamiento mecánico compatible LC1D/AF/NC1",
-            "brand": "Schneider",
-            "model": "LAD9R1V",
-            "supplier_id": "SUP-001",
-            "supplier_name": "ElectroIndustrial Guayaquil",
-            "city": "Guayaquil",
-            "price_usd": 27.0,
-            "stock_status": "available",
-            "lead_time_days": 2,
-            "confidence": 0.88,
-            "source_type": "confirmed",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Debe coincidir con contactores",
-            "score": 1.643
-          },
-          {
-            "component_id": "mechanical_interlock",
-            "category": "Seguridad",
-            "description": "Enclavamiento mecánico compatible ABB",
-            "brand": "ABB",
-            "model": "VM4",
-            "supplier_id": "SUP-003",
-            "supplier_name": "Cuenca Control Supply",
-            "city": "Cuenca",
-            "price_usd": 31.0,
-            "stock_status": "available",
-            "lead_time_days": 4,
+            "lead_time_days": 6,
             "confidence": 0.78,
             "source_type": "reference",
             "valid_until": "2026-08-31",
             "url": "",
-            "notes": "Verificar serie AF",
-            "score": 1.333
+            "notes": "Premium; outlier alto",
+            "score": 1.332
           },
           {
-            "component_id": "mechanical_interlock",
-            "category": "Seguridad",
-            "description": "Enclavamiento mecánico Chint",
-            "brand": "Chint",
-            "model": "NC1-Interlock",
-            "supplier_id": "SUP-004",
-            "supplier_name": "Suministros El Oro",
-            "city": "Machala",
-            "price_usd": 16.0,
-            "stock_status": "available",
-            "lead_time_days": 1,
-            "confidence": 0.7,
+            "component_id": "vfd",
+            "category": "Fuerza",
+            "description": "Variador 25HP 460V 3F heavy duty",
+            "brand": "Schneider",
+            "model": "ATV930D18N4",
+            "supplier_id": "SUP-002",
+            "supplier_name": "Automatización Andina",
+            "city": "Quito",
+            "price_usd": 1280.0,
+            "stock_status": "quote_needed",
+            "lead_time_days": 6,
+            "confidence": 0.78,
             "source_type": "reference",
             "valid_until": "2026-08-31",
             "url": "",
-            "notes": "Económico",
-            "score": 1.337
+            "notes": "Validar aplicación de izaje",
+            "score": 1.025
+          },
+          {
+            "component_id": "vfd",
+            "category": "Fuerza",
+            "description": "Variador 25HP 460V 3F",
+            "brand": "INVT",
+            "model": "GD200A-022G/030P-4",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 690.0,
+            "stock_status": "available",
+            "lead_time_days": 3,
+            "confidence": 0.72,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Económico; validar torque/freno",
+            "score": 1.134
           }
         ],
         "qty": 1.0,
-        "unit_cost": 27.0,
-        "extended_cost": 27.0,
-        "price_type": "confirmado",
-        "confidence_label": "alta",
-        "decision_note": "PriceGuard: VERDE (88.2%). Schneider LAD9R1V, ElectroIndustrial Guayaquil, Guayaquil.",
+        "unit_cost": 1180.0,
+        "extended_cost": 1180.0,
+        "price_type": "referencial fuerte",
+        "confidence_label": "media-alta",
+        "decision_note": "PriceGuard: VERDE (80.7%). ABB ACS580-01-039A-4, Cuenca Control Supply, Cuenca.",
         "semaphore_color": "verde",
-        "priceguard_score": 88.2,
+        "priceguard_score": 80.7,
         "market_band": {
-          "min": 16.0,
-          "p25": 16.0,
-          "median": 27.0,
-          "p75": 31.0,
-          "max": 31.0,
-          "sample_size": 3,
-          "spread_percent": 55.6
+          "min": 690.0,
+          "p25": 1057.5,
+          "median": 1230.0,
+          "p75": 1425.0,
+          "max": 1860.0,
+          "sample_size": 4,
+          "spread_percent": 95.1
         },
         "anomaly_flags": [],
         "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
         "auto_corrected": false,
         "rfq_priority": "baja",
-        "price_explanation": "Enclavamiento mecánico: se compara precio unitario contra banda catálogo min 16.0 / mediana 27.0 / max 31.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+        "price_explanation": "Variador de frecuencia: se compara precio unitario contra banda catálogo min 690.0 / mediana 1230.0 / max 1860.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "line_reactor",
+        "selected_offer": {
+          "component_id": "line_reactor",
+          "category": "Fuerza",
+          "description": "Reactor línea 3% 460V",
+          "brand": "Genérico industrial",
+          "model": "LR-25HP-460",
+          "supplier_id": "SUP-004",
+          "supplier_name": "Suministros El Oro",
+          "city": "Machala",
+          "price_usd": 168.0,
+          "stock_status": "available",
+          "lead_time_days": 4,
+          "confidence": 0.68,
+          "source_type": "reference",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Verificar corriente",
+          "score": 1.278
+        },
+        "offers": [
+          {
+            "component_id": "line_reactor",
+            "category": "Fuerza",
+            "description": "Reactor línea 3% 460V",
+            "brand": "Genérico industrial",
+            "model": "LR-25HP-460",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 168.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.68,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Verificar corriente",
+            "score": 1.278
+          },
+          {
+            "component_id": "line_reactor",
+            "category": "Fuerza",
+            "description": "Reactor de línea 3% 460V 25HP",
+            "brand": "MTE",
+            "model": "RL-025HP-460",
+            "supplier_id": "SUP-002",
+            "supplier_name": "Automatización Andina",
+            "city": "Quito",
+            "price_usd": 245.0,
+            "stock_status": "quote_needed",
+            "lead_time_days": 6,
+            "confidence": 0.72,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Recomendado con VFD",
+            "score": 0.945
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 168.0,
+        "extended_cost": 168.0,
+        "price_type": "referencial",
+        "confidence_label": "media",
+        "decision_note": "PriceGuard: AMARILLO (75.0%). Genérico industrial LR-25HP-460, Suministros El Oro, Machala.",
+        "semaphore_color": "amarillo",
+        "priceguard_score": 75.0,
+        "market_band": {
+          "min": 168.0,
+          "p25": 168.0,
+          "median": 206.5,
+          "p75": 245.0,
+          "max": 245.0,
+          "sample_size": 2,
+          "spread_percent": 37.3
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar como referencia; enviar RFQ si el proyecto es sensible a precio o plazo.",
+        "auto_corrected": false,
+        "rfq_priority": "media",
+        "price_explanation": "Reactor de línea: se compara precio unitario contra banda catálogo min 168.0 / mediana 206.5 / max 245.0 USD. Semáforo amarillo. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "braking_resistor",
+        "selected_offer": {
+          "component_id": "braking_resistor",
+          "category": "Fuerza",
+          "description": "Resistencia de frenado para VFD 25HP",
+          "brand": "Danfoss",
+          "model": "BR-25HP",
+          "supplier_id": "SUP-002",
+          "supplier_name": "Automatización Andina",
+          "city": "Quito",
+          "price_usd": 310.0,
+          "stock_status": "quote_needed",
+          "lead_time_days": 6,
+          "confidence": 0.7,
+          "source_type": "reference",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Dimensionar por ciclo de carga",
+          "score": 0.925
+        },
+        "offers": [
+          {
+            "component_id": "braking_resistor",
+            "category": "Fuerza",
+            "description": "Resistencia de frenado para VFD 25HP",
+            "brand": "Danfoss",
+            "model": "BR-25HP",
+            "supplier_id": "SUP-002",
+            "supplier_name": "Automatización Andina",
+            "city": "Quito",
+            "price_usd": 310.0,
+            "stock_status": "quote_needed",
+            "lead_time_days": 6,
+            "confidence": 0.7,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Dimensionar por ciclo de carga",
+            "score": 0.925
+          },
+          {
+            "component_id": "braking_resistor",
+            "category": "Fuerza",
+            "description": "Resistencia frenado 25HP",
+            "brand": "Genérico industrial",
+            "model": "DBR-25HP",
+            "supplier_id": "SUP-008",
+            "supplier_name": "Marketplace Referencial",
+            "city": "Ecuador",
+            "price_usd": 185.0,
+            "stock_status": "unknown",
+            "lead_time_days": 9,
+            "confidence": 0.55,
+            "source_type": "marketplace",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Validar watts/ohmios",
+            "score": 0.57
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 247.5,
+        "extended_cost": 247.5,
+        "price_type": "estimado corregido",
+        "confidence_label": "baja",
+        "decision_note": "PriceGuard: ROJO (50.8%). Danfoss BR-25HP, Automatización Andina, Quito. Alertas: stock no confirmado. Se aplicó autocorrección por banda de mercado.",
+        "semaphore_color": "rojo",
+        "priceguard_score": 50.8,
+        "market_band": {
+          "min": 185.0,
+          "p25": 185.0,
+          "median": 247.5,
+          "p75": 310.0,
+          "max": 310.0,
+          "sample_size": 2,
+          "spread_percent": 50.5
+        },
+        "anomaly_flags": [
+          "stock no confirmado"
+        ],
+        "action_required": "Precio fuera de confianza. Usar mediana temporal y enviar RFQ a varios proveedores.",
+        "auto_corrected": true,
+        "rfq_priority": "alta",
+        "price_explanation": "Resistencia de frenado: se compara precio unitario contra banda catálogo min 185.0 / mediana 247.5 / max 310.0 USD. Semáforo rojo. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
       },
       {
         "component_id": "phase_monitor",
@@ -2023,298 +2064,6 @@
         "price_explanation": "Control/rectificador de freno: se compara precio unitario contra banda catálogo min 48.0 / mediana 118.0 / max 142.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
       },
       {
-        "component_id": "vfd",
-        "selected_offer": {
-          "component_id": "vfd",
-          "category": "Fuerza",
-          "description": "Variador 25HP 460V 3F",
-          "brand": "ABB",
-          "model": "ACS580-01-039A-4",
-          "supplier_id": "SUP-003",
-          "supplier_name": "Cuenca Control Supply",
-          "city": "Cuenca",
-          "price_usd": 1180.0,
-          "stock_status": "available",
-          "lead_time_days": 5,
-          "confidence": 0.8,
-          "source_type": "reference",
-          "valid_until": "2026-08-31",
-          "url": "",
-          "notes": "Confirmar brake chopper",
-          "score": 1.348
-        },
-        "offers": [
-          {
-            "component_id": "vfd",
-            "category": "Fuerza",
-            "description": "Variador 25HP 460V 3F",
-            "brand": "ABB",
-            "model": "ACS580-01-039A-4",
-            "supplier_id": "SUP-003",
-            "supplier_name": "Cuenca Control Supply",
-            "city": "Cuenca",
-            "price_usd": 1180.0,
-            "stock_status": "available",
-            "lead_time_days": 5,
-            "confidence": 0.8,
-            "source_type": "reference",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Confirmar brake chopper",
-            "score": 1.348
-          },
-          {
-            "component_id": "vfd",
-            "category": "Fuerza",
-            "description": "Variador 25HP 460V precio alto",
-            "brand": "Siemens",
-            "model": "G120C",
-            "supplier_id": "SUP-007",
-            "supplier_name": "Proveedor Premium Quito",
-            "city": "Quito",
-            "price_usd": 1860.0,
-            "stock_status": "available",
-            "lead_time_days": 6,
-            "confidence": 0.78,
-            "source_type": "reference",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Premium; outlier alto",
-            "score": 1.332
-          },
-          {
-            "component_id": "vfd",
-            "category": "Fuerza",
-            "description": "Variador 25HP 460V 3F heavy duty",
-            "brand": "Schneider",
-            "model": "ATV930D18N4",
-            "supplier_id": "SUP-002",
-            "supplier_name": "Automatización Andina",
-            "city": "Quito",
-            "price_usd": 1280.0,
-            "stock_status": "quote_needed",
-            "lead_time_days": 6,
-            "confidence": 0.78,
-            "source_type": "reference",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Validar aplicación de izaje",
-            "score": 1.025
-          },
-          {
-            "component_id": "vfd",
-            "category": "Fuerza",
-            "description": "Variador 25HP 460V 3F",
-            "brand": "INVT",
-            "model": "GD200A-022G/030P-4",
-            "supplier_id": "SUP-004",
-            "supplier_name": "Suministros El Oro",
-            "city": "Machala",
-            "price_usd": 690.0,
-            "stock_status": "available",
-            "lead_time_days": 3,
-            "confidence": 0.72,
-            "source_type": "reference",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Económico; validar torque/freno",
-            "score": 1.134
-          }
-        ],
-        "qty": 1.0,
-        "unit_cost": 1180.0,
-        "extended_cost": 1180.0,
-        "price_type": "referencial fuerte",
-        "confidence_label": "media-alta",
-        "decision_note": "PriceGuard: VERDE (80.7%). ABB ACS580-01-039A-4, Cuenca Control Supply, Cuenca.",
-        "semaphore_color": "verde",
-        "priceguard_score": 80.7,
-        "market_band": {
-          "min": 690.0,
-          "p25": 1057.5,
-          "median": 1230.0,
-          "p75": 1425.0,
-          "max": 1860.0,
-          "sample_size": 4,
-          "spread_percent": 95.1
-        },
-        "anomaly_flags": [],
-        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
-        "auto_corrected": false,
-        "rfq_priority": "baja",
-        "price_explanation": "Variador de frecuencia: se compara precio unitario contra banda catálogo min 690.0 / mediana 1230.0 / max 1860.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
-      },
-      {
-        "component_id": "line_reactor",
-        "selected_offer": {
-          "component_id": "line_reactor",
-          "category": "Fuerza",
-          "description": "Reactor línea 3% 460V",
-          "brand": "Genérico industrial",
-          "model": "LR-25HP-460",
-          "supplier_id": "SUP-004",
-          "supplier_name": "Suministros El Oro",
-          "city": "Machala",
-          "price_usd": 168.0,
-          "stock_status": "available",
-          "lead_time_days": 4,
-          "confidence": 0.68,
-          "source_type": "reference",
-          "valid_until": "2026-08-31",
-          "url": "",
-          "notes": "Verificar corriente",
-          "score": 1.278
-        },
-        "offers": [
-          {
-            "component_id": "line_reactor",
-            "category": "Fuerza",
-            "description": "Reactor línea 3% 460V",
-            "brand": "Genérico industrial",
-            "model": "LR-25HP-460",
-            "supplier_id": "SUP-004",
-            "supplier_name": "Suministros El Oro",
-            "city": "Machala",
-            "price_usd": 168.0,
-            "stock_status": "available",
-            "lead_time_days": 4,
-            "confidence": 0.68,
-            "source_type": "reference",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Verificar corriente",
-            "score": 1.278
-          },
-          {
-            "component_id": "line_reactor",
-            "category": "Fuerza",
-            "description": "Reactor de línea 3% 460V 25HP",
-            "brand": "MTE",
-            "model": "RL-025HP-460",
-            "supplier_id": "SUP-002",
-            "supplier_name": "Automatización Andina",
-            "city": "Quito",
-            "price_usd": 245.0,
-            "stock_status": "quote_needed",
-            "lead_time_days": 6,
-            "confidence": 0.72,
-            "source_type": "reference",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Recomendado con VFD",
-            "score": 0.945
-          }
-        ],
-        "qty": 1.0,
-        "unit_cost": 168.0,
-        "extended_cost": 168.0,
-        "price_type": "referencial",
-        "confidence_label": "media",
-        "decision_note": "PriceGuard: AMARILLO (75.0%). Genérico industrial LR-25HP-460, Suministros El Oro, Machala.",
-        "semaphore_color": "amarillo",
-        "priceguard_score": 75.0,
-        "market_band": {
-          "min": 168.0,
-          "p25": 168.0,
-          "median": 206.5,
-          "p75": 245.0,
-          "max": 245.0,
-          "sample_size": 2,
-          "spread_percent": 37.3
-        },
-        "anomaly_flags": [],
-        "action_required": "Usar como referencia; enviar RFQ si el proyecto es sensible a precio o plazo.",
-        "auto_corrected": false,
-        "rfq_priority": "media",
-        "price_explanation": "Reactor de línea: se compara precio unitario contra banda catálogo min 168.0 / mediana 206.5 / max 245.0 USD. Semáforo amarillo. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
-      },
-      {
-        "component_id": "braking_resistor",
-        "selected_offer": {
-          "component_id": "braking_resistor",
-          "category": "Fuerza",
-          "description": "Resistencia de frenado para VFD 25HP",
-          "brand": "Danfoss",
-          "model": "BR-25HP",
-          "supplier_id": "SUP-002",
-          "supplier_name": "Automatización Andina",
-          "city": "Quito",
-          "price_usd": 310.0,
-          "stock_status": "quote_needed",
-          "lead_time_days": 6,
-          "confidence": 0.7,
-          "source_type": "reference",
-          "valid_until": "2026-08-31",
-          "url": "",
-          "notes": "Dimensionar por ciclo de carga",
-          "score": 0.925
-        },
-        "offers": [
-          {
-            "component_id": "braking_resistor",
-            "category": "Fuerza",
-            "description": "Resistencia de frenado para VFD 25HP",
-            "brand": "Danfoss",
-            "model": "BR-25HP",
-            "supplier_id": "SUP-002",
-            "supplier_name": "Automatización Andina",
-            "city": "Quito",
-            "price_usd": 310.0,
-            "stock_status": "quote_needed",
-            "lead_time_days": 6,
-            "confidence": 0.7,
-            "source_type": "reference",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Dimensionar por ciclo de carga",
-            "score": 0.925
-          },
-          {
-            "component_id": "braking_resistor",
-            "category": "Fuerza",
-            "description": "Resistencia frenado 25HP",
-            "brand": "Genérico industrial",
-            "model": "DBR-25HP",
-            "supplier_id": "SUP-008",
-            "supplier_name": "Marketplace Referencial",
-            "city": "Ecuador",
-            "price_usd": 185.0,
-            "stock_status": "unknown",
-            "lead_time_days": 9,
-            "confidence": 0.55,
-            "source_type": "marketplace",
-            "valid_until": "2026-08-31",
-            "url": "",
-            "notes": "Validar watts/ohmios",
-            "score": 0.57
-          }
-        ],
-        "qty": 1.0,
-        "unit_cost": 247.5,
-        "extended_cost": 247.5,
-        "price_type": "estimado corregido",
-        "confidence_label": "baja",
-        "decision_note": "PriceGuard: ROJO (50.8%). Danfoss BR-25HP, Automatización Andina, Quito. Alertas: stock no confirmado. Se aplicó autocorrección por banda de mercado.",
-        "semaphore_color": "rojo",
-        "priceguard_score": 50.8,
-        "market_band": {
-          "min": 185.0,
-          "p25": 185.0,
-          "median": 247.5,
-          "p75": 310.0,
-          "max": 310.0,
-          "sample_size": 2,
-          "spread_percent": 50.5
-        },
-        "anomaly_flags": [
-          "stock no confirmado"
-        ],
-        "action_required": "Precio fuera de confianza. Usar mediana temporal y enviar RFQ a varios proveedores.",
-        "auto_corrected": true,
-        "rfq_priority": "alta",
-        "price_explanation": "Resistencia de frenado: se compara precio unitario contra banda catálogo min 185.0 / mediana 247.5 / max 310.0 USD. Semáforo rojo. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
-      },
-      {
         "component_id": "label_package",
         "selected_offer": {
           "component_id": "label_package",
@@ -2709,11 +2458,11 @@
       }
     ],
     "supplier_count": 5,
-    "method": "PriceGuard 9: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
+    "method": "PriceGuard 10 + Architecture Lock: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
     "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
     "priceguard_methodology": {
-      "name": "PriceGuard 9",
-      "goal": "Evitar cotizaciones débiles, precios exagerados, precios demasiado bajos/incompatibles y falsas certezas antes de presupuestar trabajos de miles de dólares.",
+      "name": "PriceGuard 10",
+      "goal": "Evitar cotizaciones débiles, precios exagerados, precios incompatibles, BOM incoherente con la arquitectura y falsas certezas antes de presupuestar trabajos de miles de dólares.",
       "inputs": [
         "catálogo interno",
         "fuente de precio",
@@ -2737,24 +2486,43 @@
         "No fingir mercado real si las APIs están sin credenciales.",
         "Mostrar catálogo piloto separado de mercado vivo.",
         "Auditar todas las ofertas candidatas, no solo la seleccionada.",
+        "Forzar coherencia: solución recomendada, BOM, RFQ, PDF y propuesta deben usar la misma arquitectura.",
         "Separar precio estimado, referencial, referencial fuerte y confirmado.",
         "Bloquear salida fuerte cuando hay demasiados rojos o stock sin confirmar."
       ]
+    },
+    "architecture_lock": {
+      "id": "vfd_smart",
+      "name": "Variador + control inteligente",
+      "fit": "Premium para rampas, diagnóstico, control, crecimiento y diferenciación técnica.",
+      "how_it_works": "Controla frecuencia/tensión del motor, limita corriente, permite rampas, alarmas y lógica más avanzada. En izaje exige coordinación con freno y seguridad.",
+      "better_when": "Equipo crítico, muchas maniobras, necesidad de control suave o propuesta de alta confiabilidad.",
+      "price_impact": "Mayor costo inicial por VFD, reactor, resistencia, parametrización y pruebas. Puede reducir paradas, reclamos y desgaste.",
+      "initial_cost": "Alto",
+      "control_quality": 95,
+      "safety_depth": 90,
+      "complexity": 78,
+      "risk": "Requiere parametrización, revisión de freno, compatibilidad EMC y pruebas de seguridad.",
+      "sell_when": "Cliente valora confiabilidad, control, diagnóstico y menor riesgo operativo.",
+      "architecture_id": "vfd_smart",
+      "architecture_reason": "Aplicación de izaje detectada: carga suspendida, inversión, freno y finales de carrera elevan el riesgo. Para guinche profesional/premium o muchas maniobras, VFD + control inteligente alinea mejor control, rampa, diagnóstico y protección mecánica.",
+      "architecture_warnings": [],
+      "why": "Seleccionada por coherencia arquitectura-BOM, seguridad de aplicación, presión de cotización y valor comercial defendible."
     }
   },
   "budget": {
-    "materials": 2963.59,
+    "materials": 2854.59,
     "panel_labor": 270.0,
     "field_labor": 330.0,
     "engineering": 570.0,
     "transport_logistics": 120.0,
-    "contingency": 340.29,
-    "margin": 1148.47,
-    "floor_price": 5145.14,
-    "recommended_sell_price": 5742.35,
-    "premium_price": 7005.66,
+    "contingency": 331.57,
+    "margin": 1119.04,
+    "floor_price": 5013.3,
+    "recommended_sell_price": 5595.2,
+    "premium_price": 6826.14,
     "price_confidence": "media-alta",
-    "priceguard_status": "PriceGuard 83.8% · verde 17 · amarillo 1 · rojo 1",
+    "priceguard_status": "PriceGuard 83.0% · verde 15 · amarillo 1 · rojo 1",
     "commercial_note": "Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia."
   },
   "risks": [
@@ -2854,17 +2622,17 @@
     "commercial_savings_message": "Ahorra horas de búsqueda, normalización de BOM, armado de RFQ, presupuesto y documento para cliente.",
     "deliverables_ready": 15,
     "rfq_required_items": 1,
-    "priceguard_score_percent": 83.8,
-    "priceguard_green": 17,
+    "priceguard_score_percent": 83.0,
+    "priceguard_green": 15,
     "priceguard_yellow": 1,
     "priceguard_red": 1,
     "priceguard_verdict": "Revisable con RFQ",
-    "locked_price_count": 16,
+    "locked_price_count": 14,
     "referential_price_count": 1,
     "blocked_price_count": 1,
     "candidate_offer_audit": {
-      "total_candidate_offers": 58,
-      "suspicious_low_rejected": 4,
+      "total_candidate_offers": 51,
+      "suspicious_low_rejected": 3,
       "suspicious_high_flagged": 0,
       "expired_rejected": 0,
       "weak_source_flagged": 5,
@@ -2892,48 +2660,6 @@
           ]
         },
         {
-          "component_id": "contactor_rev",
-          "supplier": "Suministros El Oro",
-          "brand_model": "Chint NC1-3210 120V",
-          "price_usd": 43.0,
-          "market_median": 85.0,
-          "flags": [
-            "precio sospechosamente bajo"
-          ]
-        },
-        {
-          "component_id": "cabinet",
-          "supplier": "Marketplace Referencial",
-          "brand_model": "Genérico GAB-604025",
-          "price_usd": 79.0,
-          "market_median": 135.0,
-          "flags": [
-            "stock no confirmado",
-            "fuente débil"
-          ]
-        },
-        {
-          "component_id": "brake_rectifier",
-          "supplier": "Automatización Andina",
-          "brand_model": "Kendrion BR120-2A",
-          "price_usd": 118.0,
-          "market_median": 118.0,
-          "flags": [
-            "stock no confirmado"
-          ]
-        },
-        {
-          "component_id": "brake_rectifier",
-          "supplier": "Marketplace Referencial",
-          "brand_model": "Genérico BR-120",
-          "price_usd": 48.0,
-          "market_median": 118.0,
-          "flags": [
-            "stock no confirmado",
-            "fuente débil"
-          ]
-        },
-        {
           "component_id": "vfd",
           "supplier": "Automatización Andina",
           "brand_model": "Schneider ATV930D18N4",
@@ -2952,6 +2678,48 @@
           "flags": [
             "precio sospechosamente bajo"
           ]
+        },
+        {
+          "component_id": "line_reactor",
+          "supplier": "Automatización Andina",
+          "brand_model": "MTE RL-025HP-460",
+          "price_usd": 245.0,
+          "market_median": 206.5,
+          "flags": [
+            "stock no confirmado"
+          ]
+        },
+        {
+          "component_id": "braking_resistor",
+          "supplier": "Automatización Andina",
+          "brand_model": "Danfoss BR-25HP",
+          "price_usd": 310.0,
+          "market_median": 247.5,
+          "flags": [
+            "stock no confirmado"
+          ]
+        },
+        {
+          "component_id": "braking_resistor",
+          "supplier": "Marketplace Referencial",
+          "brand_model": "Genérico industrial DBR-25HP",
+          "price_usd": 185.0,
+          "market_median": 247.5,
+          "flags": [
+            "stock no confirmado",
+            "fuente débil"
+          ]
+        },
+        {
+          "component_id": "cabinet",
+          "supplier": "Marketplace Referencial",
+          "brand_model": "Genérico GAB-604025",
+          "price_usd": 79.0,
+          "market_median": 135.0,
+          "flags": [
+            "stock no confirmado",
+            "fuente débil"
+          ]
         }
       ],
       "policy": "El motor audita también ofertas no seleccionadas para no caer en precio barato falso ni precio inflado fuera de banda."
@@ -2959,7 +2727,7 @@
     "price_outliers": 1,
     "auto_corrected_prices": 1,
     "execution_days_estimate": "2–4 días con materiales disponibles",
-    "quote_readiness_score": 95.4
+    "quote_readiness_score": 95.3
   },
   "deliverables": [
     {
@@ -3063,7 +2831,7 @@
     },
     {
       "topic": "Precio de materiales",
-      "assumption": "Cobertura catálogo 100.0%; PriceGuard 83.8%; verdes 17, amarillos 1, rojos 1; RFQ requerido en 1 ítems.",
+      "assumption": "Cobertura catálogo 100.0%; PriceGuard 83.0%; verdes 15, amarillos 1, rojos 1; RFQ requerido en 1 ítems.",
       "confidence": "según fuente",
       "verification": "Confirmar stock/vigencia; el precio 100% cerrado solo existe con proveedor confirmado."
     },
@@ -3116,6 +2884,20 @@
         "severity": "alta",
         "detail": "No se declaró corriente de cortocircuito disponible.",
         "action": "Cotizar con advertencia; no liberar fabricación hasta verificar kAIC/SCCR."
+      },
+      {
+        "name": "Coherencia arquitectura-BOM",
+        "status": "ok",
+        "severity": "alta",
+        "detail": "Arquitectura vfd_smart coincide con el BOM generado.",
+        "action": "Mantener regla: una arquitectura recomendada = un BOM principal coherente."
+      },
+      {
+        "name": "Regla especial guinche/izaje",
+        "status": "ok",
+        "severity": "alta",
+        "detail": "Arquitectura vfd_smart evita recomendar estrella-triángulo por defecto en carga suspendida.",
+        "action": "Validar freno, finales, E-Stop, rampas y pruebas antes de construir."
       }
     ],
     "blockers": []
@@ -3159,7 +2941,7 @@
     "construction_verdict": "No liberada para construcción automática"
   },
   "quote_readiness": {
-    "score_percent": 95.4,
+    "score_percent": 95.3,
     "status": "Alta: lista para propuesta piloto revisable",
     "seller_message": "Ahorra tiempo porque arma el 80–90% del expediente; el humano valida, no reconstruye.",
     "do_not_send_if": []
@@ -3199,49 +2981,49 @@
   "qa_scorecard": {
     "data_score": 96.0,
     "consistency_score": 100,
-    "quote_score": 95.4,
+    "quote_score": 95.3,
     "release_gate_passed": true,
     "construction_gate_passed": false,
     "principle": "Métricas altas no eliminan aprobación humana; reducen corrección y tiempo perdido."
   },
   "review_board": {
-    "veredicto": "La V9 está lista para prueba piloto cerrada con ingenieros: el humano revisa, no reconstruye.",
-    "quote_score": 95.4,
+    "veredicto": "La V10 Architecture Lock está lista para prueba piloto cerrada con ingenieros: el humano revisa, no reconstruye.",
+    "quote_score": 95.3,
     "personas": [
       {
         "perfil": "Ingeniero junior",
         "lo_que_exigia": "Guía paso a paso, ejemplos y bloqueo si faltan datos.",
-        "respuesta_v9": "Flujo guiado, modo rápido, semáforo de precisión y compuertas de salida.",
+        "respuesta_v10": "Flujo guiado, modo rápido, semáforo de precisión y compuertas de salida.",
         "estado": "feliz para piloto"
       },
       {
         "perfil": "Técnico tablerista",
         "lo_que_exigia": "BOM aterrizado, categorías, chequeos críticos y materiales editables.",
-        "respuesta_v9": "BOM normalizado por categoría, tabla cotizable, CSV/XLSX y notas de riesgo por componente.",
+        "respuesta_v10": "BOM normalizado por categoría, tabla cotizable, CSV/XLSX y notas de riesgo por componente.",
         "estado": "feliz para piloto"
       },
       {
         "perfil": "Mantenimiento industrial",
         "lo_que_exigia": "Plan de pruebas, fallas comunes y entrega sin improvisación.",
-        "respuesta_v9": "Checklist de taller/campo, plan de verificación y diagnóstico de fallas típicas.",
+        "respuesta_v10": "Checklist de taller/campo, plan de verificación y diagnóstico de fallas típicas.",
         "estado": "feliz para piloto"
       },
       {
         "perfil": "Diseñador eléctrico",
         "lo_que_exigia": "Trazabilidad, supuestos, auditoría, compuertas y documentos formales.",
-        "respuesta_v9": "Libro de supuestos, auditoría de coherencia, export PDF, Markdown y bloqueo SCCR/kAIC.",
+        "respuesta_v10": "Libro de supuestos, auditoría de coherencia, export PDF, Markdown y bloqueo SCCR/kAIC.",
         "estado": "Satisfecho para piloto"
       },
       {
         "perfil": "Cotizador/compras",
         "lo_que_exigia": "Precios por confianza, proveedores, RFQ y exportación a Excel.",
-        "respuesta_v9": "Market engine, price confidence, RFQ, CSV/XLSX BOM y fuente/vigencia por línea.",
+        "respuesta_v10": "Market engine, price confidence, RFQ, CSV/XLSX BOM y fuente/vigencia por línea.",
         "estado": "feliz para piloto"
       },
       {
         "perfil": "Seguridad/supervisor",
         "lo_que_exigia": "No liberar construcción si hay riesgo crítico.",
-        "respuesta_v9": "Construction gate separado de quote gate; aprobación humana obligatoria.",
+        "respuesta_v10": "Construction gate separado de quote gate; aprobación humana obligatoria.",
         "estado": "feliz: no promete construcción automática"
       }
     ],
@@ -3265,7 +3047,7 @@
     "next_best_actions": [
       "Si no se conoce, marcar SCCR/kAIC como pendiente y no liberar construcción."
     ],
-    "market_status": "19/19 materiales tienen precio; PriceGuard 83.8%; verdes 17, amarillos 1, rojos 1; 1 requieren RFQ."
+    "market_status": "17/17 materiales tienen precio; PriceGuard 83.0%; verdes 15, amarillos 1, rojos 1; 1 requieren RFQ."
   },
   "output_quality_contract": {
     "promesa": "Con pocos datos produce el 80-90% del expediente para revisión, cotización y negociación.",
@@ -3405,7 +3187,7 @@
     "upgrade_rule": "Antes de fabricar, convertir a CAD final con marcas/modelos reales, numeración congelada, revisión de SCCR/kAIC y firma responsable."
   },
   "api_activation": {
-    "release": "V9 PriceTrust Closing",
+    "release": "V10 Architecture Lock",
     "configured_count": 0,
     "enabled_count": 0,
     "services": [
@@ -3493,8 +3275,8 @@
   },
   "priceguard": {
     "methodology": {
-      "name": "PriceGuard 9",
-      "goal": "Evitar cotizaciones débiles, precios exagerados, precios demasiado bajos/incompatibles y falsas certezas antes de presupuestar trabajos de miles de dólares.",
+      "name": "PriceGuard 10",
+      "goal": "Evitar cotizaciones débiles, precios exagerados, precios incompatibles, BOM incoherente con la arquitectura y falsas certezas antes de presupuestar trabajos de miles de dólares.",
       "inputs": [
         "catálogo interno",
         "fuente de precio",
@@ -3518,16 +3300,17 @@
         "No fingir mercado real si las APIs están sin credenciales.",
         "Mostrar catálogo piloto separado de mercado vivo.",
         "Auditar todas las ofertas candidatas, no solo la seleccionada.",
+        "Forzar coherencia: solución recomendada, BOM, RFQ, PDF y propuesta deben usar la misma arquitectura.",
         "Separar precio estimado, referencial, referencial fuerte y confirmado.",
         "Bloquear salida fuerte cuando hay demasiados rojos o stock sin confirmar."
       ]
     },
     "summary": {
-      "materials_cost": 2963.59,
-      "items_with_price": 19,
-      "total_items": 19,
+      "materials_cost": 2854.59,
+      "items_with_price": 17,
+      "total_items": 17,
       "coverage_percent": 100.0,
-      "high_confidence_items": 16,
+      "high_confidence_items": 14,
       "needs_rfq_count": 1,
       "suppliers_used": [
         "Automatización Andina",
@@ -3539,16 +3322,16 @@
       "quote_needed_components": [
         "braking_resistor"
       ],
-      "priceguard_score_percent": 83.8,
-      "green_count": 17,
+      "priceguard_score_percent": 83.0,
+      "green_count": 15,
       "yellow_count": 1,
       "red_count": 1,
       "outlier_count": 1,
       "auto_corrected_count": 1,
-      "catalog_depth_score_percent": 94.7,
+      "catalog_depth_score_percent": 94.1,
       "candidate_offer_audit": {
-        "total_candidate_offers": 58,
-        "suspicious_low_rejected": 4,
+        "total_candidate_offers": 51,
+        "suspicious_low_rejected": 3,
         "suspicious_high_flagged": 0,
         "expired_rejected": 0,
         "weak_source_flagged": 5,
@@ -3576,48 +3359,6 @@
             ]
           },
           {
-            "component_id": "contactor_rev",
-            "supplier": "Suministros El Oro",
-            "brand_model": "Chint NC1-3210 120V",
-            "price_usd": 43.0,
-            "market_median": 85.0,
-            "flags": [
-              "precio sospechosamente bajo"
-            ]
-          },
-          {
-            "component_id": "cabinet",
-            "supplier": "Marketplace Referencial",
-            "brand_model": "Genérico GAB-604025",
-            "price_usd": 79.0,
-            "market_median": 135.0,
-            "flags": [
-              "stock no confirmado",
-              "fuente débil"
-            ]
-          },
-          {
-            "component_id": "brake_rectifier",
-            "supplier": "Automatización Andina",
-            "brand_model": "Kendrion BR120-2A",
-            "price_usd": 118.0,
-            "market_median": 118.0,
-            "flags": [
-              "stock no confirmado"
-            ]
-          },
-          {
-            "component_id": "brake_rectifier",
-            "supplier": "Marketplace Referencial",
-            "brand_model": "Genérico BR-120",
-            "price_usd": 48.0,
-            "market_median": 118.0,
-            "flags": [
-              "stock no confirmado",
-              "fuente débil"
-            ]
-          },
-          {
             "component_id": "vfd",
             "supplier": "Automatización Andina",
             "brand_model": "Schneider ATV930D18N4",
@@ -3636,11 +3377,53 @@
             "flags": [
               "precio sospechosamente bajo"
             ]
+          },
+          {
+            "component_id": "line_reactor",
+            "supplier": "Automatización Andina",
+            "brand_model": "MTE RL-025HP-460",
+            "price_usd": 245.0,
+            "market_median": 206.5,
+            "flags": [
+              "stock no confirmado"
+            ]
+          },
+          {
+            "component_id": "braking_resistor",
+            "supplier": "Automatización Andina",
+            "brand_model": "Danfoss BR-25HP",
+            "price_usd": 310.0,
+            "market_median": 247.5,
+            "flags": [
+              "stock no confirmado"
+            ]
+          },
+          {
+            "component_id": "braking_resistor",
+            "supplier": "Marketplace Referencial",
+            "brand_model": "Genérico industrial DBR-25HP",
+            "price_usd": 185.0,
+            "market_median": 247.5,
+            "flags": [
+              "stock no confirmado",
+              "fuente débil"
+            ]
+          },
+          {
+            "component_id": "cabinet",
+            "supplier": "Marketplace Referencial",
+            "brand_model": "Genérico GAB-604025",
+            "price_usd": 79.0,
+            "market_median": 135.0,
+            "flags": [
+              "stock no confirmado",
+              "fuente débil"
+            ]
           }
         ],
         "policy": "El motor audita también ofertas no seleccionadas para no caer en precio barato falso ni precio inflado fuera de banda."
       },
-      "locked_price_count": 16,
+      "locked_price_count": 14,
       "referential_price_count": 1,
       "blocked_price_count": 1,
       "priceguard_verdict": "Revisable con RFQ",
@@ -3661,8 +3444,8 @@
       "precio_bloqueado": "No usar para cerrar propuesta; enviar RFQ y esperar respuesta."
     },
     "candidate_offer_audit": {
-      "total_candidate_offers": 58,
-      "suspicious_low_rejected": 4,
+      "total_candidate_offers": 51,
+      "suspicious_low_rejected": 3,
       "suspicious_high_flagged": 0,
       "expired_rejected": 0,
       "weak_source_flagged": 5,
@@ -3690,48 +3473,6 @@
           ]
         },
         {
-          "component_id": "contactor_rev",
-          "supplier": "Suministros El Oro",
-          "brand_model": "Chint NC1-3210 120V",
-          "price_usd": 43.0,
-          "market_median": 85.0,
-          "flags": [
-            "precio sospechosamente bajo"
-          ]
-        },
-        {
-          "component_id": "cabinet",
-          "supplier": "Marketplace Referencial",
-          "brand_model": "Genérico GAB-604025",
-          "price_usd": 79.0,
-          "market_median": 135.0,
-          "flags": [
-            "stock no confirmado",
-            "fuente débil"
-          ]
-        },
-        {
-          "component_id": "brake_rectifier",
-          "supplier": "Automatización Andina",
-          "brand_model": "Kendrion BR120-2A",
-          "price_usd": 118.0,
-          "market_median": 118.0,
-          "flags": [
-            "stock no confirmado"
-          ]
-        },
-        {
-          "component_id": "brake_rectifier",
-          "supplier": "Marketplace Referencial",
-          "brand_model": "Genérico BR-120",
-          "price_usd": 48.0,
-          "market_median": 118.0,
-          "flags": [
-            "stock no confirmado",
-            "fuente débil"
-          ]
-        },
-        {
           "component_id": "vfd",
           "supplier": "Automatización Andina",
           "brand_model": "Schneider ATV930D18N4",
@@ -3749,6 +3490,48 @@
           "market_median": 1230.0,
           "flags": [
             "precio sospechosamente bajo"
+          ]
+        },
+        {
+          "component_id": "line_reactor",
+          "supplier": "Automatización Andina",
+          "brand_model": "MTE RL-025HP-460",
+          "price_usd": 245.0,
+          "market_median": 206.5,
+          "flags": [
+            "stock no confirmado"
+          ]
+        },
+        {
+          "component_id": "braking_resistor",
+          "supplier": "Automatización Andina",
+          "brand_model": "Danfoss BR-25HP",
+          "price_usd": 310.0,
+          "market_median": 247.5,
+          "flags": [
+            "stock no confirmado"
+          ]
+        },
+        {
+          "component_id": "braking_resistor",
+          "supplier": "Marketplace Referencial",
+          "brand_model": "Genérico industrial DBR-25HP",
+          "price_usd": 185.0,
+          "market_median": 247.5,
+          "flags": [
+            "stock no confirmado",
+            "fuente débil"
+          ]
+        },
+        {
+          "component_id": "cabinet",
+          "supplier": "Marketplace Referencial",
+          "brand_model": "Genérico GAB-604025",
+          "price_usd": 79.0,
+          "market_median": 135.0,
+          "flags": [
+            "stock no confirmado",
+            "fuente débil"
           ]
         }
       ],
@@ -3843,21 +3626,42 @@
       }
     ],
     "recommended": {
-      "id": "star_delta",
-      "name": "Estrella-triángulo",
-      "fit": "Reduce corriente de arranque en motores aptos y cargas con bajo torque inicial.",
-      "how_it_works": "Arranca el motor en estrella para bajar tensión/corriente y luego conmuta a triángulo para operación normal.",
-      "better_when": "Motores con seis terminales accesibles, carga liviana al arranque y red sensible a picos.",
-      "price_impact": "Costo medio por tres contactores, temporizador y más cableado. No sirve si la carga necesita alto torque inicial.",
-      "initial_cost": "Medio",
-      "control_quality": 62,
-      "safety_depth": 64,
-      "complexity": 62,
-      "risk": "Puede fallar si el motor/carga no es apto; conmutación mal ajustada genera golpes eléctricos/mecánicos.",
-      "sell_when": "Cliente pide reducción de corriente sin llegar a soft starter/variador y el motor lo permite.",
-      "why": "Seleccionada por equilibrio entre seguridad, tiempo de cotización, control del riesgo y valor comercial defendible."
+      "id": "vfd_smart",
+      "name": "Variador + control inteligente",
+      "fit": "Premium para rampas, diagnóstico, control, crecimiento y diferenciación técnica.",
+      "how_it_works": "Controla frecuencia/tensión del motor, limita corriente, permite rampas, alarmas y lógica más avanzada. En izaje exige coordinación con freno y seguridad.",
+      "better_when": "Equipo crítico, muchas maniobras, necesidad de control suave o propuesta de alta confiabilidad.",
+      "price_impact": "Mayor costo inicial por VFD, reactor, resistencia, parametrización y pruebas. Puede reducir paradas, reclamos y desgaste.",
+      "initial_cost": "Alto",
+      "control_quality": 95,
+      "safety_depth": 90,
+      "complexity": 78,
+      "risk": "Requiere parametrización, revisión de freno, compatibilidad EMC y pruebas de seguridad.",
+      "sell_when": "Cliente valora confiabilidad, control, diagnóstico y menor riesgo operativo.",
+      "architecture_id": "vfd_smart",
+      "architecture_reason": "Aplicación de izaje detectada: carga suspendida, inversión, freno y finales de carrera elevan el riesgo. Para guinche profesional/premium o muchas maniobras, VFD + control inteligente alinea mejor control, rampa, diagnóstico y protección mecánica.",
+      "architecture_warnings": [],
+      "why": "Seleccionada por coherencia arquitectura-BOM, seguridad de aplicación, presión de cotización y valor comercial defendible."
     },
-    "didactic_rule": "Cada arranque explica cómo funciona, cuándo conviene y cómo impacta precio/riesgo."
+    "architecture_lock": {
+      "id": "vfd_smart",
+      "name": "Variador + control inteligente",
+      "fit": "Premium para rampas, diagnóstico, control, crecimiento y diferenciación técnica.",
+      "how_it_works": "Controla frecuencia/tensión del motor, limita corriente, permite rampas, alarmas y lógica más avanzada. En izaje exige coordinación con freno y seguridad.",
+      "better_when": "Equipo crítico, muchas maniobras, necesidad de control suave o propuesta de alta confiabilidad.",
+      "price_impact": "Mayor costo inicial por VFD, reactor, resistencia, parametrización y pruebas. Puede reducir paradas, reclamos y desgaste.",
+      "initial_cost": "Alto",
+      "control_quality": 95,
+      "safety_depth": 90,
+      "complexity": 78,
+      "risk": "Requiere parametrización, revisión de freno, compatibilidad EMC y pruebas de seguridad.",
+      "sell_when": "Cliente valora confiabilidad, control, diagnóstico y menor riesgo operativo.",
+      "architecture_id": "vfd_smart",
+      "architecture_reason": "Aplicación de izaje detectada: carga suspendida, inversión, freno y finales de carrera elevan el riesgo. Para guinche profesional/premium o muchas maniobras, VFD + control inteligente alinea mejor control, rampa, diagnóstico y protección mecánica.",
+      "architecture_warnings": [],
+      "why": "Seleccionada por coherencia arquitectura-BOM, seguridad de aplicación, presión de cotización y valor comercial defendible."
+    },
+    "didactic_rule": "Cada arranque explica cómo funciona, cuándo conviene, cómo impacta precio/riesgo y por qué el BOM debe coincidir con la arquitectura seleccionada."
   },
   "premium_document_contract": {
     "pdf": "portada + resumen ejecutivo + semáforos + supuestos + presupuesto + BOM + anexos + firmas",

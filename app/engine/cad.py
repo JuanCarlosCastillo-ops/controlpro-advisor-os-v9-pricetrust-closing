@@ -255,13 +255,13 @@ def drawio_xml(i: ProjectIntake, calc: Dict[str, Any]) -> str:
     project = xml_escape(i.project_name)
     flc = xml_escape(str(calc.get("full_load_current_a", "--")))
     breaker = xml_escape(str(calc.get("breaker_size_a", "--")))
-    return f'''<mxfile host="ControlPro" modified="{datetime.now(timezone.utc).isoformat()}" agent="ControlPro Advisor OS V9" version="24.0.0">
+    return f'''<mxfile host="ControlPro" modified="{datetime.now(timezone.utc).isoformat()}" agent="ControlPro Advisor OS V10" version="24.0.0">
   <diagram id="controlpro-e001" name="E-001 Unifilar">
     <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="title" value="ControlPro OS V9 - {project}" style="text;html=1;strokeColor=none;fillColor=none;fontSize=18;fontStyle=1" vertex="1" parent="1"><mxGeometry x="40" y="30" width="600" height="40" as="geometry" /></mxCell>
+        <mxCell id="title" value="ControlPro OS V10 - {project}" style="text;html=1;strokeColor=none;fillColor=none;fontSize=18;fontStyle=1" vertex="1" parent="1"><mxGeometry x="40" y="30" width="600" height="40" as="geometry" /></mxCell>
         <mxCell id="qf" value="QF-01 MCCB 3P&#xa;{breaker} A preliminar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf" vertex="1" parent="1"><mxGeometry x="420" y="110" width="220" height="70" as="geometry" /></mxCell>
         <mxCell id="km" value="KM1/KM2 Inversión enclavada" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1"><mxGeometry x="420" y="240" width="220" height="70" as="geometry" /></mxCell>
         <mxCell id="ol" value="OL-01 Sobrecarga" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1"><mxGeometry x="420" y="370" width="220" height="70" as="geometry" /></mxCell>

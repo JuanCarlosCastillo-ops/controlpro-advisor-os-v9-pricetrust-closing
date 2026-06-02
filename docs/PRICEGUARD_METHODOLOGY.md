@@ -1,4 +1,4 @@
-# PriceGuard 9 — metodología de precios confiables
+# PriceGuard 10 — metodología de precios confiables
 
 ControlPro no debe escoger el precio más barato ni fingir certeza. PriceGuard clasifica cada línea del BOM con semáforo:
 

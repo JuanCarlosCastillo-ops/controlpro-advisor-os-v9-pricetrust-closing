@@ -1,13 +1,4 @@
-# Validation Report — ControlPro Advisor OS V9 PriceTrust Closing
-
-## Resultado local
-
-```text
-PYTHONPATH=. python -m compileall app scripts tests -q
-PYTHONPATH=. python scripts/validate_project.py
-PYTHONPATH=. python scripts/run_pilot_audit.py
-PYTHONPATH=. pytest -q -s
-```
+# Validation Report — ControlPro Advisor OS V10 Architecture Lock
 
 ## Resultado
 
@@ -16,26 +7,44 @@ VALIDATION OK
 Engineering completeness: 97.8%
 Market coverage: 100.0%
 RFQ items: 1
-PriceGuard: 83.8%
-Recommended sell price: $5742.35
-8 tests passed
+PriceGuard: 83.0%
+Recommended sell price: $5595.20
+9 tests passed
 ```
 
-## Escenarios piloto
+## Corrección crítica V10
 
-- Demo guinche: cotización alta/revisable, construcción bloqueada hasta verificación humana y SCCR/kAIC.
-- Caso incompleto: baja preparación, salida solo como borrador interno.
-- Compresor estándar: cotización piloto lista con RFQ cero en catálogo piloto.
+La V10 incorpora **Architecture Lock**:
 
-## Cierre V9
+- La solución recomendada se define antes del BOM.
+- El BOM se genera desde esa arquitectura.
+- La propuesta cliente y el PDF heredan la misma arquitectura.
+- La auditoría de coherencia bloquea mezclas como `estrella-triángulo + VFD/reactor/resistencia`.
+- Para guinches/izaje, estrella-triángulo no se recomienda por defecto; se orienta a VFD + control inteligente si el caso es profesional, con freno, finales y muchas maniobras.
 
-- Catálogo piloto ampliado a fuerza, control, seguridad, VFD, soft starter, taller, cables y consumibles.
-- PriceGuard 9 con auditoría de ofertas candidatas, no solo la oferta elegida.
-- Dashboard de confiabilidad de precios.
-- Dashboard de ahorro comercial.
-- PDF premium renderizado y verificado a imágenes.
-- Exportables: PDF, Markdown, propuesta cliente, BOM CSV/XLSX, SVG CAD-like, Draw.io, borneras y cables.
+## Caso demo guinche
+
+```text
+Solución recomendada: Variador + control inteligente
+Architecture ID: vfd_smart
+BOM incluye: VFD, reactor de línea, resistencia de frenado, contactor de línea/seguridad, freno, finales, E-Stop, monitor de fase y cableado.
+Coherencia arquitectura-BOM: OK
+Construcción automática: NO liberada
+```
+
+## Endpoints cubiertos
+
+- `/api/health`
+- `/api/example`
+- `/api/generate`
+- `/api/export/markdown`
+- `/api/export/client-proposal`
+- `/api/export/bom-csv`
+- `/api/export/bom-xlsx`
+- `/api/export/pdf`
+- `/api/export/cad/*`
+- `/api/integrations/status`
 
 ## Límite profesional
 
-La V9 queda lista para prueba piloto cerrada con ingenieros. No certifica construcción ni energización sin verificación de campo, normativa aplicable, componentes reales, cálculo final, proveedor confirmado y responsable técnico.
+ControlPro reduce tiempo, ordena el expediente y baja la carga de corrección; no reemplaza normativa local, verificación de campo, proveedor confirmado ni aprobación humana antes de fabricar o energizar.

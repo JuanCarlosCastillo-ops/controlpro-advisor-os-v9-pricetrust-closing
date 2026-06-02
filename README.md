@@ -1,10 +1,10 @@
-# ControlPro Advisor OS V9 — Activation Ready
+# ControlPro Advisor OS V10 — Architecture Lock
 
 Sistema operativo en español para **diseñar, cotizar, justificar y preparar entregables** de trabajos eléctricos industriales: tableros de motor, guinches, bombas, compresores y soluciones de control.
 
 Esta versión está pensada para prueba con ingenieros eléctricos reales. El valor principal no es verse bonita: es **ahorrar tiempo de cotización**, ordenar datos, generar BOM, buscar/preparar precios por confianza, producir RFQ y entregar expediente técnico-comercial revisable.
 
-## Qué trae V9
+## Qué trae V10
 
 - Interfaz premium en español.
 - Flujo didáctico: datos → fotos → 3D → CAD-like → cálculos → soluciones → BOM → mercado → APIs → RFQ → presupuesto → validación → entregables.
@@ -13,7 +13,7 @@ Esta versión está pensada para prueba con ingenieros eléctricos reales. El va
 - Auditoría de coherencia.
 - Release gates: cotización vs construcción.
 - BOM técnico cotizable.
-- PriceGuard 9: semáforo verde/amarillo/rojo, banda de mercado, detección de outliers, autocorrección y RFQ obligatorio cuando no hay confianza.
+- PriceGuard 10: semáforo verde/amarillo/rojo, banda de mercado, detección de outliers, autocorrección y RFQ obligatorio cuando no hay confianza.
 - Precio por confianza: estimado, estimado corregido, referencial, referencial fuerte, confirmado.
 - RFQ listo para WhatsApp/correo.
 - Exportables:
@@ -36,7 +36,7 @@ Esta versión está pensada para prueba con ingenieros eléctricos reales. El va
 ## Ejecutar localmente
 
 ```powershell
-cd C:\AGENTES\controlpro_advisor_os_v9_pricetrust_closing
+cd C:\AGENTES\controlpro_advisor_os_v10_architecture_lock
 
 python -m venv .venv
 .venv\Scripts\activate
@@ -77,7 +77,7 @@ Ver plantilla desde API:
 ## Subir a GitHub
 
 ```powershell
-cd C:\AGENTES\controlpro_advisor_os_v9_pricetrust_closing
+cd C:\AGENTES\controlpro_advisor_os_v10_architecture_lock
 
 git init
 git branch -M main
@@ -85,9 +85,9 @@ git config --global user.name "JuanCarlosCastillo-ops"
 git config --global user.email "JuanCarlosCastillo-ops@users.noreply.github.com"
 
 git add .
-git commit -m "Publicar ControlPro Advisor OS V9 PriceTrust Closing"
+git commit -m "Publicar ControlPro Advisor OS V10 Architecture Lock"
 
-gh repo create controlpro-advisor-os-v9-pricetrust-closing --public --source=. --remote=origin --push
+gh repo create controlpro-advisor-os-v10-architecture-lock --public --source=. --remote=origin --push
 ```
 
 ## Render
@@ -106,7 +106,7 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
 ## Límites profesionales
 
-ControlPro V9 es un asesor técnico-comercial premium. No reemplaza:
+ControlPro V10 es un asesor técnico-comercial premium. No reemplaza:
 
 - visita de campo,
 - placa real,

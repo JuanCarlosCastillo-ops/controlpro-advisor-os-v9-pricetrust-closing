@@ -42,5 +42,20 @@ def test_output_contains_traceability_sections():
     assert data['review_board']['veredicto']
     assert data['cad_outputs']['wire_schedule']
     assert data['cad_outputs']['drawio_available'] is True
-    assert data['priceguard']['methodology']['name'] == 'PriceGuard 9'
+    assert data['priceguard']['methodology']['name'] == 'PriceGuard 10'
     assert data['premium_document_contract']['pdf']
+
+
+def test_hoist_architecture_lock_aligns_recommendation_and_bom():
+    payload = client.get('/api/example').json()
+    r = client.post('/api/generate', json=payload)
+    assert r.status_code == 200
+    data = r.json()
+    assert data['recommended_option']['architecture_id'] == 'vfd_smart'
+    ids = {r['component_id'] for r in data['requirements']}
+    assert 'vfd' in ids
+    assert 'line_reactor' in ids
+    assert 'braking_resistor' in ids
+    assert 'star_delta_timer' not in ids
+    assert 'star_contactor' not in ids
+    assert any(c['name'] == 'Coherencia arquitectura-BOM' and c['status'] == 'ok' for c in data['consistency_audit']['checks'])

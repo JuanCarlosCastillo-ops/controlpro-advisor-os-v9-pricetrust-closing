@@ -1,4 +1,4 @@
-# Checklist de aceptación piloto — ControlPro V9
+# Checklist de aceptación piloto — ControlPro V10
 
 ## Objetivo
 

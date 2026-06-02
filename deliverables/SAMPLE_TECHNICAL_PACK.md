@@ -1,9 +1,9 @@
-# ControlPro Advisor OS V9 PriceTrust Closing — Expediente técnico-comercial
+# ControlPro Advisor OS V10 Architecture Lock — Expediente técnico-comercial
 
 **Proyecto:** Guinche de izaje — Cotización técnica premium
 **Cliente:** Cliente industrial
 **Ubicación:** Zaruma, El Oro, Ecuador
-**Generado:** 2026-06-02T01:00:17.661162+00:00
+**Generado:** 2026-06-02T17:15:10.221653+00:00
 
 ## Veredicto ejecutivo
 El sistema guía la entrada, genera solución, cálculos, BOM normalizado, precios por confianza, RFQ, presupuesto, riesgos, compuertas de calidad, exportables y acciones pendientes para que el ingeniero revise en vez de reconstruir.
@@ -22,7 +22,7 @@ Estado: **cotización revisable; exige RFQ/verificación antes de oferta cerrada
 - FALTA · **Cortocircuito disponible** · impacto Alta · Si no se conoce, marcar SCCR/kAIC como pendiente y no liberar construcción.
 
 ## Semáforo de precisión
-Preparación cotización: **Alta: lista para propuesta piloto revisable** · Score: **95.4%**
+Preparación cotización: **Alta: lista para propuesta piloto revisable** · Score: **95.3%**
 Liberación construcción: **No liberada para construcción automática**
 
 ## Auditoría de coherencia
@@ -30,10 +30,12 @@ Liberación construcción: **No liberada para construcción automática**
 - **Arquitectura de izaje** · ok · Aplicación de carga suspendida detectada. · Acción: No liberar construcción sin freno, finales de carrera, paro de emergencia y enclavamientos.
 - **Caída de tensión** · ok · Caída estimada 0.42%. · Acción: Mantener verificación con tabla/código local.
 - **SCCR/kAIC** · pendiente · No se declaró corriente de cortocircuito disponible. · Acción: Cotizar con advertencia; no liberar fabricación hasta verificar kAIC/SCCR.
+- **Coherencia arquitectura-BOM** · ok · Arquitectura vfd_smart coincide con el BOM generado. · Acción: Mantener regla: una arquitectura recomendada = un BOM principal coherente.
+- **Regla especial guinche/izaje** · ok · Arquitectura vfd_smart evita recomendar estrella-triángulo por defecto en carga suspendida. · Acción: Validar freno, finales, E-Stop, rampas y pruebas antes de construir.
 
 ## Libro de supuestos
 - **SCCR/kAIC** · No se conoce corriente de cortocircuito; el breaker se trata como preliminar. · Confianza: baja · Verificación: Solicitar dato de transformador/red o medir/calcular antes de construir.
-- **Precio de materiales** · Cobertura catálogo 100.0%; PriceGuard 83.8%; verdes 17, amarillos 1, rojos 1; RFQ requerido en 1 ítems. · Confianza: según fuente · Verificación: Confirmar stock/vigencia; el precio 100% cerrado solo existe con proveedor confirmado.
+- **Precio de materiales** · Cobertura catálogo 100.0%; PriceGuard 83.0%; verdes 15, amarillos 1, rojos 1; RFQ requerido en 1 ítems. · Confianza: según fuente · Verificación: Confirmar stock/vigencia; el precio 100% cerrado solo existe con proveedor confirmado.
 - **Mano de obra** · Se asumen 1.5 días tablero y 1.5 días campo. · Confianza: media · Verificación: Ajustar con visita técnica y alcance final.
 - **Alcance** · Tablero + instalación en campo · Confianza: media · Verificación: Definir exclusiones: obra civil, canalización extra, parada de producción, permisos.
 - **Izaje** · Se trata como equipo crítico por carga suspendida; se exige revisión superior. · Confianza: alta · Verificación: Probar sin carga, con carga supervisada y firmar checklist.
@@ -51,15 +53,17 @@ Liberación construcción: **No liberada para construcción automática**
 - **notice:** Cálculos preliminares para cotización. Para construcción se requiere placa real, tablas/códigos aplicables, temperatura, canalización, coordinación y verificación de campo.
 
 ## Solución recomendada
-**Estrella-triángulo** — Reduce corriente de arranque en motores aptos y cargas con bajo torque inicial.
-Seleccionada por equilibrio entre seguridad, tiempo de cotización, control del riesgo y valor comercial defendible.
+**Variador + control inteligente** — Premium para rampas, diagnóstico, control, crecimiento y diferenciación técnica.
+Seleccionada por coherencia arquitectura-BOM, seguridad de aplicación, presión de cotización y valor comercial defendible.
+Architecture Lock: **vfd_smart** · Aplicación de izaje detectada: carga suspendida, inversión, freno y finales de carrera elevan el riesgo. Para guinche profesional/premium o muchas maniobras, VFD + control inteligente alinea mejor control, rampa, diagnóstico y protección mecánica.
 
 ## BOM cotizable
 - **mccb_main** · Cant. 1.0 · Schneider EasyPact CVS 60A 25kA · ElectroIndustrial Guayaquil · $145.0 · confianza alta · PriceGuard: VERDE (88.0%). Schneider EasyPact CVS 60A 25kA, ElectroIndustrial Guayaquil, Guayaquil.
 - **overload_relay** · Cant. 1.0 · Schneider LRD3357 · ElectroIndustrial Guayaquil · $66.0 · confianza alta · PriceGuard: VERDE (88.1%). Schneider LRD3357, ElectroIndustrial Guayaquil, Guayaquil.
 - **contactor_fwd** · Cant. 1.0 · Schneider LC1D32G7 · ElectroIndustrial Guayaquil · $82.0 · confianza alta · PriceGuard: VERDE (91.4%). Schneider LC1D32G7, ElectroIndustrial Guayaquil, Guayaquil.
-- **contactor_rev** · Cant. 1.0 · Schneider LC1D32G7 · ElectroIndustrial Guayaquil · $82.0 · confianza alta · PriceGuard: VERDE (91.4%). Schneider LC1D32G7, ElectroIndustrial Guayaquil, Guayaquil.
-- **mechanical_interlock** · Cant. 1.0 · Schneider LAD9R1V · ElectroIndustrial Guayaquil · $27.0 · confianza alta · PriceGuard: VERDE (88.2%). Schneider LAD9R1V, ElectroIndustrial Guayaquil, Guayaquil.
+- **vfd** · Cant. 1.0 · ABB ACS580-01-039A-4 · Cuenca Control Supply · $1180.0 · confianza media-alta · PriceGuard: VERDE (80.7%). ABB ACS580-01-039A-4, Cuenca Control Supply, Cuenca.
+- **line_reactor** · Cant. 1.0 · Genérico industrial LR-25HP-460 · Suministros El Oro · $168.0 · confianza media · PriceGuard: AMARILLO (75.0%). Genérico industrial LR-25HP-460, Suministros El Oro, Machala.
+- **braking_resistor** · Cant. 1.0 · Danfoss BR-25HP · Automatización Andina · $247.5 · confianza baja · PriceGuard: ROJO (50.8%). Danfoss BR-25HP, Automatización Andina, Quito. Alertas: stock no confirmado. Se aplicó autocorrección por banda de mercado.
 - **phase_monitor** · Cant. 1.0 · Schneider RM22TR33 · ElectroIndustrial Guayaquil · $94.0 · confianza alta · PriceGuard: VERDE (86.3%). Schneider RM22TR33, ElectroIndustrial Guayaquil, Guayaquil.
 - **control_transformer** · Cant. 1.0 · Genérico industrial TC-2KVA · Suministros El Oro · $125.0 · confianza alta · PriceGuard: VERDE (86.2%). Genérico industrial TC-2KVA, Suministros El Oro, Machala.
 - **cabinet** · Cant. 1.0 · Metálico Nacional MN-604025 · Suministros El Oro · $135.0 · confianza alta · PriceGuard: VERDE (84.9%). Metálico Nacional MN-604025, Suministros El Oro, Machala.
@@ -67,27 +71,24 @@ Seleccionada por equilibrio entre seguridad, tiempo de cotización, control del 
 - **pushbuttons** · Cant. 1.0 · Schneider XB4 Kit · ElectroIndustrial Guayaquil · $72.0 · confianza alta · PriceGuard: VERDE (86.5%). Schneider XB4 Kit, ElectroIndustrial Guayaquil, Guayaquil.
 - **limit_switches** · Cant. 2.0 · Schneider XCK-M · ElectroIndustrial Guayaquil · $38.0 · confianza alta · PriceGuard: VERDE (86.8%). Schneider XCK-M, ElectroIndustrial Guayaquil, Guayaquil.
 - **brake_rectifier** · Cant. 1.0 · Bonfiglioli BRE120 · Proveedor Premium Quito · $142.0 · confianza media · PriceGuard: VERDE (77.7%). Bonfiglioli BRE120, Proveedor Premium Quito, Quito.
-- **vfd** · Cant. 1.0 · ABB ACS580-01-039A-4 · Cuenca Control Supply · $1180.0 · confianza media-alta · PriceGuard: VERDE (80.7%). ABB ACS580-01-039A-4, Cuenca Control Supply, Cuenca.
-- **line_reactor** · Cant. 1.0 · Genérico industrial LR-25HP-460 · Suministros El Oro · $168.0 · confianza media · PriceGuard: AMARILLO (75.0%). Genérico industrial LR-25HP-460, Suministros El Oro, Machala.
-- **braking_resistor** · Cant. 1.0 · Danfoss BR-25HP · Automatización Andina · $247.5 · confianza baja · PriceGuard: ROJO (50.8%). Danfoss BR-25HP, Automatización Andina, Quito. Alertas: stock no confirmado. Se aplicó autocorrección por banda de mercado.
 - **label_package** · Cant. 1.0 · Genérico LABEL-KIT · Suministros El Oro · $32.0 · confianza alta · PriceGuard: VERDE (81.1%). Genérico LABEL-KIT, Suministros El Oro, Machala.
 - **terminal_blocks** · Cant. 1.0 · Genérico TB-KIT-30 · Suministros El Oro · $38.0 · confianza alta · PriceGuard: VERDE (86.5%). Genérico TB-KIT-30, Suministros El Oro, Machala.
 - **wiring_pack** · Cant. 1.0 · Genérico WP-LOCAL · Suministros El Oro · $98.0 · confianza alta · PriceGuard: VERDE (85.8%). Genérico WP-LOCAL, Suministros El Oro, Machala.
 - **power_cable** · Cant. 53.1 · Electrocables THHN-8AWG-CU · Suministros El Oro · $2.45 · confianza alta · PriceGuard: VERDE (88.7%). Electrocables THHN-8AWG-CU, Suministros El Oro, Machala.
 
 ## Presupuesto
-- **materials:** 2963.59
+- **materials:** 2854.59
 - **panel_labor:** 270.0
 - **field_labor:** 330.0
 - **engineering:** 570.0
 - **transport_logistics:** 120.0
-- **contingency:** 340.29
-- **margin:** 1148.47
-- **floor_price:** 5145.14
-- **recommended_sell_price:** 5742.35
-- **premium_price:** 7005.66
+- **contingency:** 331.57
+- **margin:** 1119.04
+- **floor_price:** 5013.3
+- **recommended_sell_price:** 5595.2
+- **premium_price:** 6826.14
 - **price_confidence:** media-alta
-- **priceguard_status:** PriceGuard 83.8% · verde 17 · amarillo 1 · rojo 1
+- **priceguard_status:** PriceGuard 83.0% · verde 15 · amarillo 1 · rojo 1
 - **commercial_note:** Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia.
 
 ## RFQ listo para enviar
@@ -138,7 +139,7 @@ Gracias.
 - **Ambiente severo** (Media): Seleccionar gabinete y componentes según ambiente declarado: Interior industrial con polvo.
 
 ## Mesa simulada de ingenieros
-La V9 está lista para prueba piloto cerrada con ingenieros: el humano revisa, no reconstruye.
+La V10 Architecture Lock está lista para prueba piloto cerrada con ingenieros: el humano revisa, no reconstruye.
 - **Ingeniero junior**: feliz para piloto · Flujo guiado, modo rápido, semáforo de precisión y compuertas de salida.
 - **Técnico tablerista**: feliz para piloto · BOM normalizado por categoría, tabla cotizable, CSV/XLSX y notas de riesgo por componente.
 - **Mantenimiento industrial**: feliz para piloto · Checklist de taller/campo, plan de verificación y diagnóstico de fallas típicas.

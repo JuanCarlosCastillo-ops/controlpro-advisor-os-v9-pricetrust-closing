@@ -448,8 +448,8 @@ def generate_rfq_message(requirements: Iterable[ComponentRequirement], decisions
 
 def priceguard_methodology() -> Dict[str, Any]:
     return {
-        "name": "PriceGuard 9",
-        "goal": "Evitar cotizaciones débiles, precios exagerados, precios demasiado bajos/incompatibles y falsas certezas antes de presupuestar trabajos de miles de dólares.",
+        "name": "PriceGuard 10",
+        "goal": "Evitar cotizaciones débiles, precios exagerados, precios incompatibles, BOM incoherente con la arquitectura y falsas certezas antes de presupuestar trabajos de miles de dólares.",
         "inputs": ["catálogo interno", "fuente de precio", "stock", "vigencia", "proveedor", "banda de mercado", "ubicación", "historial/RFQ", "auditoría de outliers", "estado de credenciales API"],
         "semaforos": {
             "verde": "usable en cotización revisable; aun así debe verificarse si el precio es sensible o la oferta vence pronto",
@@ -462,6 +462,7 @@ def priceguard_methodology() -> Dict[str, Any]:
             "No fingir mercado real si las APIs están sin credenciales.",
             "Mostrar catálogo piloto separado de mercado vivo.",
             "Auditar todas las ofertas candidatas, no solo la seleccionada.",
+            "Forzar coherencia: solución recomendada, BOM, RFQ, PDF y propuesta deben usar la misma arquitectura.",
             "Separar precio estimado, referencial, referencial fuerte y confirmado.",
             "Bloquear salida fuerte cuando hay demasiados rojos o stock sin confirmar.",
         ],

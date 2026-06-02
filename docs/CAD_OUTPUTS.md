@@ -1,6 +1,6 @@
-# ControlPro V9 — Salidas CAD-like y entregables de taller
+# ControlPro V10 — Salidas CAD-like y entregables de taller
 
-La versión V9 mejora los diagramas para que dejen de sentirse como dibujos conceptuales básicos. Ahora el motor entrega salidas intermedias más cercanas a ingeniería:
+La versión V10 mejora los diagramas para que dejen de sentirse como dibujos conceptuales básicos. Ahora el motor entrega salidas intermedias más cercanas a ingeniería:
 
 ## Hojas generadas
 

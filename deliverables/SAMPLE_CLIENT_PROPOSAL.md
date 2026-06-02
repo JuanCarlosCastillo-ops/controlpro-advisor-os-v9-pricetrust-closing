@@ -8,12 +8,13 @@
 Diseño, selección preliminar de componentes, armado de expediente técnico, lista de materiales, presupuesto, checklist de pruebas y recomendaciones de instalación para sistema de control industrial.
 
 ## Solución recomendada
-Estrella-triángulo: Reduce corriente de arranque en motores aptos y cargas con bajo torque inicial..
+Variador + control inteligente: Premium para rampas, diagnóstico, control, crecimiento y diferenciación técnica..
+Criterio de arquitectura: Aplicación de izaje detectada: carga suspendida, inversión, freno y finales de carrera elevan el riesgo. Para guinche profesional/premium o muchas maniobras, VFD + control inteligente alinea mejor control, rampa, diagnóstico y protección mecánica.
 
 ## Valores comerciales
-- Precio piso técnico: $5,145.14
-- Precio recomendado: $5,742.35
-- Opción premium: $7,005.66
+- Precio piso técnico: $5,013.30
+- Precio recomendado: $5,595.20
+- Opción premium: $6,826.14
 
 ## Vigencia y condiciones
 Precio sujeto a confirmación de stock, proveedor, placa real de motor/freno, condiciones de campo y aprobación técnica final.

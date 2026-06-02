@@ -65,3 +65,11 @@ label_package,Taller,Etiquetado tablero básico,Genérico,LABEL-KIT,SUP-004,Mach
 plc_basic,Control,PLC básico 24VDC 8DI/6DO,Siemens,LOGO! 8,SUP-002,Quito,265,available,5,0.8,reference,2026-08-31,,Opción smart básica
 plc_basic,Control,PLC compacto,Schneider,Zelio SR3,SUP-001,Guayaquil,220,available,2,0.78,reference,2026-08-31,,Opción smart
 hmi_basic,Control,HMI básica 4.3 pulgadas,Weintek,MT8071iE,SUP-002,Quito,245,quote_needed,6,0.7,reference,2026-08-31,,Opcional
+main_contactor,Fuerza,Contactor principal estrella-triángulo 32A AC-3 bobina 120V,Schneider,LC1D32G7,SUP-001,Guayaquil,82,available,2,0.82,reference,2026-08-31,,Arquitectura estrella-triángulo; validar coordinación
+main_contactor,Fuerza,Contactor principal estrella-triángulo 32A,ABB,AF30,SUP-003,Cuenca,88,available,4,0.78,reference,2026-08-31,,Alternativa
+star_contactor,Fuerza,Contactor estrella 32A AC-3 bobina 120V,Schneider,LC1D32G7,SUP-001,Guayaquil,82,available,2,0.82,reference,2026-08-31,,Arquitectura estrella-triángulo
+star_contactor,Fuerza,Contactor estrella 32A,ABB,AF30,SUP-003,Cuenca,88,available,4,0.78,reference,2026-08-31,,Alternativa
+delta_contactor,Fuerza,Contactor triángulo 32A AC-3 bobina 120V,Schneider,LC1D32G7,SUP-001,Guayaquil,82,available,2,0.82,reference,2026-08-31,,Arquitectura estrella-triángulo
+delta_contactor,Fuerza,Contactor triángulo 32A,ABB,AF30,SUP-003,Cuenca,88,available,4,0.78,reference,2026-08-31,,Alternativa
+star_delta_timer,Control,Temporizador estrella-triángulo 120V,Schneider,RE17RAMU,SUP-001,Guayaquil,54,available,2,0.78,reference,2026-08-31,,Validar tensión de control
+star_delta_timer,Control,Timer estrella-triángulo universal,Genérico industrial,Y-D TIMER,SUP-004,Machala,28,unknown,3,0.54,marketplace,2026-08-31,,Fuente débil para PriceGuard

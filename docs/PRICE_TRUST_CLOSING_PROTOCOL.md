@@ -1,4 +1,4 @@
-# ControlPro V9 - PriceTrust Closing Protocol
+# ControlPro V10 - Architecture Lock Protocol
 
 Objetivo: que la app no entregue precios basura en cotizaciones de miles de dólares.
 

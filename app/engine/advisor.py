@@ -8,8 +8,8 @@ from .pricing import decide_prices, generate_rfq_message, summarize_market, load
 from .cad import single_line_cad_svg, control_ladder_cad_svg, panel_layout_cad_svg, terminal_schedule, wire_schedule, drawio_xml
 from app.integrations.config import integration_status
 
-VERSION = "9.0-pricetrust-closing"
-PRODUCT = "ControlPro Advisor OS V9 PriceTrust Closing"
+VERSION = "10.0-architecture-lock"
+PRODUCT = "ControlPro Advisor OS V10 Architecture Lock"
 
 
 def example_intake() -> Dict[str, Any]:
@@ -106,45 +106,142 @@ def _data_quality(i: ProjectIntake) -> Dict[str, Any]:
     }
 
 
-def _build_requirements(i: ProjectIntake, calc: Dict[str, Any]) -> List[ComponentRequirement]:
-    req: List[ComponentRequirement] = []
-    req.append(ComponentRequirement(component_id="mccb_main", category="Fuerza", item="MCCB principal", qty=1, spec=f"3P, {calc['breaker_size_a']} A preliminar, tensión {int(i.voltage)} V, SCCR/kAIC por verificar", critical_checks=["corriente", "tensión", "SCCR", "curva"], risk_note="No seleccionar sin verificar cortocircuito disponible."))
-    req.append(ComponentRequirement(component_id="overload_relay", category="Fuerza", item="Relé de sobrecarga", qty=1, spec=f"Rango que cubra ajuste {calc['overload_setting_a']} A", critical_checks=["rango", "clase", "compatibilidad"], risk_note="Ajuste incorrecto puede disparar falso o no proteger."))
-    if i.needs_reversing:
-        req.append(ComponentRequirement(component_id="contactor_fwd", category="Fuerza", item="Contactor subir", qty=1, spec=f"AC-3, corriente mínima >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", critical_checks=["AC-3", "bobina", "corriente"], risk_note="Verificar compatibilidad con enclavamiento."))
-        req.append(ComponentRequirement(component_id="contactor_rev", category="Fuerza", item="Contactor bajar", qty=1, spec=f"AC-3, corriente mínima >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", critical_checks=["AC-3", "bobina", "corriente"], risk_note="Verificar compatibilidad con enclavamiento."))
-        req.append(ComponentRequirement(component_id="mechanical_interlock", category="Seguridad", item="Enclavamiento mecánico", qty=1, spec="Compatible con ambos contactores de inversión", critical_checks=["compatibilidad física", "bloqueo real"], risk_note="Obligatorio para evitar inversión simultánea."))
-    else:
-        req.append(ComponentRequirement(component_id="contactor_fwd", category="Fuerza", item="Contactor principal", qty=1, spec=f"AC-3, corriente mínima >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", critical_checks=["AC-3", "bobina", "corriente"]))
-    if i.needs_phase_monitor:
-        req.append(ComponentRequirement(component_id="phase_monitor", category="Seguridad", item="Relé monitor de fase", qty=1, spec=f"Para red {int(i.voltage)} V trifásica; falla y secuencia de fase", critical_checks=["tensión", "secuencia", "ajustes"], risk_note="Recomendado para proteger guinche/motor ante pérdida de fase."))
-    req.append(ComponentRequirement(component_id="control_transformer", category="Control", item="Transformador de control", qty=1, spec=f"{int(i.voltage)} V a {int(i.control_voltage)} V, {calc['control_transformer_va']} VA preliminar", critical_checks=["VA", "fusibles", "aislamiento"]))
-    req.append(ComponentRequirement(component_id="cabinet", category="Tablero", item="Gabinete industrial", qty=1, spec="NEMA/IP según polvo, humedad y temperatura; tamaño con 25% de reserva", critical_checks=["grado IP/NEMA", "espacio", "ventilación"]))
-    if i.needs_estop:
-        req.append(ComponentRequirement(component_id="estop", category="Seguridad", item="Paro de emergencia", qty=1, spec="Hongo 22mm, contacto NC, rotulado y accesible", critical_checks=["contacto NC", "acción positiva", "ubicación"]))
-    req.append(ComponentRequirement(component_id="pushbuttons", category="Control", item="Botonera de mando", qty=1, spec="Subir, bajar, stop, pilotos y rotulación", critical_checks=["IP", "contactos", "rotulado"]))
-    if i.needs_limit_switches:
-        req.append(ComponentRequirement(component_id="limit_switches", category="Seguridad", item="Finales de carrera", qty=2, spec="Superior e inferior, robustos, IP adecuado", critical_checks=["mecánica", "IP", "cableado"], risk_note="Clave para evitar sobre-recorrido."))
-    if i.needs_brake:
-        req.append(ComponentRequirement(component_id="brake_rectifier", category="Control", item="Control/rectificador de freno", qty=1, spec="Según placa del freno; validar tensión y corriente", critical_checks=["tensión freno", "corriente", "secuencia lógica"], risk_note="No comprar sin confirmar placa del freno."))
-    notes = (i.budget_profile + " " + i.user_notes + " " + i.application + " " + i.load_type).lower()
-    if "soft" in notes or "suave" in notes:
-        req.append(ComponentRequirement(component_id="soft_starter", category="Fuerza", item="Soft starter", qty=1, spec=f"Para {i.motor_power_hp:g} HP, {int(i.voltage)} V, corriente >= {calc['full_load_current_a']} A", must_have=False, critical_checks=["corriente", "bypass", "torque", "rampa"], risk_note="Opción intermedia; validar torque de arranque y compatibilidad con freno."))
-        req.append(ComponentRequirement(component_id="bypass_contactor", category="Fuerza", item="Contactor bypass", qty=1, spec=f"AC-3, corriente mínima >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", must_have=False, critical_checks=["AC-3", "bobina", "coordinación"], risk_note="Puede requerirse para reducir pérdidas/temperatura en soft starter."))
-    if i.budget_profile.lower().startswith("premium") or "variador" in notes or "vfd" in notes or i.starts_per_hour >= 30:
-        req.append(ComponentRequirement(component_id="vfd", category="Fuerza", item="Variador de frecuencia", qty=1, spec=f"Para {i.motor_power_hp:g} HP, {int(i.voltage)} V, heavy duty, con criterio de frenado y seguridad", must_have=False, critical_checks=["corriente", "freno", "resistencia", "seguridad", "parametrización"], risk_note="Opción premium; no reemplaza seguridad de izaje por sí sola."))
-        req.append(ComponentRequirement(component_id="line_reactor", category="Fuerza", item="Reactor de línea", qty=1, spec=f"3%, {int(i.voltage)} V, corriente compatible con {calc['full_load_current_a']} A", must_have=False, critical_checks=["corriente", "tensión", "temperatura"], risk_note="Mejora robustez de variador/red; validar necesidad según instalación."))
-        if i.needs_brake or _is_hoist(i):
-            req.append(ComponentRequirement(component_id="braking_resistor", category="Fuerza", item="Resistencia de frenado", qty=1, spec="Dimensionar por ciclo de carga, energía de frenado y especificación del VFD", must_have=False, critical_checks=["ohmios", "watts", "ciclo", "ventilación"], risk_note="En izaje no usar genérica sin cálculo térmico y validación del fabricante."))
-    if "plc" in notes or "hmi" in notes or "inteligente" in notes:
-        req.append(ComponentRequirement(component_id="plc_basic", category="Control", item="PLC básico", qty=1, spec="Entradas/salidas suficientes para mando, finales, freno, fallas y reserva", must_have=False, critical_checks=["IO", "tensión", "programación", "backup"], risk_note="Sube ingeniería, pero mejora diagnóstico y expansión."))
-    req.append(ComponentRequirement(component_id="label_package", category="Taller", item="Etiquetado premium", qty=1, spec="Marcadores de cables, borneras, componentes y láminas de tablero", must_have=False, critical_checks=["legibilidad", "durabilidad", "numeración"], risk_note="Ahorra horas de mantenimiento y da presentación profesional."))
-    req.append(ComponentRequirement(component_id="terminal_blocks", category="Cableado", item="Borneras, puentes y marcadores", qty=1, spec="Paquete industrial para control/fuerza con rotulación", critical_checks=["sección", "corriente", "marcado"]))
-    req.append(ComponentRequirement(component_id="wiring_pack", category="Cableado", item="Consumibles de cableado de tablero", qty=1, spec="Canaleta, punteras, etiquetas, cable control, amarras", critical_checks=["orden", "calibre", "colores"]))
-    power_cable_m = max(1, round(i.cable_run_m * 1.18, 1))
-    req.append(ComponentRequirement(component_id="power_cable", category="Cableado", item="Conductor de fuerza", qty=power_cable_m, unit="m", spec=f"{calc['conductor_preliminary']} preliminar, longitud con reserva incluida", critical_checks=["calibre", "temperatura", "caída de tensión", "canalización"]))
-    return req
+def _starter_by_id(alternatives: List[Dict[str, Any]], starter_id: str) -> Dict[str, Any]:
+    for profile in alternatives:
+        if profile.get("id") == starter_id:
+            return profile.copy()
+    fallback = {
+        "id": starter_id,
+        "name": starter_id.replace("_", " ").title(),
+        "fit": "Arquitectura seleccionada por reglas internas de seguridad y coherencia.",
+        "how_it_works": "Pendiente de descripción específica.",
+        "better_when": "Pendiente de validación del caso.",
+        "price_impact": "Impacto de precio dependiente del BOM final.",
+        "initial_cost": "Variable",
+        "control_quality": 70,
+        "safety_depth": 70,
+        "complexity": 60,
+        "risk": "Requiere revisión humana.",
+        "sell_when": "Cuando la arquitectura coincide con el riesgo y el presupuesto.",
+    }
+    return fallback
 
+
+def _select_architecture(i: ProjectIntake, alternatives: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Selecciona arquitectura antes de armar BOM.
+
+    Regla crítica V10: la solución recomendada, el BOM y la propuesta al cliente
+    deben hablar el mismo idioma. Si el caso es izaje, estrella-triángulo no se
+    recomienda por defecto porque puede requerir torque y control fino.
+    """
+    text = f"{i.budget_profile} {i.user_notes} {i.application} {i.load_type} {i.preferred_quality}".lower()
+    hoist = _is_hoist(i)
+    explicit_star = any(w in text for w in ["estrella", "triangulo", "triángulo", "star-delta", "star delta"])
+    explicit_soft = any(w in text for w in ["soft", "suave", "arrancador suave"])
+    explicit_vfd = any(w in text for w in ["variador", "vfd", "frecuencia", "premium", "inteligente"])
+    explicit_plc = any(w in text for w in ["plc", "hmi", "scada"])
+    economical = any(w in text for w in ["econ", "barato", "mínimo", "minimo"])
+
+    reason: List[str] = []
+    warnings: List[str] = []
+
+    if hoist:
+        reason.append("Aplicación de izaje detectada: carga suspendida, inversión, freno y finales de carrera elevan el riesgo.")
+        if explicit_star:
+            warnings.append("Estrella-triángulo no queda como recomendación principal para este guinche salvo validación explícita: motor de 6 terminales, carga liviana al arranque y torque suficiente.")
+        if explicit_soft and not explicit_vfd:
+            arch = "soft_starter"
+            reason.append("Se pidió arranque suave; se trata como opción intermedia, pero no reemplaza control de freno ni seguridad de izaje.")
+        elif economical and i.starts_per_hour < 12 and not explicit_vfd:
+            arch = "dol_reversing"
+            reason.append("Perfil económico y baja frecuencia: inversión con contactores puede ser cotizable, manteniendo freno/enclavamientos/finales.")
+        else:
+            arch = "vfd_smart"
+            reason.append("Para guinche profesional/premium o muchas maniobras, VFD + control inteligente alinea mejor control, rampa, diagnóstico y protección mecánica.")
+    else:
+        if explicit_plc:
+            arch = "plc_hmi_control"
+            reason.append("Se pidió PLC/HMI o trazabilidad avanzada.")
+        elif explicit_vfd or i.starts_per_hour >= 30:
+            arch = "vfd_smart"
+            reason.append("Muchas maniobras o solicitud premium: VFD mejora control y diagnóstico.")
+        elif explicit_soft or i.starts_per_hour >= 15:
+            arch = "soft_starter"
+            reason.append("Arranques moderados: soft starter reduce corriente/golpe sin control de velocidad.")
+        elif explicit_star:
+            arch = "star_delta"
+            reason.append("Estrella-triángulo solo si el motor/carga lo permiten y se confirma cableado de 6 terminales.")
+        elif i.needs_reversing:
+            arch = "dol_reversing"
+            reason.append("Se requiere inversión de giro con costo controlado.")
+        else:
+            arch = "dol_basic"
+            reason.append("Caso simple sin inversión ni requerimientos de control avanzado.")
+
+    profile = _starter_by_id(alternatives, arch)
+    profile.update({
+        "architecture_id": arch,
+        "architecture_reason": " ".join(reason),
+        "architecture_warnings": warnings,
+        "why": "Seleccionada por coherencia arquitectura-BOM, seguridad de aplicación, presión de cotización y valor comercial defendible.",
+    })
+    return profile
+
+
+def _build_requirements(i: ProjectIntake, calc: Dict[str, Any], architecture: Dict[str, Any]) -> List[ComponentRequirement]:
+    arch = architecture.get("architecture_id") or architecture.get("id") or "dol_basic"
+    req: List[ComponentRequirement] = []
+
+    def add(component_id: str, category: str, item: str, qty: float, spec: str, must_have: bool = True, checks=None, risk: str = "", unit: str = "u"):
+        req.append(ComponentRequirement(component_id=component_id, category=category, item=item, qty=qty, unit=unit, spec=spec, must_have=must_have, critical_checks=checks or [], risk_note=risk))
+
+    # Protección y seguridad comunes
+    add("mccb_main", "Fuerza", "MCCB principal", 1, f"3P, {calc['breaker_size_a']} A preliminar, tensión {int(i.voltage)} V, SCCR/kAIC por verificar", checks=["corriente", "tensión", "SCCR", "curva"], risk="No seleccionar sin verificar cortocircuito disponible.")
+    add("overload_relay", "Fuerza", "Relé de sobrecarga", 1, f"Rango que cubra ajuste {calc['overload_setting_a']} A", checks=["rango", "clase", "compatibilidad"], risk="Ajuste incorrecto puede disparar falso o no proteger.")
+
+    # Componentes dependientes de arquitectura: aquí se evita mezclar VFD con estrella-triángulo.
+    if arch == "vfd_smart" or arch == "plc_hmi_control":
+        add("contactor_fwd", "Fuerza", "Contactor de línea / seguridad para VFD", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V; no usado para invertir fases", checks=["AC-3", "bobina", "coordinación con VFD"], risk="En VFD la inversión no se hace con dos contactores; se controla por entradas/lógica del variador.")
+        add("vfd", "Fuerza", "Variador de frecuencia", 1, f"Para {i.motor_power_hp:g} HP, {int(i.voltage)} V, heavy duty, con parametrización para izaje si aplica", checks=["corriente", "freno", "resistencia", "rampas", "parametrización"], risk="No reemplaza freno mecánico ni finales de carrera; requiere comisionamiento.")
+        add("line_reactor", "Fuerza", "Reactor de línea", 1, f"3%, {int(i.voltage)} V, corriente compatible con {calc['full_load_current_a']} A", must_have=False, checks=["corriente", "tensión", "temperatura"], risk="Mejora robustez de variador/red; validar necesidad según instalación.")
+        if i.needs_brake or _is_hoist(i):
+            add("braking_resistor", "Fuerza", "Resistencia de frenado", 1, "Dimensionar por ciclo de carga, energía de frenado y especificación del VFD", must_have=False, checks=["ohmios", "watts", "ciclo", "ventilación"], risk="En izaje no usar genérica sin cálculo térmico y validación del fabricante.")
+        if arch == "plc_hmi_control":
+            add("plc_basic", "Control", "PLC básico", 1, "Entradas/salidas suficientes para mando, finales, freno, fallas y reserva", must_have=False, checks=["IO", "tensión", "programación", "backup"], risk="Sube ingeniería, pero mejora diagnóstico y expansión.")
+    elif arch == "soft_starter":
+        add("contactor_fwd", "Fuerza", "Contactor principal", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"])
+        add("soft_starter", "Fuerza", "Soft starter", 1, f"Para {i.motor_power_hp:g} HP, {int(i.voltage)} V, corriente >= {calc['full_load_current_a']} A", checks=["corriente", "bypass", "torque", "rampa"], risk="Validar torque de arranque y compatibilidad con freno.")
+        add("bypass_contactor", "Fuerza", "Contactor bypass", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", must_have=False, checks=["AC-3", "bobina", "coordinación"], risk="Puede requerirse para reducir pérdidas/temperatura en soft starter.")
+    elif arch == "star_delta":
+        add("main_contactor", "Fuerza", "Contactor principal estrella-triángulo", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"] )
+        add("star_contactor", "Fuerza", "Contactor estrella", 1, "Compatible con esquema estrella-triángulo y temporizador", checks=["coordinación", "enclavamiento"] )
+        add("delta_contactor", "Fuerza", "Contactor triángulo", 1, "Compatible con esquema estrella-triángulo y temporizador", checks=["coordinación", "enclavamiento"] )
+        add("star_delta_timer", "Control", "Temporizador estrella-triángulo", 1, "Rango ajustable y contactos para conmutación segura", checks=["tiempo", "contactos", "tensión control"], risk="No usar si el motor no tiene 6 terminales accesibles o la carga requiere alto torque inicial.")
+    elif arch == "dol_reversing":
+        add("contactor_fwd", "Fuerza", "Contactor subir", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"], risk="Verificar compatibilidad con enclavamiento.")
+        add("contactor_rev", "Fuerza", "Contactor bajar", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"], risk="Verificar compatibilidad con enclavamiento.")
+        add("mechanical_interlock", "Seguridad", "Enclavamiento mecánico", 1, "Compatible con ambos contactores de inversión", checks=["compatibilidad física", "bloqueo real"], risk="Obligatorio para evitar inversión simultánea.")
+    else:
+        add("contactor_fwd", "Fuerza", "Contactor principal", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"])
+
+    if i.needs_phase_monitor:
+        add("phase_monitor", "Seguridad", "Relé monitor de fase", 1, f"Para red {int(i.voltage)} V trifásica; falla y secuencia de fase", checks=["tensión", "secuencia", "ajustes"], risk="Recomendado para proteger guinche/motor ante pérdida de fase.")
+    add("control_transformer", "Control", "Transformador de control", 1, f"{int(i.voltage)} V a {int(i.control_voltage)} V, {calc['control_transformer_va']} VA preliminar", checks=["VA", "fusibles", "aislamiento"])
+    add("cabinet", "Tablero", "Gabinete industrial", 1, "NEMA/IP según polvo, humedad y temperatura; tamaño con 25% de reserva", checks=["grado IP/NEMA", "espacio", "ventilación"])
+    if i.needs_estop:
+        add("estop", "Seguridad", "Paro de emergencia", 1, "Hongo 22mm, contacto NC, rotulado y accesible", checks=["contacto NC", "acción positiva", "ubicación"])
+    add("pushbuttons", "Control", "Botonera de mando", 1, "Subir, bajar, stop, pilotos y rotulación", checks=["IP", "contactos", "rotulado"])
+    if i.needs_limit_switches:
+        add("limit_switches", "Seguridad", "Finales de carrera", 2, "Superior e inferior, robustos, IP adecuado", checks=["mecánica", "IP", "cableado"], risk="Clave para evitar sobre-recorrido.")
+    if i.needs_brake:
+        add("brake_rectifier", "Control", "Control/rectificador de freno", 1, "Según placa del freno; validar tensión y corriente", checks=["tensión freno", "corriente", "secuencia lógica"], risk="No comprar sin confirmar placa del freno.")
+
+    add("label_package", "Taller", "Etiquetado premium", 1, "Marcadores de cables, borneras, componentes y láminas de tablero", must_have=False, checks=["legibilidad", "durabilidad", "numeración"], risk="Ahorra horas de mantenimiento y da presentación profesional.")
+    add("terminal_blocks", "Cableado", "Borneras, puentes y marcadores", 1, "Paquete industrial para control/fuerza con rotulación", checks=["sección", "corriente", "marcado"])
+    add("wiring_pack", "Cableado", "Consumibles de cableado de tablero", 1, "Canaleta, punteras, etiquetas, cable control, amarras", checks=["orden", "calibre", "colores"])
+    power_cable_m = max(1, round(i.cable_run_m * 1.18, 1))
+    add("power_cable", "Cableado", "Conductor de fuerza", power_cable_m, f"{calc['conductor_preliminary']} preliminar, longitud con reserva incluida", checks=["calibre", "temperatura", "caída de tensión", "canalización"], unit="m")
+    return req
 
 def _alternatives(i: ProjectIntake) -> List[Dict[str, Any]]:
     profiles = load_starter_profiles()
@@ -156,17 +253,15 @@ def _alternatives(i: ProjectIntake) -> List[Dict[str, Any]]:
         {"name": "Variador + control inteligente", "fit": "Premium para control, rampas y diagnóstico", "initial_cost": "Alto", "control_quality": 94, "safety_depth": 88, "complexity": 76, "risk": "Requiere parametrización", "sell_when": "Guinche crítico o uso frecuente.", "how_it_works": "Controla frecuencia/tensión del motor.", "better_when": "Se quiere control y confiabilidad superior.", "price_impact": "Más caro al inicio, pero reduce paradas y reclamos."},
     ]
 
-def _recommended(i: ProjectIntake, alternatives: List[Dict[str, Any]]) -> Dict[str, Any]:
-    text = (i.budget_profile + " " + i.user_notes + " " + i.application).lower()
-    if "premium" in text or "variador" in text or i.starts_per_hour >= 30:
-        rec = alternatives[2].copy()
-    elif "econ" in text:
-        rec = alternatives[0].copy()
-    else:
-        rec = alternatives[1].copy() if i.starts_per_hour >= 15 else alternatives[0].copy()
-    rec["why"] = "Seleccionada por equilibrio entre seguridad, tiempo de cotización, control del riesgo y valor comercial defendible."
+def _recommended(i: ProjectIntake, alternatives: List[Dict[str, Any]], architecture: Dict[str, Any]) -> Dict[str, Any]:
+    rec = _starter_by_id(alternatives, architecture.get("architecture_id") or architecture.get("id") or "dol_basic")
+    rec.update({
+        "architecture_id": architecture.get("architecture_id") or architecture.get("id"),
+        "architecture_reason": architecture.get("architecture_reason", ""),
+        "architecture_warnings": architecture.get("architecture_warnings", []),
+        "why": architecture.get("why", "Seleccionada por coherencia entre solución, BOM y riesgo técnico."),
+    })
     return rec
-
 
 def _agents() -> List[Dict[str, Any]]:
     return [
@@ -299,7 +394,7 @@ def _is_hoist(i: ProjectIntake) -> bool:
     return any(w in text for w in ["guinche", "winche", "hoist", "izaje", "elevador", "polipasto"])
 
 
-def _consistency_audit(i: ProjectIntake, calc: Dict[str, Any]) -> Dict[str, Any]:
+def _consistency_audit(i: ProjectIntake, calc: Dict[str, Any], architecture: Dict[str, Any], requirements: List[ComponentRequirement]) -> Dict[str, Any]:
     checks: List[Dict[str, Any]] = []
 
     def add(name: str, status: str, severity: str, detail: str, action: str):
@@ -329,6 +424,26 @@ def _consistency_audit(i: ProjectIntake, calc: Dict[str, Any]) -> Dict[str, Any]
         add("SCCR/kAIC", "dato disponible", "alta", f"Corto disponible declarado: {i.short_circuit_available_ka} kA.", "Seleccionar interruptor/tablero con capacidad superior y coordinación.")
     else:
         add("SCCR/kAIC", "pendiente", "alta", "No se declaró corriente de cortocircuito disponible.", "Cotizar con advertencia; no liberar fabricación hasta verificar kAIC/SCCR.")
+
+    arch = architecture.get("architecture_id") or architecture.get("id") or "desconocida"
+    component_ids = {r.component_id for r in requirements}
+    vfd_set = {"vfd", "line_reactor", "braking_resistor"}
+    star_set = {"main_contactor", "star_contactor", "delta_contactor", "star_delta_timer"}
+    if arch == "vfd_smart" and not {"vfd"}.issubset(component_ids):
+        add("Coherencia arquitectura-BOM", "bloquear", "crítica", "La arquitectura recomendada es VFD pero el BOM no contiene variador.", "Regenerar BOM desde arquitectura o bloquear propuesta.")
+    elif arch == "star_delta" and (component_ids & vfd_set):
+        add("Coherencia arquitectura-BOM", "bloquear", "crítica", "La arquitectura estrella-triángulo contiene componentes de VFD.", "Eliminar VFD/reactor/resistencia o cambiar recomendación a VFD.")
+    elif arch == "vfd_smart" and (component_ids & star_set):
+        add("Coherencia arquitectura-BOM", "bloquear", "crítica", "La arquitectura VFD contiene componentes estrella-triángulo.", "Eliminar contactores estrella-triángulo o cambiar arquitectura.")
+    elif arch == "dol_reversing" and (component_ids & (vfd_set | star_set)):
+        add("Coherencia arquitectura-BOM", "bloquear", "crítica", "La arquitectura de inversión por contactores tiene componentes de otra arquitectura.", "Separar alternativas y cotizar solo la arquitectura seleccionada.")
+    else:
+        add("Coherencia arquitectura-BOM", "ok", "alta", f"Arquitectura {arch} coincide con el BOM generado.", "Mantener regla: una arquitectura recomendada = un BOM principal coherente.")
+
+    if _is_hoist(i) and arch == "star_delta":
+        add("Regla especial guinche/izaje", "revisar", "alta", "Se seleccionó estrella-triángulo en aplicación de izaje.", "Solo aceptar si motor/carga lo permiten y responsable humano confirma torque, seis terminales y secuencia de freno.")
+    elif _is_hoist(i):
+        add("Regla especial guinche/izaje", "ok", "alta", f"Arquitectura {arch} evita recomendar estrella-triángulo por defecto en carga suspendida.", "Validar freno, finales, E-Stop, rampas y pruebas antes de construir.")
 
     blockers = [c for c in checks if c["status"] in {"bloquear"} or (c["severity"] == "crítica" and c["status"] in {"pendiente", "revisar"})]
     score = max(0, round(100 - len(blockers) * 14 - sum(1 for c in checks if c["status"] == "revisar") * 6, 1))
@@ -423,15 +538,15 @@ def _engineer_review_board(i: ProjectIntake, release: Dict[str, Any], market_sum
     construction = "Satisfecho para piloto" if not release["construction_ready"] else "Satisfecho para revisión formal"
     rfq_ok = market_summary["needs_rfq_count"] <= 3
     personas = [
-        {"perfil": "Ingeniero junior", "lo_que_exigia": "Guía paso a paso, ejemplos y bloqueo si faltan datos.", "respuesta_v9": "Flujo guiado, modo rápido, semáforo de precisión y compuertas de salida.", "estado": "feliz para piloto"},
-        {"perfil": "Técnico tablerista", "lo_que_exigia": "BOM aterrizado, categorías, chequeos críticos y materiales editables.", "respuesta_v9": "BOM normalizado por categoría, tabla cotizable, CSV/XLSX y notas de riesgo por componente.", "estado": "feliz para piloto"},
-        {"perfil": "Mantenimiento industrial", "lo_que_exigia": "Plan de pruebas, fallas comunes y entrega sin improvisación.", "respuesta_v9": "Checklist de taller/campo, plan de verificación y diagnóstico de fallas típicas.", "estado": "feliz para piloto"},
-        {"perfil": "Diseñador eléctrico", "lo_que_exigia": "Trazabilidad, supuestos, auditoría, compuertas y documentos formales.", "respuesta_v9": "Libro de supuestos, auditoría de coherencia, export PDF, Markdown y bloqueo SCCR/kAIC.", "estado": construction},
-        {"perfil": "Cotizador/compras", "lo_que_exigia": "Precios por confianza, proveedores, RFQ y exportación a Excel.", "respuesta_v9": "Market engine, price confidence, RFQ, CSV/XLSX BOM y fuente/vigencia por línea.", "estado": "feliz para piloto" if rfq_ok else "feliz con advertencia RFQ"},
-        {"perfil": "Seguridad/supervisor", "lo_que_exigia": "No liberar construcción si hay riesgo crítico.", "respuesta_v9": "Construction gate separado de quote gate; aprobación humana obligatoria.", "estado": "feliz: no promete construcción automática"},
+        {"perfil": "Ingeniero junior", "lo_que_exigia": "Guía paso a paso, ejemplos y bloqueo si faltan datos.", "respuesta_v10": "Flujo guiado, modo rápido, semáforo de precisión y compuertas de salida.", "estado": "feliz para piloto"},
+        {"perfil": "Técnico tablerista", "lo_que_exigia": "BOM aterrizado, categorías, chequeos críticos y materiales editables.", "respuesta_v10": "BOM normalizado por categoría, tabla cotizable, CSV/XLSX y notas de riesgo por componente.", "estado": "feliz para piloto"},
+        {"perfil": "Mantenimiento industrial", "lo_que_exigia": "Plan de pruebas, fallas comunes y entrega sin improvisación.", "respuesta_v10": "Checklist de taller/campo, plan de verificación y diagnóstico de fallas típicas.", "estado": "feliz para piloto"},
+        {"perfil": "Diseñador eléctrico", "lo_que_exigia": "Trazabilidad, supuestos, auditoría, compuertas y documentos formales.", "respuesta_v10": "Libro de supuestos, auditoría de coherencia, export PDF, Markdown y bloqueo SCCR/kAIC.", "estado": construction},
+        {"perfil": "Cotizador/compras", "lo_que_exigia": "Precios por confianza, proveedores, RFQ y exportación a Excel.", "respuesta_v10": "Market engine, price confidence, RFQ, CSV/XLSX BOM y fuente/vigencia por línea.", "estado": "feliz para piloto" if rfq_ok else "feliz con advertencia RFQ"},
+        {"perfil": "Seguridad/supervisor", "lo_que_exigia": "No liberar construcción si hay riesgo crítico.", "respuesta_v10": "Construction gate separado de quote gate; aprobación humana obligatoria.", "estado": "feliz: no promete construcción automática"},
     ]
     return {
-        "veredicto": "La V9 está lista para prueba piloto cerrada con ingenieros: el humano revisa, no reconstruye.",
+        "veredicto": "La V10 Architecture Lock está lista para prueba piloto cerrada con ingenieros: el humano revisa, no reconstruye.",
         "quote_score": quote["score_percent"],
         "personas": personas,
         "regla_de_venta": "Vender ahorro de tiempo y expediente técnico-comercial trazable, no certificación automática.",
@@ -490,15 +605,16 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
         "notice": "Cálculos preliminares para cotización. Para construcción se requiere placa real, tablas/códigos aplicables, temperatura, canalización, coordinación y verificación de campo.",
     }
     quality = _data_quality(i)
-    requirements = _build_requirements(i, calculations)
+    alternatives = _alternatives(i)
+    architecture = _select_architecture(i, alternatives)
+    requirements = _build_requirements(i, calculations, architecture)
     decisions = decide_prices(requirements, i)
     market_summary = summarize_market(decisions)
-    consistency = _consistency_audit(i, calculations)
+    consistency = _consistency_audit(i, calculations, architecture, requirements)
     release = _release_gates(i, quality, consistency, market_summary)
     quote = _quote_readiness(quality, consistency, market_summary, release)
     assumptions = _assumption_ledger(i, calculations, market_summary)
-    alternatives = _alternatives(i)
-    recommended = _recommended(i, alternatives)
+    recommended = _recommended(i, alternatives, architecture)
     budget = _build_budget(i, float(market_summary["materials_cost"]), market_summary)
     rfq_message = generate_rfq_message(requirements, decisions, i)
     completeness = min(99.5, round((quality["score_percent"] * 0.30) + (consistency["score_percent"] * 0.24) + (float(market_summary["coverage_percent"]) * 0.24) + (quote["score_percent"] * 0.22), 1))
@@ -510,7 +626,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
     output_contract = _output_quality_contract(release, quote)
 
     pack = EngineeringPack(
-        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release cerrado para mesa de ingenieros"},
+        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con Architecture Lock"},
         intake=i.model_dump(),
         executive_verdict={
             "headline": "Cotización industrial inteligente: menos datos, más expediente, cero certezas falsas.",
@@ -528,9 +644,10 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
             "summary": market_summary,
             "price_decisions": [d.model_dump() for d in decisions],
             "supplier_count": len(market_summary["suppliers_used"]),
-            "method": "PriceGuard 9: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
+            "method": "PriceGuard 10 + Architecture Lock: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
             "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
             "priceguard_methodology": priceguard_methodology(),
+            "architecture_lock": architecture,
         },
         budget=budget,
         risks=_risks(i),
@@ -620,7 +737,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
         },
         api_activation=integration_status(),
         priceguard={"methodology": priceguard_methodology(), "summary": market_summary, "anti_garbage_rule": "Si un precio sale fuera de banda, sin stock, vencido o de fuente débil, se marca amarillo/rojo y no se permite precio cerrado sin RFQ.", "catalog_scope": market_summary.get("catalog_scope"), "confidence_policy": market_summary.get("confidence_policy"), "candidate_offer_audit": market_summary.get("candidate_offer_audit")},
-        starter_intelligence={"profiles": alternatives, "recommended": recommended, "didactic_rule": "Cada arranque explica cómo funciona, cuándo conviene y cómo impacta precio/riesgo."},
+        starter_intelligence={"profiles": alternatives, "recommended": recommended, "architecture_lock": architecture, "didactic_rule": "Cada arranque explica cómo funciona, cuándo conviene, cómo impacta precio/riesgo y por qué el BOM debe coincidir con la arquitectura seleccionada."},
         premium_document_contract={"pdf": "portada + resumen ejecutivo + semáforos + supuestos + presupuesto + BOM + anexos + firmas", "spreadsheet": "BOM editable con semáforo y fuente", "cad": "SVG/Draw.io CAD-like para revisión y formalización"},
         human_review_notice="ControlPro reduce tiempo, ordena el expediente y baja la carga de corrección; no reemplaza normativa local, verificación de campo, proveedor confirmado ni aprobación humana antes de fabricar o energizar.",
     )
@@ -664,6 +781,11 @@ def export_pack_markdown(payload: Dict[str, Any] | ProjectIntake) -> str:
     lines.append("## Solución recomendada")
     lines.append(f"**{pack['recommended_option']['name']}** — {pack['recommended_option']['fit']}")
     lines.append(pack['recommended_option']['why'])
+    if pack.get("starter_intelligence", {}).get("architecture_lock"):
+        arch = pack["starter_intelligence"]["architecture_lock"]
+        lines.append(f"Architecture Lock: **{arch.get('architecture_id', arch.get('id',''))}** · {arch.get('architecture_reason','')}")
+        for w in arch.get('architecture_warnings', []):
+            lines.append(f"- Advertencia arquitectura: {w}")
     lines.append("")
     lines.append("## BOM cotizable")
     for row in pack['market']['price_decisions']:
@@ -704,7 +826,7 @@ def export_pack_markdown(payload: Dict[str, Any] | ProjectIntake) -> str:
     lines.append("## Mesa simulada de ingenieros")
     lines.append(pack["review_board"]["veredicto"])
     for p in pack["review_board"]["personas"]:
-        lines.append(f"- **{p['perfil']}**: {p['estado']} · {p.get('respuesta_v9', 'Resuelto')}")
+        lines.append(f"- **{p['perfil']}**: {p['estado']} · {p.get('respuesta_v10', 'Resuelto')}")
     lines.append("")
     lines.append("## Próximas acciones guiadas")
     for n in pack["guided_flow"]["next_best_actions"]:
@@ -730,6 +852,7 @@ def export_client_proposal(payload: Dict[str, Any] | ProjectIntake) -> str:
         "",
         "## Solución recomendada",
         f"{pack['recommended_option']['name']}: {pack['recommended_option']['fit']}.",
+        f"Criterio de arquitectura: {pack.get('starter_intelligence', {}).get('architecture_lock', {}).get('architecture_reason', '')}",
         "",
         "## Valores comerciales",
         f"- Precio piso técnico: ${b['floor_price']:,.2f}",

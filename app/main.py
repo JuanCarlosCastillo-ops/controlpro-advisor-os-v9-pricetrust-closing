@@ -16,9 +16,9 @@ BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
 app = FastAPI(
-    title="ControlPro Advisor OS V9 PriceTrust Closing",
+    title="ControlPro Advisor OS V10 Architecture Lock",
     description="Sistema operativo en español para diseño, cotización, CAD-like, mercado, RFQ y activación con credenciales reales.",
-    version="8.0-priceguard-premium",
+    version="10.0-architecture-lock",
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -32,7 +32,7 @@ def index() -> str:
 def health():
     return {
         "status": "ok",
-        "product": "ControlPro Advisor OS V9 PriceTrust Closing",
+        "product": "ControlPro Advisor OS V10 Architecture Lock",
         "language": "es",
         "modules": [
             "datos", "fotos", "3d", "unifilar", "control", "calculos", "soluciones",
