@@ -59,6 +59,7 @@ function renderPack(pack){
   $('#controlSvg').innerHTML = pack.diagrams.control_ladder_svg;
   $('#panelSvg').innerHTML = pack.diagrams.panel_preview_svg;
   renderPrecision(pack);
+  renderMachineContext(pack);
   renderPriceTrustDashboard(pack);
   renderSavingsDashboard(pack);
   renderCAD(pack);
@@ -149,7 +150,7 @@ function renderGuidedFlow(pack){
 function renderReviewBoard(pack){
   const board = pack.review_board || {};
   const personas = board.personas || [];
-  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V11 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
+  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V12 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
 }
 
 function renderCalculations(pack){
@@ -287,7 +288,53 @@ function setupNav(){
   $$('.sidebar a').forEach(a=>a.addEventListener('click',()=>{$$('.sidebar a').forEach(x=>x.classList.remove('active')); a.classList.add('active');}));
 }
 
+function setupLayers(){
+  const layerMap = {
+    cotizar: ['lead-capture','quick-mode','dashboard','precision','intake','photos'],
+    evidencia: ['assembly','singleline','control','panel3d','cadshop'],
+    mercado: ['calculations','solutions','bom','market','rfq','budget'],
+    entregables: ['statistics','validation','deliverables','pricetrust-dashboard'],
+    admin: ['api-activation']
+  };
+  const allIds = [...new Set(Object.values(layerMap).flat())];
+  function showLayer(layer){
+    allIds.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('layer-hidden', !(layerMap[layer]||[]).includes(id)); });
+    $$('.layer-btn').forEach(b=>b.classList.toggle('active', b.dataset.layer===layer));
+    localStorage.setItem('controlpro_v12_layer', layer);
+  }
+  $$('.layer-btn').forEach(btn=>btn.addEventListener('click',()=>showLayer(btn.dataset.layer)));
+  showLayer(localStorage.getItem('controlpro_v12_layer') || 'cotizar');
+}
+
+async function saveLead(){
+  const form = $('#leadForm'); if(!form) return;
+  const data = Object.fromEntries(new FormData(form).entries());
+  data.saved_at = new Date().toISOString();
+  localStorage.setItem('controlpro_v12_pilot_lead', JSON.stringify(data));
+  try{
+    const res = await fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    const out = await res.json();
+    setTextSafe('#leadStatus', out.message || 'Registro guardado para piloto.');
+  }catch(e){ setTextSafe('#leadStatus','Registro guardado localmente. Conectar CRM/DB para producción.'); }
+  showToast('Registro piloto guardado');
+}
+
+function restoreLead(){
+  try{
+    const data = JSON.parse(localStorage.getItem('controlpro_v12_pilot_lead')||'{}');
+    Object.entries(data).forEach(([k,v])=>{ const el=document.querySelector(`#leadForm [name="${k}"]`); if(el) el.value=v; });
+  }catch(e){}
+}
+
+function renderMachineContext(pack){
+  const ctx = pack.machine_context || {};
+  const text = ctx.label ? `Contexto detectado: ${ctx.label}. La app ajusta riesgos, checklist, CAD/taller y RFQ según esta máquina.` : 'Contexto de máquina pendiente.';
+  setTextSafe('#statusText', `${pack.validation.status} · ${text}`);
+}
+
+
 $('#generateBtn').addEventListener('click', generate);
+$('#saveLeadBtn')?.addEventListener('click', saveLead);
 $('#loadExampleBtn').addEventListener('click', loadExample);
 $('#exportBtn').addEventListener('click', ()=>exportEndpoint('/api/export/markdown','controlpro_expediente_tecnico.md'));
 $('#proposalBtn').addEventListener('click', ()=>exportEndpoint('/api/export/client-proposal','controlpro_propuesta_cliente.md'));
@@ -302,4 +349,4 @@ $('#terminalBtn')?.addEventListener('click', ()=>exportBinary('/api/export/cad/t
 $('#copyEnvBtn')?.addEventListener('click', async()=>{ await navigator.clipboard.writeText($('#envTemplate').value || ''); showToast('Plantilla .env copiada'); });
 $$('.quick-chip').forEach(btn=>btn.addEventListener('click', ()=>applyTemplate(btn.dataset.template)));
 $('#copyRfqBtn').addEventListener('click', async()=>{ await navigator.clipboard.writeText($('#rfqMessage').value || ''); showToast('RFQ copiado'); });
-setupPhotos(); setupNav(); loadIntegrationStatus(); generate();
+restoreLead(); setupPhotos(); setupNav(); setupLayers(); loadIntegrationStatus(); generate();

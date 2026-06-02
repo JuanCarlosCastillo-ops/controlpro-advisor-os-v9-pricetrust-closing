@@ -1,36 +1,32 @@
-# Validation Report — ControlPro Advisor OS V11 Workshop Lock
+# Validation Report - ControlPro Advisor OS V12 MarketPilot Lock
 
 ## Resultado
-
 VALIDATION OK.
 
-## Pruebas ejecutadas
+## Validaciones ejecutadas
 
-```text
-PYTHONPATH=. python -m compileall app scripts tests -q
+```bash
+python -m compileall app scripts tests -q
 PYTHONPATH=. python scripts/validate_project.py
 PYTHONPATH=. pytest -q
 ```
 
-## Métricas del caso demo
+## Resultado esperado
+- Engineering completeness: >= 80%
+- Market coverage: >= 80%
+- PriceGuard: >= 70%
+- API health: OK
+- Exportables: Markdown, propuesta cliente, PDF, BOM CSV/XLSX, SVG, Draw.io, listas CSV
+- Tests: 11 passed
 
-VALIDATION OK
-Engineering completeness: 97.8%
-Market coverage: 100.0%
-RFQ items: 1
-PriceGuard: 83.0%
-Recommended sell price: $5595.2
+## Cierre V12
+La V12 agrega **Machine Context Lock** y **Layered UX**:
 
-## Corrección crítica V11
+1. El texto, riesgos, checklist, CAD/taller y RFQ cambian según la máquina: guinche, compresor, bomba, banda o motor general.
+2. La web se usa por capas: registro piloto, datos mínimos, evidencia/CAD, mercado, entregables y admin interno.
+3. El panel de APIs queda oculto para el cliente normal; solo sirve para activación interna.
+4. La vista 3D didáctica se reemplaza por un visual premium de producto.
+5. Se agrega captura de lead piloto con endpoint `/api/leads` y almacenamiento temporal/local.
 
-La V11 incorpora **Workshop Lock**:
-
-- Si la arquitectura recomendada es `vfd_smart`, los diagramas CAD-like, Draw.io, lista de borneras y lista de cables dejan de usar `KM1/KM2` como inversión principal.
-- Para VFD, la fuerza queda como `QF-01 -> K1/VFD-01 -> MTR-01`.
-- Para VFD, el control queda como pulsadores/finales a entradas digitales del VFD y liberación de freno coordinada.
-- Para contactores, se mantiene `KM1/KM2` únicamente cuando la arquitectura principal es `dol_reversing`.
-- Para estrella-triángulo, se usa `KM-L/KM-Y/KM-Δ` únicamente en arquitectura `star_delta`.
-
-## PDF
-
-Se renderizó el PDF de muestra a imágenes para confirmar que no estuviera roto o cortado.
+## Límite profesional
+ControlPro reduce tiempo y ordena el expediente. No reemplaza normativa local, verificación de campo, proveedor confirmado ni aprobación humana antes de fabricar o energizar.

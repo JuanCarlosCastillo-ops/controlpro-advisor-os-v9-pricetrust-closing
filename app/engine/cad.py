@@ -20,6 +20,32 @@ def _arch_id(architecture: Dict[str, Any] | str | None = None) -> str:
     return "dol_basic"
 
 
+
+def _machine_type(i: ProjectIntake) -> str:
+    text = f"{i.application} {i.load_type} {i.project_name} {i.user_notes}".lower()
+    if any(w in text for w in ["guinche", "winche", "hoist", "izaje", "polipasto"]):
+        return "hoist"
+    if any(w in text for w in ["compresor", "compressor", "aire comprimido"]):
+        return "compressor"
+    if any(w in text for w in ["bomba", "pump", "centrífuga", "centrifuga"]):
+        return "pump"
+    if any(w in text for w in ["banda", "transportadora", "conveyor", "cinta"]):
+        return "conveyor"
+    return "general_motor"
+
+
+def _labels(i: ProjectIntake) -> Dict[str, str]:
+    mt = _machine_type(i)
+    if mt == "hoist":
+        return {"cmd1":"SUBIR", "cmd2":"BAJAR", "di1":"FWD/UP", "di2":"REV/DOWN", "permissive":"LS-UP/LS-DN", "aux":"BRK", "aux_desc":"Liberación freno", "cable_aux":"Freno", "note":"finales/freno/carga suspendida"}
+    if mt == "compressor":
+        return {"cmd1":"MARCHA", "cmd2":"AUTO/RESET", "di1":"RUN", "di2":"AUTO/RESET", "permissive":"PRESOSTATO/TERM", "aux":"RUN", "aux_desc":"Permisivo marcha", "cable_aux":"Presostato/termistor", "note":"presostato/unloader/temperatura"}
+    if mt == "pump":
+        return {"cmd1":"MARCHA", "cmd2":"AUTO/MAN", "di1":"RUN", "di2":"AUTO", "permissive":"NIVEL/PRES", "aux":"RUN", "aux_desc":"Permisivo bomba", "cable_aux":"Nivel/presión", "note":"nivel/presión/trabajo en seco"}
+    if mt == "conveyor":
+        return {"cmd1":"MARCHA", "cmd2":"PARO", "di1":"RUN", "di2":"STOP", "permissive":"PULLCORD/SENS", "aux":"RUN", "aux_desc":"Permisivo banda", "cable_aux":"Pull-cord/sensores", "note":"guardas/paros distribuidos"}
+    return {"cmd1":"MARCHA", "cmd2":"RESET", "di1":"RUN", "di2":"RESET", "permissive":"PERMISIVO", "aux":"RUN", "aux_desc":"Permisivo motor", "cable_aux":"Permisivo", "note":"protección motor"}
+
 def revision_block(title: str, project: str, rev: str = "A") -> str:
     date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return f"""
@@ -29,7 +55,7 @@ def revision_block(title: str, project: str, rev: str = "A") -> str:
       <line x1='686' y1='714' x2='1152' y2='714' stroke='#9edcff' stroke-width='1'/>
       <line x1='894' y1='650' x2='894' y2='776' stroke='#9edcff' stroke-width='1'/>
       <line x1='1016' y1='714' x2='1016' y2='776' stroke='#9edcff' stroke-width='1'/>
-      <text x='700' y='672' fill='#55c8ff' font-size='17' font-weight='800'>CONTROLPRO ADVISOR OS V11</text>
+      <text x='700' y='672' fill='#55c8ff' font-size='17' font-weight='800'>CONTROLPRO ADVISOR OS V12</text>
       <text x='700' y='704' fill='#e6f7ff' font-size='14'>PLANO: {_e(title)}</text>
       <text x='700' y='736' fill='#e6f7ff' font-size='13'>PROYECTO: {_e(project)[:50]}</text>
       <text x='700' y='760' fill='#b8d6e8' font-size='12'>USO: COTIZACIÓN / REVISIÓN · NO LIBERA CONSTRUCCIÓN SIN APROBACIÓN</text>
@@ -166,28 +192,30 @@ def single_line_cad_svg(i: ProjectIntake, calc: Dict[str, Any], architecture: Di
 
 def control_ladder_cad_svg(i: ProjectIntake, architecture: Dict[str, Any] | str | None = None) -> str:
     arch = _arch_id(architecture)
+    lab = _labels(i)
     if arch in {"vfd_smart", "plc_hmi_control"}:
-        detail = "Lógica VFD: comandos a DI, falla por relé, liberación de freno coordinada. No usa KM1/KM2 para invertir fases."
+        detail = f"Lógica VFD por contexto: {lab['note']}. Comandos a DI, falla por relé y permisos de seguridad. No usa KM1/KM2 para invertir fases."
         rung_labels = [
             ("R1", "S0 STOP NC", "S-ESTOP NC", "RESET", "CR"),
-            ("R2", "CR NO", "S1 SUBIR", "LS-UP NC", "VFD-DI1 FWD/UP"),
-            ("R3", "CR NO", "S2 BAJAR", "LS-DN NC", "VFD-DI2 REV/DOWN"),
-            ("R4", "VFD RUN", "FM OK", "BRK OK", "BRK"),
+            ("R2", "CR NO", f"S1 {lab['cmd1']}", f"{lab['permissive']} OK", f"VFD-DI1 {lab['di1']}"),
+            ("R3", "CR NO", f"S2 {lab['cmd2']}", "PERM OK", f"VFD-DI2 {lab['di2']}"),
+            ("R4", "VFD RUN", "FM OK", lab['aux_desc'], lab['aux']),
             ("R5", "VFD FAULT", "FM FAIL", "OL/THERM", "ALM"),
             ("R6", "CR NO", "VFD READY", "RUN FB", "PIL"),
         ]
-        terminal_note = "W201 CR → VFD-DI1; W301 CR → VFD-DI2; W401 VFD-RUN/BRK → freno; W501 VFD-FAULT → ALM."
+        terminal_note = f"W201 CR → VFD-DI1 {lab['di1']}; W301 CR → VFD-DI2 {lab['di2']}; W401 VFD-RUN → {lab['aux']}; W601 {lab['permissive']} → DI3/DI4."
     else:
         detail = "Lógica contactorizada: usar enclavamiento eléctrico/mecánico según arquitectura."
+        cmd1, cmd2 = lab['cmd1'], lab['cmd2']
         rung_labels = [
             ("R1", "S0 STOP NC", "S-ESTOP NC", "RESET", "CR"),
-            ("R2", "CR NO", "S1 SUBIR", "LS-UP NC", "KM1"),
-            ("R3", "CR NO", "S2 BAJAR", "LS-DN NC", "KM2"),
-            ("R4", "KM1/KM2 NO", "OL NC", "FM OK", "BRK"),
+            ("R2", "CR NO", f"S1 {cmd1}", "PERM OK", "KM1"),
+            ("R3", "CR NO", f"S2 {cmd2}", "PERM OK", "KM2"),
+            ("R4", "KM1/KM2 NO", "OL NC", "FM OK", lab['aux']),
             ("R5", "OL TRIP", "FM FAIL", "AUX", "ALM"),
             ("R6", "CR NO", "KM1 NO", "KM2 NO", "PIL"),
         ]
-        terminal_note = "W201 CR → KM1; W301 CR → KM2; W401 KM1/KM2 → BRK."
+        terminal_note = "W201 CR → KM1; W301 CR → KM2 si aplica; W401 permiso de marcha → salida auxiliar."
     yvals = [150, 235, 320, 405, 490, 575]
     rows = []
     for y, labels in zip(yvals, rung_labels):
@@ -207,10 +235,10 @@ def control_ladder_cad_svg(i: ProjectIntake, architecture: Dict[str, Any] | str 
   <text x='74' y='104' class='txt'>L+</text><text x='1094' y='104' class='txt'>L-</text>
   {''.join(rows)}
   <g id='terminal-tags' font-family='Inter,Arial'>
-    <rect x='74' y='625' width='700' height='96' class='device'/>
-    <text x='96' y='654' class='blue'>Numeración preliminar de cables · {_e(arch)}</text>
+    <rect x='74' y='625' width='730' height='96' class='device'/>
+    <text x='96' y='654' class='blue'>Numeración preliminar de cables · {_e(arch)} · {_e(_machine_type(i))}</text>
     <text x='96' y='681' class='small'>{_e(terminal_note)}</text>
-    <text x='96' y='704' class='warn'>Revisión de taller: confirmar borneras, colores, calibre de control, parametrización VFD/relés y tensión real de freno.</text>
+    <text x='96' y='704' class='warn'>Revisión de taller: confirmar borneras, colores, calibre de control, parámetros VFD/relés y protecciones específicas de la máquina.</text>
   </g>
   {revision_block('E-002 Control ladder', i.project_name)}
 </svg>
@@ -268,7 +296,7 @@ def panel_layout_cad_svg(i: ProjectIntake, requirements: List[Dict[str, Any]] | 
     <circle cx='72' cy='270' r='18' fill='#ffb33a'/><text x='114' y='277' class='txt'>FALLA</text>
     <rect x='44' y='326' width='210' height='48' rx='8' class='device2'/><text x='70' y='356' class='txt'>PLACA / ROTULADO</text>
   </g>
-  <text x='170' y='642' class='warn'>Workshop Lock: layout, borneras, cables y Draw.io obedecen la arquitectura principal; no mezclar VFD con KM1/KM2.</text>
+  <text x='170' y='642' class='warn'>MarketPilot Lock: layout, borneras, cables y Draw.io obedecen la arquitectura principal; no mezclar VFD con KM1/KM2.</text>
   {revision_block('E-003 Layout tablero', i.project_name)}
 </svg>
 """.strip()
@@ -276,6 +304,7 @@ def panel_layout_cad_svg(i: ProjectIntake, requirements: List[Dict[str, Any]] | 
 
 def terminal_schedule(i: ProjectIntake, architecture: Dict[str, Any] | str | None = None) -> List[Dict[str, Any]]:
     arch = _arch_id(architecture)
+    lab = _labels(i)
     rows = [
         {"terminal": "TB1-01", "wire": "W101", "from": "T1 secondary L+", "to": "S0 STOP NC", "function": "Alimentación control", "gauge": "#16 AWG Cu", "color": "Rojo"},
         {"terminal": "TB1-02", "wire": "W102", "from": "S0 STOP NC", "to": "S-ESTOP NC", "function": "Cadena de paro", "gauge": "#16 AWG Cu", "color": "Rojo"},
@@ -283,11 +312,11 @@ def terminal_schedule(i: ProjectIntake, architecture: Dict[str, Any] | str | Non
     ]
     if arch in {"vfd_smart", "plc_hmi_control"}:
         rows += [
-            {"terminal": "TB1-04", "wire": "W201", "from": "S1 SUBIR", "to": "VFD DI1 FWD/UP", "function": "Orden subir por entrada digital", "gauge": "#16 AWG Cu", "color": "Azul"},
-            {"terminal": "TB1-05", "wire": "W301", "from": "S2 BAJAR", "to": "VFD DI2 REV/DOWN", "function": "Orden bajar por entrada digital", "gauge": "#16 AWG Cu", "color": "Azul"},
-            {"terminal": "TB1-06", "wire": "W401", "from": "VFD RO1 RUN/BRK", "to": "BRK", "function": "Liberación de freno coordinada", "gauge": "#16 AWG Cu", "color": "Naranja"},
+            {"terminal": "TB1-04", "wire": "W201", "from": f"S1 {lab['cmd1']}", "to": f"VFD DI1 {lab['di1']}", "function": f"Orden {lab['cmd1'].lower()} por entrada digital", "gauge": "#16 AWG Cu", "color": "Azul"},
+            {"terminal": "TB1-05", "wire": "W301", "from": f"S2 {lab['cmd2']}", "to": f"VFD DI2 {lab['di2']}", "function": f"Orden {lab['cmd2'].lower()} por entrada digital", "gauge": "#16 AWG Cu", "color": "Azul"},
+            {"terminal": "TB1-06", "wire": "W401", "from": "VFD RO1 RUN", "to": lab["aux"], "function": lab["aux_desc"], "gauge": "#16 AWG Cu", "color": "Naranja"},
             {"terminal": "TB1-07", "wire": "W501", "from": "VFD FAULT / FM", "to": "ALM", "function": "Alarma/falla variador o fase", "gauge": "#16 AWG Cu", "color": "Amarillo"},
-            {"terminal": "TB1-08", "wire": "W601", "from": "LS-UP/LS-DN", "to": "VFD DI3/DI4 permissive", "function": "Finales de carrera a entradas/permisivos", "gauge": "#16 AWG Cu", "color": "Violeta"},
+            {"terminal": "TB1-08", "wire": "W601", "from": lab["permissive"], "to": "VFD DI3/DI4 permissive", "function": f"Permisivos específicos: {lab['note']}", "gauge": "#16 AWG Cu", "color": "Violeta"},
         ]
     elif arch == "star_delta":
         rows += [
@@ -297,9 +326,9 @@ def terminal_schedule(i: ProjectIntake, architecture: Dict[str, Any] | str | Non
         ]
     else:
         rows += [
-            {"terminal": "TB1-04", "wire": "W201", "from": "S1 SUBIR", "to": "KM1 coil", "function": "Orden subir", "gauge": "#16 AWG Cu", "color": "Azul"},
-            {"terminal": "TB1-05", "wire": "W301", "from": "S2 BAJAR", "to": "KM2 coil", "function": "Orden bajar", "gauge": "#16 AWG Cu", "color": "Azul"},
-            {"terminal": "TB1-06", "wire": "W401", "from": "KM1/KM2 aux", "to": "BRK", "function": "Liberación freno", "gauge": "#16 AWG Cu", "color": "Naranja"},
+            {"terminal": "TB1-04", "wire": "W201", "from": f"S1 {lab['cmd1']}", "to": "KM1 coil", "function": f"Orden {lab['cmd1'].lower()}", "gauge": "#16 AWG Cu", "color": "Azul"},
+            {"terminal": "TB1-05", "wire": "W301", "from": f"S2 {lab['cmd2']}", "to": "KM2 coil", "function": f"Orden {lab['cmd2'].lower()} si aplica", "gauge": "#16 AWG Cu", "color": "Azul"},
+            {"terminal": "TB1-06", "wire": "W401", "from": "KM/AUX", "to": lab["aux"], "function": lab["aux_desc"], "gauge": "#16 AWG Cu", "color": "Naranja"},
             {"terminal": "TB1-07", "wire": "W501", "from": "OL/FM", "to": "ALM", "function": "Alarma/falla", "gauge": "#16 AWG Cu", "color": "Amarillo"},
         ]
     rows.append({"terminal": "TB1-99", "wire": "W000", "from": "Control common", "to": "L-", "function": "Retorno control", "gauge": "#16 AWG Cu", "color": "Blanco"})
@@ -310,26 +339,31 @@ def terminal_schedule(i: ProjectIntake, architecture: Dict[str, Any] | str | Non
 
 def wire_schedule(i: ProjectIntake, calc: Dict[str, Any], architecture: Dict[str, Any] | str | None = None) -> List[Dict[str, Any]]:
     arch = _arch_id(architecture)
+    lab = _labels(i)
     conductor = calc.get("conductor_preliminary", "Por validar")
     if arch in {"vfd_smart", "plc_hmi_control"}:
-        return [
+        rows = [
             {"cable": "C-PWR-01", "from": "QF-01", "to": "K1/VFD-01", "conductors": "3F+PE", "size": conductor, "length_m": round(i.cable_run_m * 0.08 + 2.0, 1), "service": "Alimentación VFD dentro tablero", "verify": "SCCR/radio/EMC"},
             {"cable": "C-MTR-01", "from": "VFD-01", "to": "MTR-01", "conductors": "3F+PE", "size": conductor, "length_m": round(i.cable_run_m * 1.18, 1), "service": "Salida VFD a motor", "verify": "longitud, cable apantallado si aplica, dv/dt"},
-            {"cable": "C-BRK-01", "from": "VFD/BRK-CTRL", "to": "Freno", "conductors": "2C+PE", "size": "#16/#14 AWG según placa", "length_m": round(i.cable_run_m * 1.05, 1), "service": "Freno electromecánico", "verify": "tensión/corriente de freno"},
-            {"cable": "C-CNT-01", "from": "TB1", "to": "Botonera", "conductors": "8C", "size": "#16 AWG Cu", "length_m": 8.0, "service": "Mando a entradas VFD", "verify": "IP/ambiente"},
-            {"cable": "C-LS-01", "from": "TB1", "to": "Final carrera sup/inf", "conductors": "4C", "size": "#16 AWG Cu", "length_m": 12.0, "service": "Permisivos / límites de recorrido", "verify": "posición mecánica"},
+            {"cable": "C-CNT-01", "from": "TB1", "to": "Botonera", "conductors": "8C", "size": "#16 AWG Cu", "length_m": 8.0, "service": f"Mando {lab['cmd1']}/{lab['cmd2']} a entradas VFD", "verify": "IP/ambiente"},
+            {"cable": "C-PRM-01", "from": "TB1", "to": lab["permissive"], "conductors": "4C", "size": "#16 AWG Cu", "length_m": 12.0, "service": f"Permisivos: {lab['note']}", "verify": "posición/sensor/setpoint"},
         ]
+        if _machine_type(i) == "hoist" or i.needs_brake:
+            rows.insert(2, {"cable": "C-BRK-01", "from": "VFD/BRK-CTRL", "to": "Freno", "conductors": "2C+PE", "size": "#16/#14 AWG según placa", "length_m": round(i.cable_run_m * 1.05, 1), "service": "Freno electromecánico", "verify": "tensión/corriente de freno"})
+        return rows
     if arch == "star_delta":
         return [
             {"cable": "C-PWR-01", "from": "QF-01", "to": "KM-L/KM-Y/KM-Δ", "conductors": "3F+PE", "size": conductor, "length_m": round(i.cable_run_m * 0.1 + 2.0, 1), "service": "Fuerza tablero", "verify": "enclavamiento"},
             {"cable": "C-MTR-01", "from": "KM-L/KM-Y/KM-Δ", "to": "MTR-01", "conductors": "6F+PE", "size": conductor, "length_m": round(i.cable_run_m * 1.18, 1), "service": "Motor 6 terminales", "verify": "placa y caja de bornes"},
         ]
-    return [
-        {"cable": "C-PWR-01", "from": "QF-01", "to": "KM1/KM2", "conductors": "3F+PE", "size": conductor, "length_m": round(i.cable_run_m * 0.08 + 2.0, 1), "service": "Dentro tablero", "verify": "calibre/radio"},
+    rows = [
+        {"cable": "C-PWR-01", "from": "QF-01", "to": "KM1/KM2" if i.needs_reversing else "KM1", "conductors": "3F+PE", "size": conductor, "length_m": round(i.cable_run_m * 0.08 + 2.0, 1), "service": "Dentro tablero", "verify": "calibre/radio"},
         {"cable": "C-MTR-01", "from": "OL-01", "to": "MTR-01", "conductors": "3F+PE", "size": conductor, "length_m": round(i.cable_run_m * 1.18, 1), "service": "Fuerza motor", "verify": "canalización/caída"},
         {"cable": "C-CNT-01", "from": "TB1", "to": "Botonera", "conductors": "8C", "size": "#16 AWG Cu", "length_m": 8.0, "service": "Mando", "verify": "IP/ambiente"},
-        {"cable": "C-LS-01", "from": "TB1", "to": "Final carrera sup/inf", "conductors": "4C", "size": "#16 AWG Cu", "length_m": 12.0, "service": "Seguridad de recorrido", "verify": "posición mecánica"},
     ]
+    if _machine_type(i) == "hoist":
+        rows.append({"cable": "C-LS-01", "from": "TB1", "to": "Final carrera sup/inf", "conductors": "4C", "size": "#16 AWG Cu", "length_m": 12.0, "service": "Seguridad de recorrido", "verify": "posición mecánica"})
+    return rows
 
 
 def drawio_xml(i: ProjectIntake, calc: Dict[str, Any], architecture: Dict[str, Any] | str | None = None) -> str:
@@ -355,13 +389,13 @@ def drawio_xml(i: ProjectIntake, calc: Dict[str, Any], architecture: Dict[str, A
         <mxCell id="e1" edge="1" parent="1" source="qf" target="km" style="endArrow=block;html=1;rounded=0"><mxGeometry relative="1" as="geometry" /></mxCell>
         <mxCell id="e2" edge="1" parent="1" source="km" target="ol" style="endArrow=block;html=1;rounded=0"><mxGeometry relative="1" as="geometry" /></mxCell>
         <mxCell id="e3" edge="1" parent="1" source="ol" target="m" style="endArrow=block;html=1;rounded=0"><mxGeometry relative="1" as="geometry" /></mxCell>'''
-    return f'''<mxfile host="ControlPro" modified="{datetime.now(timezone.utc).isoformat()}" agent="ControlPro Advisor OS V11" version="24.0.0">
+    return f'''<mxfile host="ControlPro" modified="{datetime.now(timezone.utc).isoformat()}" agent="ControlPro Advisor OS V12" version="24.0.0">
   <diagram id="controlpro-e001" name="E-001 Unifilar {xml_escape(arch)}">
     <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="title" value="ControlPro OS V11 - {project} - {xml_escape(arch)}" style="text;html=1;strokeColor=none;fillColor=none;fontSize=18;fontStyle=1" vertex="1" parent="1"><mxGeometry x="40" y="30" width="700" height="40" as="geometry" /></mxCell>
+        <mxCell id="title" value="ControlPro OS V12 - {project} - {xml_escape(arch)}" style="text;html=1;strokeColor=none;fillColor=none;fontSize=18;fontStyle=1" vertex="1" parent="1"><mxGeometry x="40" y="30" width="700" height="40" as="geometry" /></mxCell>
         {cells}
       </root>
     </mxGraphModel>

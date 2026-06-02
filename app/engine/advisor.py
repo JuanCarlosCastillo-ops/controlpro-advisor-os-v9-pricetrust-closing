@@ -8,8 +8,8 @@ from .pricing import decide_prices, generate_rfq_message, summarize_market, load
 from .cad import single_line_cad_svg, control_ladder_cad_svg, panel_layout_cad_svg, terminal_schedule, wire_schedule, drawio_xml
 from app.integrations.config import integration_status
 
-VERSION = "11.0-workshop-lock"
-PRODUCT = "ControlPro Advisor OS V11 Workshop Lock"
+VERSION = "12.0-marketpilot-lock"
+PRODUCT = "ControlPro Advisor OS V12 MarketPilot Lock"
 
 
 def example_intake() -> Dict[str, Any]:
@@ -60,6 +60,114 @@ def _voltage_drop_percent(current: float, voltage: float, distance_m: float, pha
     return max(0.1, round((vd / voltage) * 100, 2))
 
 
+
+def _machine_type(i: ProjectIntake) -> str:
+    text = f"{i.application} {i.load_type} {i.project_name} {i.user_notes}".lower()
+    if any(w in text for w in ["guinche", "winche", "hoist", "izaje", "elevador", "polipasto"]):
+        return "hoist"
+    if any(w in text for w in ["compresor", "compressor", "aire comprimido"]):
+        return "compressor"
+    if any(w in text for w in ["bomba", "pump", "sumergible", "centrífuga", "centrifuga"]):
+        return "pump"
+    if any(w in text for w in ["banda", "transportadora", "conveyor", "cinta"]):
+        return "conveyor"
+    if any(w in text for w in ["ventilador", "fan", "extractor"]):
+        return "fan"
+    return "general_motor"
+
+
+def _machine_context(i: ProjectIntake) -> Dict[str, Any]:
+    mt = _machine_type(i)
+    contexts = {
+        "hoist": {
+            "label": "Guinche / izaje",
+            "safety_gate": "Seguridad de izaje",
+            "safety_fix": "Confirmar freno, finales de carrera, paro de emergencia, enclavamientos y prueba sin carga/con carga supervisada.",
+            "checks": ["freno", "finales de carrera", "E-Stop", "enclavamientos", "prueba con carga"],
+            "vfd_note": "En izaje exige coordinación de freno, rampas, finales, E-Stop y validación de carga suspendida.",
+            "terminal_labels": {"cmd1": "SUBIR", "cmd2": "BAJAR", "di1": "FWD/UP", "di2": "REV/DOWN", "limit": "LS-UP/LS-DN", "aux": "BRK"},
+            "risks": [
+                ("Movimiento simultáneo subir/bajar", "Alta", "Enclavamiento lógico, permisos VFD y prueba funcional."),
+                ("Sobre-recorrido de carga", "Alta", "Finales superior/inferior y prueba supervisada."),
+                ("Freno mal seleccionado o secuenciado", "Alta", "Confirmar placa del freno y lógica de liberación."),
+            ],
+            "field_steps": [
+                ("Freno", "Placa/tensión/corriente del freno y lógica de liberación.", "El guinche no se trata como motor común."),
+                ("Finales de carrera", "Ubicación mecánica, accionamiento y redundancia si aplica.", "Evita sobre-recorrido y riesgo de carga."),
+            ],
+            "checklists": {
+                "taller": ["Continuidad", "Torque/ajuste", "E-Stop", "Finales", "Freno", "Rampas VFD", "Prueba sin carga", "Rotulado"],
+                "campo": ["Bloqueo/etiquetado", "Verificación tensión", "Sentido de giro", "Freno", "Finales", "Prueba con carga supervisada", "Firma de entrega"],
+                "fallas_comunes": ["No arranca: revisar E-Stop/permisivos/VFD", "Freno no libera: verificar tensión/rectificador/secuencia", "Se pasa de carrera: revisar finales y parámetros", "Alarma VFD: leer código antes de resetear"],
+            },
+        },
+        "compressor": {
+            "label": "Compresor de aire",
+            "safety_gate": "Seguridad de compresor",
+            "safety_fix": "Confirmar presostato, unloader/descarga, válvula de alivio, ventilación, temperatura y protección por sobrecarga.",
+            "checks": ["presostato", "unloader", "válvula de alivio", "ventilación", "temperatura", "duty cycle"],
+            "vfd_note": "En compresores el VFD se justifica por rampa, control de presión, menor golpe mecánico y diagnóstico; validar compatibilidad con unloader/presostato.",
+            "terminal_labels": {"cmd1": "MARCHA", "cmd2": "PARO/AUTO", "di1": "RUN", "di2": "RESET/AUTO", "limit": "PRESOSTATO/TERM", "aux": "RUN"},
+            "risks": [
+                ("Arranques frecuentes y calentamiento", "Alta", "Validar ciclos/hora, ventilación, protección térmica y rampa."),
+                ("Control de presión incompleto", "Alta", "Confirmar presostato, válvula de alivio y lógica de paro por presión."),
+                ("Descarga/unloader no considerada", "Media", "Verificar sistema de descarga antes de seleccionar arranque."),
+            ],
+            "field_steps": [
+                ("Sistema de presión", "Presostato, válvula de alivio, tanque, drenajes y setpoints.", "Evita sobrepresión y arranques erráticos."),
+                ("Descarga/unloader", "Confirmar si el compresor arranca cargado o descargado.", "Define torque, rampa y tipo de arranque."),
+            ],
+            "checklists": {
+                "taller": ["Continuidad", "Torque/ajuste", "E-Stop", "Presostato", "Señal RUN/FAULT", "Ventilación VFD", "Rotulado"],
+                "campo": ["Bloqueo/etiquetado", "Tensión real", "Sentido de giro", "Presión de corte/arranque", "Temperatura", "Prueba de paro por falla", "Firma de entrega"],
+                "fallas_comunes": ["No arranca: revisar presostato/E-Stop/VFD", "Dispara térmico: revisar carga, ventilación y rampa", "No alcanza presión: revisar mecánica/fugas", "Cicla muy rápido: revisar tanque/presostato/unloader"],
+            },
+        },
+        "pump": {
+            "label": "Bomba",
+            "safety_gate": "Protección hidráulica",
+            "safety_fix": "Confirmar protección contra trabajo en seco, nivel/presión, válvulas, cebado y golpe de ariete.",
+            "checks": ["nivel", "presión", "trabajo en seco", "válvulas", "cebad/flujo"],
+            "vfd_note": "En bombas el VFD se justifica por control de presión/caudal, ahorro y arranque suave; validar caudal mínimo y curva.",
+            "terminal_labels": {"cmd1": "MARCHA", "cmd2": "AUTO/MAN", "di1": "RUN", "di2": "AUTO", "limit": "NIVEL/PRES", "aux": "RUN"},
+            "risks": [
+                ("Trabajo en seco", "Alta", "Agregar sensor de nivel/flujo o protección dedicada."),
+                ("Cavitación o bajo caudal", "Media", "Verificar curva de bomba, válvulas y condiciones de succión."),
+                ("Golpe de ariete", "Media", "Usar rampa/valvulado adecuado y pruebas de presión."),
+            ],
+            "field_steps": [("Hidráulica", "Nivel, presión, válvulas, succión/descarga y sentido de giro.", "La protección eléctrica no corrige fallas hidráulicas.")],
+            "checklists": {
+                "taller": ["Continuidad", "Torque/ajuste", "E-Stop", "Entradas nivel/presión", "Señal RUN/FAULT", "Rotulado"],
+                "campo": ["Bloqueo/etiquetado", "Tensión real", "Sentido de giro", "Nivel/flujo", "Presión", "Prueba automática/manual", "Firma de entrega"],
+                "fallas_comunes": ["No arranca: revisar nivel/presión/E-Stop", "Trabaja en seco: bloquear y revisar sensor", "Cavita: revisar succión", "Dispara protección: revisar carga/obstrucción"],
+            },
+        },
+        "conveyor": {
+            "label": "Banda transportadora",
+            "safety_gate": "Seguridad de banda",
+            "safety_fix": "Confirmar guardas, cable de paro, sensores de desalineación/atasco y señalización.",
+            "checks": ["guardas", "pull-cord", "desalineación", "atasco", "E-Stop"],
+            "vfd_note": "En bandas el VFD se justifica por rampa, velocidad y menor estrés; validar guardas y paros de emergencia distribuidos.",
+            "terminal_labels": {"cmd1": "MARCHA", "cmd2": "PARO", "di1": "RUN", "di2": "STOP", "limit": "PULLCORD/SENS", "aux": "RUN"},
+            "risks": [("Atrapamiento", "Alta", "Guardas y cable de paro accesible."), ("Desalineación/atasco", "Media", "Sensores y prueba de paro."), ("Arranque inesperado", "Alta", "Alarma previa y enclavamientos.")],
+            "field_steps": [("Seguridad mecánica", "Guardas, pull-cord, puntos de atrapamiento y señalización.", "El control debe proteger al operador." )],
+            "checklists": {"taller": ["Continuidad", "E-Stop/pull-cord", "RUN/FAULT", "Rotulado"], "campo": ["Bloqueo/etiquetado", "Guardas", "Alarma previa", "Prueba pull-cord", "Firma"], "fallas_comunes": ["No arranca: revisar pull-cord/E-Stop", "Se detiene: revisar desalineación/atasco", "Falla VFD: leer código"]},
+        },
+        "general_motor": {
+            "label": "Motor industrial general",
+            "safety_gate": "Seguridad de motor",
+            "safety_fix": "Confirmar paro, sobrecarga, fase, ambiente y procedimiento de prueba.",
+            "checks": ["sobrecarga", "fase", "E-Stop", "ambiente", "rotulado"],
+            "vfd_note": "En motor general el VFD se justifica por rampa, diagnóstico o control de velocidad; si no, DOL/soft pueden ser suficientes.",
+            "terminal_labels": {"cmd1": "MARCHA", "cmd2": "PARO", "di1": "RUN", "di2": "RESET", "limit": "PERMISIVO", "aux": "RUN"},
+            "risks": [("Protección mal ajustada", "Alta", "Confirmar FLA de placa y clase de protección."), ("Pérdida de fase", "Media", "Relé monitor de fase en trifásicos críticos."), ("Ambiente severo", "Media", "Gabinete y ventilación según sitio.")],
+            "field_steps": [],
+            "checklists": {"taller": ["Continuidad", "Torque/ajuste", "E-Stop", "RUN/FAULT", "Rotulado"], "campo": ["Bloqueo/etiquetado", "Tensión real", "Giro", "Corriente en carga", "Firma"], "fallas_comunes": ["No arranca: revisar E-Stop/control", "Dispara térmico: medir corriente", "Gira al revés: corregir fases con procedimiento seguro"]},
+        },
+    }
+    ctx = contexts.get(mt, contexts["general_motor"])
+    return {"type": mt, **ctx}
+
 def _data_quality(i: ProjectIntake) -> Dict[str, Any]:
     """Score de entrada: no premia llenar por llenar; premia datos verificables.
 
@@ -71,12 +179,18 @@ def _data_quality(i: ProjectIntake) -> Dict[str, Any]:
     def add(name: str, ok: bool, impact: str, fix: str, weight: int):
         checks.append({"check": name, "ok": ok, "impact": impact, "fix": fix, "weight": weight})
 
-    is_hoist = _is_hoist(i)
+    ctx = _machine_context(i)
+    is_hoist = ctx["type"] == "hoist"
+    safety_ok = True
+    if is_hoist:
+        safety_ok = i.needs_brake and i.needs_limit_switches and i.needs_estop
+    elif ctx["type"] in {"compressor", "pump", "conveyor"}:
+        safety_ok = i.needs_estop and ((i.phases != 3) or i.needs_phase_monitor)
     add("Corriente de placa / FLA", bool(i.full_load_amps and i.full_load_amps > 0), "Crítica", "Subir foto de placa o confirmar FLA medido antes de enviar precio cerrado.", 16)
     add("Datos eléctricos base", i.voltage > 0 and i.phases in {1, 3} and i.frequency_hz in {50, 60}, "Crítica", "Confirmar tensión real, fases y frecuencia.", 12)
     add("Potencia y aplicación", i.motor_power_hp > 0 and bool(i.application), "Crítica", "Indicar máquina, potencia y uso real.", 10)
     add("Evidencia fotográfica", i.field_photos_count >= 3 or (i.nameplate_photo_confirmed and i.panel_photo_confirmed and i.site_photo_confirmed), "Alta", "Cargar placa, tablero actual/ruta y ambiente de instalación.", 12)
-    add("Seguridad de izaje", (not is_hoist) or (i.needs_brake and i.needs_limit_switches and i.needs_estop), "Crítica", "Para guinche/izaje exigir freno, finales de carrera y paro de emergencia.", 16)
+    add(ctx["safety_gate"], safety_ok, "Crítica", ctx["safety_fix"], 16)
     add("Protección ante falla de fase", (i.phases != 3) or i.needs_phase_monitor, "Alta", "En motores trifásicos de trabajo crítico usar monitor de fase/secuencia.", 8)
     add("Distancia y ambiente", i.cable_run_m >= 0 and bool(i.environment), "Alta", "Medir ruta real, temperatura, polvo/humedad y canalización.", 10)
     add("Ubicación comercial", bool(i.location_city and i.location_province and i.country), "Media", "Indicar ciudad/provincia para proveedores, logística y vigencia.", 6)
@@ -130,7 +244,7 @@ def _starter_by_id(alternatives: List[Dict[str, Any]], starter_id: str) -> Dict[
 def _select_architecture(i: ProjectIntake, alternatives: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Selecciona arquitectura antes de armar BOM.
 
-    Regla crítica V11: la solución recomendada, el BOM y la propuesta al cliente
+    Regla crítica V12: la solución recomendada, el BOM y la propuesta al cliente
     deben hablar el mismo idioma. Si el caso es izaje, estrella-triángulo no se
     recomienda por defecto porque puede requerir torque y control fino.
     """
@@ -164,10 +278,10 @@ def _select_architecture(i: ProjectIntake, alternatives: List[Dict[str, Any]]) -
             reason.append("Se pidió PLC/HMI o trazabilidad avanzada.")
         elif explicit_vfd or i.starts_per_hour >= 30:
             arch = "vfd_smart"
-            reason.append("Muchas maniobras o solicitud premium: VFD mejora control y diagnóstico.")
+            reason.append(_machine_context(i)["vfd_note"])
         elif explicit_soft or i.starts_per_hour >= 15:
             arch = "soft_starter"
-            reason.append("Arranques moderados: soft starter reduce corriente/golpe sin control de velocidad.")
+            reason.append(f"{_machine_context(i)['label']}: arranques moderados; soft starter reduce corriente/golpe sin control de velocidad.")
         elif explicit_star:
             arch = "star_delta"
             reason.append("Estrella-triángulo solo si el motor/carga lo permiten y se confirma cableado de 6 terminales.")
@@ -202,10 +316,11 @@ def _build_requirements(i: ProjectIntake, calc: Dict[str, Any], architecture: Di
     # Componentes dependientes de arquitectura: aquí se evita mezclar VFD con estrella-triángulo.
     if arch == "vfd_smart" or arch == "plc_hmi_control":
         add("contactor_fwd", "Fuerza", "Contactor de línea / seguridad para VFD", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V; no usado para invertir fases", checks=["AC-3", "bobina", "coordinación con VFD"], risk="En VFD la inversión no se hace con dos contactores; se controla por entradas/lógica del variador.")
-        add("vfd", "Fuerza", "Variador de frecuencia", 1, f"Para {i.motor_power_hp:g} HP, {int(i.voltage)} V, heavy duty, con parametrización para izaje si aplica", checks=["corriente", "freno", "resistencia", "rampas", "parametrización"], risk="No reemplaza freno mecánico ni finales de carrera; requiere comisionamiento.")
+        ctx = _machine_context(i)
+        add("vfd", "Fuerza", "Variador de frecuencia", 1, f"Para {i.motor_power_hp:g} HP, {int(i.voltage)} V, heavy duty, parametrización según {ctx['label']}", checks=["corriente", "rampas", "protecciones", "parámetros", "diagnóstico"], risk=ctx["vfd_note"] + " Requiere comisionamiento.")
         add("line_reactor", "Fuerza", "Reactor de línea", 1, f"3%, {int(i.voltage)} V, corriente compatible con {calc['full_load_current_a']} A", must_have=False, checks=["corriente", "tensión", "temperatura"], risk="Mejora robustez de variador/red; validar necesidad según instalación.")
         if i.needs_brake or _is_hoist(i):
-            add("braking_resistor", "Fuerza", "Resistencia de frenado", 1, "Dimensionar por ciclo de carga, energía de frenado y especificación del VFD", must_have=False, checks=["ohmios", "watts", "ciclo", "ventilación"], risk="En izaje no usar genérica sin cálculo térmico y validación del fabricante.")
+            add("braking_resistor", "Fuerza", "Resistencia de frenado", 1, "Dimensionar por ciclo de carga, energía de frenado y especificación del VFD", must_have=False, checks=["ohmios", "watts", "ciclo", "ventilación"], risk="No usar genérica sin cálculo térmico y validación del fabricante.")
         if arch == "plc_hmi_control":
             add("plc_basic", "Control", "PLC básico", 1, "Entradas/salidas suficientes para mando, finales, freno, fallas y reserva", must_have=False, checks=["IO", "tensión", "programación", "backup"], risk="Sube ingeniería, pero mejora diagnóstico y expansión.")
     elif arch == "soft_starter":
@@ -225,12 +340,23 @@ def _build_requirements(i: ProjectIntake, calc: Dict[str, Any], architecture: Di
         add("contactor_fwd", "Fuerza", "Contactor principal", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"])
 
     if i.needs_phase_monitor:
-        add("phase_monitor", "Seguridad", "Relé monitor de fase", 1, f"Para red {int(i.voltage)} V trifásica; falla y secuencia de fase", checks=["tensión", "secuencia", "ajustes"], risk="Recomendado para proteger guinche/motor ante pérdida de fase.")
+        add("phase_monitor", "Seguridad", "Relé monitor de fase", 1, f"Para red {int(i.voltage)} V trifásica; falla y secuencia de fase", checks=["tensión", "secuencia", "ajustes"], risk=f"Recomendado para proteger { _machine_context(i)['label'].lower() } ante pérdida de fase.")
     add("control_transformer", "Control", "Transformador de control", 1, f"{int(i.voltage)} V a {int(i.control_voltage)} V, {calc['control_transformer_va']} VA preliminar", checks=["VA", "fusibles", "aislamiento"])
     add("cabinet", "Tablero", "Gabinete industrial", 1, "NEMA/IP según polvo, humedad y temperatura; tamaño con 25% de reserva", checks=["grado IP/NEMA", "espacio", "ventilación"])
     if i.needs_estop:
         add("estop", "Seguridad", "Paro de emergencia", 1, "Hongo 22mm, contacto NC, rotulado y accesible", checks=["contacto NC", "acción positiva", "ubicación"])
-    add("pushbuttons", "Control", "Botonera de mando", 1, "Subir, bajar, stop, pilotos y rotulación", checks=["IP", "contactos", "rotulado"])
+    _ctx = _machine_context(i)
+    if _ctx["type"] == "hoist":
+        _push_spec = "Subir, bajar, stop, pilotos y rotulación"
+    elif _ctx["type"] == "compressor":
+        _push_spec = "Marcha/paro, reset, modo auto/manual y pilotos presión/falla"
+    elif _ctx["type"] == "pump":
+        _push_spec = "Manual/auto, marcha/paro, pilotos nivel/presión/falla"
+    elif _ctx["type"] == "conveyor":
+        _push_spec = "Marcha/paro, prealarma, E-Stop/pull-cord y pilotos"
+    else:
+        _push_spec = "Marcha, paro, reset, pilotos marcha/falla y rotulación"
+    add("pushbuttons", "Control", "Botonera de mando", 1, _push_spec, checks=["IP", "contactos", "rotulado"])
     if i.needs_limit_switches:
         add("limit_switches", "Seguridad", "Finales de carrera", 2, "Superior e inferior, robustos, IP adecuado", checks=["mecánica", "IP", "cableado"], risk="Clave para evitar sobre-recorrido.")
     if i.needs_brake:
@@ -255,6 +381,11 @@ def _alternatives(i: ProjectIntake) -> List[Dict[str, Any]]:
 
 def _recommended(i: ProjectIntake, alternatives: List[Dict[str, Any]], architecture: Dict[str, Any]) -> Dict[str, Any]:
     rec = _starter_by_id(alternatives, architecture.get("architecture_id") or architecture.get("id") or "dol_basic")
+    ctx = _machine_context(i)
+    if (architecture.get("architecture_id") or architecture.get("id")) == "vfd_smart":
+        rec["how_it_works"] = f"Controla frecuencia/tensión del motor, limita corriente, permite rampas, alarmas y diagnóstico. {ctx['vfd_note']}"
+        rec["price_impact"] = "Mayor costo inicial por variador, protección, parametrización y pruebas. Se justifica cuando reduce paradas, estrés mecánico, reclamos o tiempo de diagnóstico."
+        rec["better_when"] = f"{ctx['label']}: cuando se requiere arranque controlado, diagnóstico, rampa o propuesta de alta confiabilidad."
     rec.update({
         "architecture_id": architecture.get("architecture_id") or architecture.get("id"),
         "architecture_reason": architecture.get("architecture_reason", ""),
@@ -378,20 +509,19 @@ def _build_budget(i: ProjectIntake, material_cost: float, market_summary: Dict[s
 
 
 def _risks(i: ProjectIntake) -> List[Dict[str, Any]]:
-    return [
+    ctx = _machine_context(i)
+    base = [
         {"risk": "Cotización con precio no confirmado", "severity": "Alta", "mitigation": "Separar precio estimado, referencial y confirmado; enviar RFQ cuando confianza sea baja."},
-        {"risk": "Movimiento simultáneo subir/bajar", "severity": "Alta", "mitigation": "Enclavamiento eléctrico y mecánico; prueba funcional obligatoria."},
-        {"risk": "Sobre-recorrido de carga", "severity": "Alta", "mitigation": "Finales de carrera superior/inferior y prueba sin carga antes de carga real."},
-        {"risk": "Freno mal seleccionado o mal secuenciado", "severity": "Alta", "mitigation": "Confirmar placa del freno; validar tensión, corriente y lógica de liberación."},
         {"risk": "SCCR no coordinado", "severity": "Media", "mitigation": "Verificar corriente de cortocircuito disponible y ratings de todos los componentes."},
         {"risk": "Ambiente severo", "severity": "Media", "mitigation": f"Seleccionar gabinete y componentes según ambiente declarado: {i.environment}."},
     ]
+    specific = [{"risk": r, "severity": sev, "mitigation": mit} for r, sev, mit in ctx["risks"]]
+    return base[:1] + specific + base[1:]
 
 
 
 def _is_hoist(i: ProjectIntake) -> bool:
-    text = f"{i.application} {i.load_type} {i.project_name}".lower()
-    return any(w in text for w in ["guinche", "winche", "hoist", "izaje", "elevador", "polipasto"])
+    return _machine_type(i) == "hoist"
 
 
 def _consistency_audit(i: ProjectIntake, calc: Dict[str, Any], architecture: Dict[str, Any], requirements: List[ComponentRequirement]) -> Dict[str, Any]:
@@ -410,10 +540,11 @@ def _consistency_audit(i: ProjectIntake, calc: Dict[str, Any], architecture: Dic
     else:
         add("Coherencia FLA vs potencia", "pendiente", "alta", f"Sin FLA; estimado {estimated:.1f} A usado solo como referencia.", "Confirmar corriente de placa antes de cerrar protección/material.")
 
+    ctx = _machine_context(i)
     if _is_hoist(i):
-        add("Arquitectura de izaje", "ok" if (i.needs_brake and i.needs_limit_switches and i.needs_estop) else "bloquear", "crítica", "Aplicación de carga suspendida detectada.", "No liberar construcción sin freno, finales de carrera, paro de emergencia y enclavamientos.")
+        add(ctx["safety_gate"], "ok" if (i.needs_brake and i.needs_limit_switches and i.needs_estop) else "bloquear", "crítica", "Aplicación de carga suspendida detectada.", ctx["safety_fix"])
     else:
-        add("Arquitectura de seguridad", "ok", "media", "No se detecta izaje; aplicar criterios de la máquina específica.", "Revisar riesgos mecánicos propios del equipo.")
+        add(ctx["safety_gate"], "ok" if i.needs_estop else "revisar", "media", f"Contexto detectado: {ctx['label']}.", ctx["safety_fix"])
 
     if calc["voltage_drop_percent"] > 3:
         add("Caída de tensión", "revisar", "media", f"Caída estimada {calc['voltage_drop_percent']}%.", "Revisar calibre, canalización y longitud real.")
@@ -474,7 +605,14 @@ def _release_gates(i: ProjectIntake, quality: Dict[str, Any], consistency: Dict[
     gate("Coherencia técnica", len(consistency["blockers"]) == 0, "Bloqueadores elevan revisión humana y bajan confianza.", "Resolver auditoría de coherencia.")
     gate("Mercado/precio", market_summary.get("needs_rfq_count", 99) <= 3 and market_summary.get("priceguard_score_percent", 0) >= 70, "Ítems en rojo o PriceGuard bajo obligan a RFQ antes de precio cerrado.", "Confirmar proveedores/stock y corregir outliers de precio.")
     gate("SCCR/kAIC", bool(i.short_circuit_available_ka and i.short_circuit_available_ka > 0), "No liberar fabricación sin capacidad interruptiva verificada.", "Solicitar corto disponible o criterio de protección.")
-    gate("Seguridad de izaje", (not _is_hoist(i)) or (i.needs_brake and i.needs_limit_switches and i.needs_estop), "Carga suspendida sin seguridad completa es bloqueo crítico.", "Añadir freno, finales, E-Stop y pruebas.")
+    ctx = _machine_context(i)
+    if _is_hoist(i):
+        passed_ctx = i.needs_brake and i.needs_limit_switches and i.needs_estop
+        consequence = "Carga suspendida sin seguridad completa es bloqueo crítico."
+    else:
+        passed_ctx = i.needs_estop and ((i.phases != 3) or i.needs_phase_monitor)
+        consequence = f"{ctx['label']} sin protecciones mínimas aumenta riesgo de falla y reclamo."
+    gate(ctx["safety_gate"], passed_ctx, consequence, ctx["safety_fix"])
     quote_ready = all(g["passed"] for g in gates[:3])
     construction_ready = all(g["passed"] for g in gates)
     return {
@@ -509,11 +647,8 @@ def _field_verification_plan(i: ProjectIntake) -> List[Dict[str, Any]]:
         {"step": "Tablero existente", "what": "Fotos internas, espacio, entradas inferiores/superiores, borneras y cableado.", "why": "Reduce sorpresas y horas de montaje."},
         {"step": "Proveedor", "what": "Confirmar precio, stock, marca, garantía y entrega.", "why": "Convierte precio referencial en precio confirmado."},
     ]
-    if _is_hoist(i):
-        base += [
-            {"step": "Freno", "what": "Placa/tensión/corriente del freno y lógica de liberación.", "why": "El guinche no se trata como motor común."},
-            {"step": "Finales de carrera", "what": "Ubicación mecánica, accionamiento y redundancia si aplica.", "why": "Evita sobre-recorrido y riesgo de carga."},
-        ]
+    ctx = _machine_context(i)
+    base += [{"step": step, "what": what, "why": why} for step, what, why in ctx.get("field_steps", [])]
     return base
 
 
@@ -546,7 +681,7 @@ def _engineer_review_board(i: ProjectIntake, release: Dict[str, Any], market_sum
         {"perfil": "Seguridad/supervisor", "lo_que_exigia": "No liberar construcción si hay riesgo crítico.", "respuesta_v10": "Construction gate separado de quote gate; aprobación humana obligatoria.", "estado": "feliz: no promete construcción automática"},
     ]
     return {
-        "veredicto": "La V11 Workshop Lock está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
+        "veredicto": "La V12 MarketPilot Lock está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
         "quote_score": quote["score_percent"],
         "personas": personas,
         "regla_de_venta": "Vender ahorro de tiempo y expediente técnico-comercial trazable, no certificación automática.",
@@ -589,6 +724,17 @@ def _output_quality_contract(release: Dict[str, Any], quote: Dict[str, Any]) -> 
         "construction_gate": release["construction_verdict"],
     }
 
+
+def _machine_checklists(i: ProjectIntake) -> Dict[str, List[str]]:
+    ctx = _machine_context(i)
+    return {
+        "datos_minimos": ["Foto de placa", "Tensión/fases medidas", "FLA o corriente medida", "Distancia real", "Ambiente", "Ubicación de entrega", "kAIC/SCCR si se libera construcción"] + ctx["checks"][:3],
+        "cotizacion": ["Confirmar ítems de baja confianza", "Enviar RFQ", "Revisar stock", "Definir vigencia", "Aplicar margen", "Adjuntar exclusiones", "Marcar supuestos"],
+        "taller": ctx["checklists"]["taller"],
+        "campo": ctx["checklists"]["campo"],
+        "fallas_comunes": ctx["checklists"]["fallas_comunes"],
+    }
+
 def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> EngineeringPack:
     i = payload if isinstance(payload, ProjectIntake) else ProjectIntake(**payload)
     flc = _estimate_flc(i)
@@ -626,7 +772,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
     output_contract = _output_quality_contract(release, quote)
 
     pack = EngineeringPack(
-        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con Workshop Lock"},
+        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con MarketPilot Lock"},
         intake=i.model_dump(),
         executive_verdict={
             "headline": "Cotización industrial inteligente: menos datos, más expediente, cero certezas falsas.",
@@ -644,20 +790,14 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
             "summary": market_summary,
             "price_decisions": [d.model_dump() for d in decisions],
             "supplier_count": len(market_summary["suppliers_used"]),
-            "method": "PriceGuard 11 + Workshop Lock: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
+            "method": "PriceGuard 12 + MarketPilot Lock: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
             "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
             "priceguard_methodology": priceguard_methodology(),
             "architecture_lock": architecture,
         },
         budget=budget,
         risks=_risks(i),
-        checklists={
-            "datos_minimos": ["Foto de placa", "Tensión/fases medidas", "Distancia real", "Ambiente", "Freno", "Finales de carrera", "Ubicación de entrega", "kAIC/SCCR si se libera construcción"],
-            "cotizacion": ["Confirmar ítems de baja confianza", "Enviar RFQ", "Revisar stock", "Definir vigencia", "Aplicar margen", "Adjuntar exclusiones", "Marcar supuestos"],
-            "taller": ["Continuidad", "Torque/ajuste", "Enclavamientos", "Paro de emergencia", "Finales", "Freno", "Prueba sin carga", "Rotulado"],
-            "campo": ["Bloqueo/etiquetado", "Verificación tensión", "Giro", "Freno", "Prueba con carga supervisada", "Firma de entrega"],
-            "fallas_comunes": ["No arranca: revisar control, E-Stop, térmico y bobina", "Dispara térmico: medir corriente, carga mecánica y ajuste", "Gira al revés: invertir dos fases con procedimiento seguro", "Freno no libera: verificar tensión/rectificador/secuencia", "Final no actúa: probar continuidad y posición mecánica"],
-        },
+        checklists=_machine_checklists(i),
         diagrams={
             "single_line_svg": single_line_cad_svg(i, calculations, architecture),
             "control_ladder_svg": control_ladder_cad_svg(i, architecture),
@@ -722,6 +862,9 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
         quote_readiness=quote,
         field_verification_plan=_field_verification_plan(i),
         qa_scorecard=_qa_scorecard(quality, consistency, release, quote),
+        machine_context=_machine_context(i),
+        client_layer={"visible_first": ["registro_piloto", "datos_minimos", "resultado", "presupuesto", "entregables"], "hidden_by_default": ["api_activation", "env_template", "admin_internal"], "principle": "El cliente ve lo necesario; el ingeniero profundiza por capas."},
+        lead_capture={"enabled": True, "mode": "piloto", "fields": ["nombre", "correo", "teléfono", "empresa", "rol"], "storage": "runtime/localStorage; conectar CRM/DB en producción"},
         review_board=review_board,
         guided_flow=guided_flow,
         output_quality_contract=output_contract,
@@ -783,7 +926,7 @@ def export_pack_markdown(payload: Dict[str, Any] | ProjectIntake) -> str:
     lines.append(pack['recommended_option']['why'])
     if pack.get("starter_intelligence", {}).get("architecture_lock"):
         arch = pack["starter_intelligence"]["architecture_lock"]
-        lines.append(f"Workshop Lock: **{arch.get('architecture_id', arch.get('id',''))}** · {arch.get('architecture_reason','')}")
+        lines.append(f"MarketPilot Lock: **{arch.get('architecture_id', arch.get('id',''))}** · {arch.get('architecture_reason','')}")
         for w in arch.get('architecture_warnings', []):
             lines.append(f"- Advertencia arquitectura: {w}")
     lines.append("")

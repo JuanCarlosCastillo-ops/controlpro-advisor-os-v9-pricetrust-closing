@@ -1,4 +1,4 @@
-# ControlPro V11 - Workshop Lock Protocol
+# ControlPro V12 - MarketPilot Lock Protocol
 
 Objetivo: que la app no entregue precios basura en cotizaciones de miles de dólares.
 

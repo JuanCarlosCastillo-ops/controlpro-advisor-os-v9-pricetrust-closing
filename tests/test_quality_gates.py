@@ -27,7 +27,7 @@ def test_hoist_without_safety_does_not_quote_as_ready():
     assert r.status_code == 200
     data = r.json()
     assert data['release_gates']['quote_ready'] is False
-    assert any('Seguridad de izaje' in g['name'] and not g['passed'] for g in data['release_gates']['gates'])
+    assert any(g['name'] == 'Seguridad de izaje' and not g['passed'] for g in data['release_gates']['gates'])
 
 
 def test_output_contains_traceability_sections():
@@ -42,7 +42,7 @@ def test_output_contains_traceability_sections():
     assert data['review_board']['veredicto']
     assert data['cad_outputs']['wire_schedule']
     assert data['cad_outputs']['drawio_available'] is True
-    assert data['priceguard']['methodology']['name'] == 'PriceGuard 11'
+    assert data['priceguard']['methodology']['name'] == 'PriceGuard 12'
     assert data['premium_document_contract']['pdf']
 
 
@@ -75,3 +75,32 @@ def test_vfd_workshop_lock_aligns_cad_outputs():
     assert 'KM2 coil' not in terminal_text
     assert 'KM1/KM2' not in wire_text
     assert 'QF-01' in wire_text and 'VFD-01' in wire_text and 'MTR-01' in wire_text
+
+
+def test_machine_context_lock_for_compressor_removes_hoist_language():
+    payload = client.get('/api/example').json()
+    payload.update({
+        'project_name': 'Compresor industrial — Control y protección',
+        'application': 'Compresor de aire',
+        'load_type': 'Compresor',
+        'motor_power_hp': 30,
+        'voltage': 440,
+        'full_load_amps': None,
+        'needs_reversing': False,
+        'needs_brake': False,
+        'needs_limit_switches': False,
+        'needs_estop': True,
+        'needs_phase_monitor': True,
+        'user_notes': 'Evaluar arranque y protección considerando alto torque y frecuencia de arranque.',
+    })
+    r = client.post('/api/generate', json=payload)
+    assert r.status_code == 200
+    data = r.json()
+    assert data['machine_context']['type'] == 'compressor'
+    assert any(g['name'] == 'Seguridad de compresor' for g in data['release_gates']['gates'])
+    risk_text = ' '.join(r['risk'] for r in data['risks'])
+    assert 'Sobre-recorrido de carga' not in risk_text
+    assert 'Freno mal seleccionado' not in risk_text
+    terminal_text = ' '.join(str(x) for row in data['cad_outputs']['terminal_schedule'] for x in row.values())
+    assert 'PRESOSTATO' in terminal_text or 'TERM' in terminal_text
+    assert 'SUBIR' not in terminal_text and 'BAJAR' not in terminal_text

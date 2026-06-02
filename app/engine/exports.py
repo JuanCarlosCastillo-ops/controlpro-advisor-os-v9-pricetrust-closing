@@ -44,7 +44,7 @@ def export_bom_xlsx(payload: Dict[str, Any] | ProjectIntake) -> bytes:
     wb = Workbook()
     ws = wb.active
     ws.title = "BOM cotizable"
-    ws.append(["ControlPro Advisor OS V11 - BOM cotizable"])
+    ws.append(["ControlPro Advisor OS V12 - BOM cotizable"])
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=17)
     ws["A1"].font = Font(bold=True, size=16, color="FFFFFF")
     ws["A1"].fill = PatternFill("solid", fgColor="0B1722")
@@ -148,8 +148,8 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
 
     story = []
     story.append(Spacer(1, 0.25 * inch))
-    story.append(Paragraph("ControlPro Advisor OS V11", styles["CoverTitle"]))
-    story.append(Paragraph("Workshop Lock - Expediente técnico-comercial para cotización industrial", styles["Subtitle"]))
+    story.append(Paragraph("ControlPro Advisor OS V12", styles["CoverTitle"]))
+    story.append(Paragraph("MarketPilot Lock - Expediente técnico-comercial para cotización industrial", styles["Subtitle"]))
     story.append(Spacer(1, 0.22 * inch))
     cover_data = [
         ["Proyecto", pack["intake"]["project_name"]],
@@ -157,7 +157,7 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
         ["Ubicación", f"{pack['intake']['location_city']}, {pack['intake']['location_province']}, {pack['intake']['country']}"],
         ["Aplicación", pack["intake"].get("application", "")],
         ["Motor", f"{pack['intake']['motor_power_hp']} HP · {pack['intake']['voltage']} V · {pack['intake']['phases']}F"],
-        ["Versión / uso", "V11 Workshop Lock · Cotización y revisión profesional"],
+        ["Versión / uso", "V12 MarketPilot Lock · Cotización y revisión profesional"],
     ]
     cover = Table(cover_data, colWidths=[1.55*inch, 5.05*inch])
     cover.setStyle(TableStyle([
@@ -383,7 +383,7 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
         canvas.saveState()
         canvas.setFont("Helvetica", 7)
         canvas.setFillColor(colors.HexColor("#607380"))
-        canvas.drawString(0.55*inch, 0.35*inch, "ControlPro Advisor OS V11 Workshop Lock - Documento para cotización/revisión")
+        canvas.drawString(0.55*inch, 0.35*inch, "ControlPro Advisor OS V12 MarketPilot Lock - Documento para cotización/revisión")
         canvas.drawRightString(7.95*inch, 0.35*inch, f"Página {doc_.page}")
         canvas.restoreState()
 

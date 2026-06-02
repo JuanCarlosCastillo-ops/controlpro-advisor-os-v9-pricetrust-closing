@@ -1,6 +1,6 @@
-# ControlPro V11 — Salidas CAD-like y entregables de taller
+# ControlPro V12 — Salidas CAD-like y entregables de taller
 
-La versión V11 mejora los diagramas para que dejen de sentirse como dibujos conceptuales básicos. Ahora el motor entrega salidas intermedias más cercanas a ingeniería:
+La versión V12 mejora los diagramas para que dejen de sentirse como dibujos conceptuales básicos. Ahora el motor entrega salidas intermedias más cercanas a ingeniería:
 
 ## Hojas generadas
 

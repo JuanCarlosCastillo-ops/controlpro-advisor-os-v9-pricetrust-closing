@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ControlPro Advisor OS V11 Workshop Lock</title>
+  <title>ControlPro Advisor OS V12 MarketPilot Lock</title>
   <link rel="manifest" href="/static/manifest.json" />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
@@ -11,7 +11,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <img src="/static/assets/brand/controlpro_logo.svg" alt="ControlPro" class="logo" />
-      <p class="version">Advisor OS V11 · Workshop Lock</p>
+      <p class="version">Advisor OS V12 · MarketPilot Lock</p>
       <nav>
         <a href="#dashboard" class="active">Panel central</a>
         <a href="#intake">Datos</a>
@@ -24,7 +24,7 @@
         <a href="#solutions">Soluciones</a>
         <a href="#bom">BOM</a>
         <a href="#market">PriceGuard/Mercado</a>
-        <a href="#api-activation">APIs</a>
+        <a href="#api-activation">Admin interno</a>
         <a href="#rfq">RFQ</a>
         <a href="#budget">Presupuesto</a>
         <a href="#statistics">Estadísticas</a>
@@ -42,7 +42,7 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">Cotización industrial inteligente + expediente técnico + mercado</p>
-          <h1>ControlPro Advisor OS V11</h1>
+          <h1>ControlPro Advisor OS V12</h1>
           <p>Con pocos datos genera un expediente técnico-comercial revisable: solución, BOM, mercado, RFQ, presupuesto, PDF/Excel y compuertas de calidad.</p>
         </div>
         <div class="actions">
@@ -58,7 +58,28 @@
       </header>
 
       <section class="workflow">
-        <span>1 Captura datos</span><i></i><span>2 Razona</span><i></i><span>3 Normaliza BOM</span><i></i><span>4 Busca precios</span><i></i><span>5 Valida</span><i></i><span>6 Entrega</span>
+        <span>1 Registro</span><i></i><span>2 Datos mínimos</span><i></i><span>3 Resultado</span><i></i><span>4 Mercado</span><i></i><span>5 Entregables</span><i></i><span>6 Admin interno</span>
+      </section>
+
+      <section class="layer-switcher">
+        <button class="layer-btn active" data-layer="cotizar">Cotizar rápido</button>
+        <button class="layer-btn" data-layer="evidencia">Evidencia y CAD</button>
+        <button class="layer-btn" data-layer="mercado">Materiales y mercado</button>
+        <button class="layer-btn" data-layer="entregables">Entregables</button>
+        <button class="layer-btn internal" data-layer="admin">Admin interno</button>
+      </section>
+
+      <section id="lead-capture" class="panel lead-card">
+        <div class="panel-head"><div><h3>Registro rápido para piloto</h3><p>Para probar como profesional: guardamos quién entra, qué empresa representa y qué caso quiere cotizar. No bloquea la app, pero ayuda a medir interés real.</p></div><span class="badge complete">Lead pilot</span></div>
+        <form id="leadForm" class="lead-grid">
+          <input name="name" placeholder="Nombre" />
+          <input name="email" placeholder="Correo" />
+          <input name="phone" placeholder="WhatsApp" />
+          <input name="company" placeholder="Empresa" />
+          <select name="role"><option>Ingeniero eléctrico</option><option>Técnico tablerista</option><option>Cotizador/compras</option><option>Dueño/manager</option><option>Otro</option></select>
+          <button type="button" id="saveLeadBtn" class="btn primary">Guardar registro piloto</button>
+        </form>
+        <small id="leadStatus">Modo piloto: el registro se guarda en navegador y también se envía al servidor si está disponible.</small>
       </section>
 
 
@@ -68,7 +89,7 @@
 
       <section id="pricetrust-dashboard" class="content-grid price-dashboard">
         <article class="panel">
-          <div class="panel-head"><div><h3>PriceGuard + Workshop Lock</h3><p>Separa catálogo piloto, mercado vivo, precio confirmado y RFQ; además verifica que solución recomendada, BOM y propuesta coincidan.</p></div><span class="badge complete">PriceGuard 11</span></div>
+          <div class="panel-head"><div><h3>PriceGuard + MarketPilot Lock</h3><p>Separa catálogo piloto, mercado vivo, precio confirmado y RFQ; además verifica que solución recomendada, BOM y propuesta coincidan.</p></div><span class="badge complete">PriceGuard 12</span></div>
           <div class="stat-grid" id="priceTrustCards"></div>
           <div id="priceTrustPolicy" class="notice small-notice"></div>
         </article>
@@ -186,13 +207,13 @@
 
         <article class="panel" id="photos"><div class="panel-head"><div><h3>2. Fotos y evidencia</h3><p>Previsualiza fotos. En producción se conecta a almacenamiento y OCR/visión para placa.</p></div><span class="badge">Evidencia</span></div><label class="upload-box"><input type="file" id="photoInput" accept="image/*" multiple><span>+ Agregar fotos</span><small>Placa, tablero, ruta de cable, freno, ambiente</small></label><div id="photoStrip" class="photo-strip"><div class="photo-card motor"><span>Motor</span></div><div class="photo-card panelpic"><span>Tablero</span></div><div class="photo-card hoist"><span>Guinche</span></div></div></article>
 
-        <article class="panel assembly-panel" id="assembly"><div class="panel-head"><div><h3>3. Vista 3D conceptual</h3><p>Modelo didáctico dentro de la app para explicar y ordenar tablero/motor.</p></div><span class="badge blue">3D web</span></div><div class="model-stage"><div class="motor3d"><i></i><b></b><em></em><span>Motor TEFC</span></div><div class="cabinet3d"><div class="cab-door"></div><div class="cab-body"><i></i><i></i><b></b><b></b><em></em></div><span>Tablero</span></div><div class="dimension d1">Motor + base</div><div class="dimension d2">Gabinete industrial</div></div></article>
+        <article class="panel assembly-panel" id="assembly"><div class="panel-head"><div><h3>3. Visual premium de solución</h3><p>Vista premium para entender la solución sin saturar; los planos y listas se generan por capas.</p></div><span class="badge blue">3D web</span></div><div class="premium-visual-stage"><img src="/static/assets/concepts/controlpro_v12_premium_workspace.png" alt="Vista premium de tablero, motor y entregables" /><div class="visual-caption"><b>Preview premium</b><span>La imagen explica el concepto; los SVG/Draw.io son los entregables editables para revisión.</span></div></div></article>
 
         <article class="panel diagram-panel" id="singleline"><div class="panel-head"><div><h3>4. Unifilar CAD-like</h3><p>Rama de energía con tags, title block, notas de SCCR/kAIC y salida SVG exportable.</p></div><span class="badge">SVG</span></div><div class="diagram-slot" id="singleLineSvg"></div></article>
         <article class="panel diagram-panel" id="control"><div class="panel-head"><div><h3>5. Ladder CAD-like</h3><p>Rungs numerados, contactos etiquetados, bobinas, cables preliminares y borneras.</p></div><span class="badge">Ladder</span></div><div class="diagram-slot" id="controlSvg"></div></article>
         <article class="panel diagram-panel" id="panel3d"><div class="panel-head"><div><h3>6. Layout de tablero CAD-like</h3><p>Backplate, riel DIN, canaleta, puerta, borneras y reserva. Exportable como SVG.</p></div><span class="badge">Preview</span></div><div class="diagram-slot" id="panelSvg"></div></article>
 
-        <article class="panel span-2" id="cadshop"><div class="panel-head"><div><h3>7. CAD / Taller</h3><p>Material intermedio para formalizar en CAD: borneras, cables, Draw.io y SVGs. La meta es que el humano revise, no redibuje desde cero.</p></div><span class="badge blue">CAD-like V11</span></div>
+        <article class="panel span-2" id="cadshop"><div class="panel-head"><div><h3>7. CAD / Taller</h3><p>Material intermedio para formalizar en CAD: borneras, cables, Draw.io y SVGs. La meta es que el humano revise, no redibuje desde cero.</p></div><span class="badge blue">CAD-like V12</span></div>
           <div class="cad-actions">
             <button id="singleSvgBtn" class="btn ghost">Exportar unifilar SVG</button>
             <button id="controlSvgBtn" class="btn ghost">Exportar ladder SVG</button>
@@ -209,9 +230,9 @@
         <article class="panel" id="solutions"><div class="panel-head"><div><h3>9. Soluciones comparadas</h3><p>El sistema compara alternativas, no impone una única respuesta.</p></div><span class="badge blue" id="recommendedBadge">Recomendado</span></div><div class="options-grid" id="optionsGrid"></div></article>
         <article class="panel span-2" id="bom"><div class="panel-head"><div><h3>10. BOM técnico</h3><p>Materiales normalizados: especificación, cantidad y chequeos críticos.</p></div><span class="badge">BOM</span></div><div class="table-wrap"><table><thead><tr><th>Categoría</th><th>Ítem</th><th>Cant.</th><th>Especificación</th><th>Chequeos</th></tr></thead><tbody id="bomRows"></tbody></table></div></article>
 
-        <article class="panel span-2" id="market"><div class="panel-head"><div><h3>11. PriceGuard + mercado y proveedores</h3><p>Semáforo de precios: verde usable, amarillo referencial, rojo bloqueado/RFQ. El sistema evita precios exagerados o sospechosamente bajos.</p></div><span class="badge complete">PriceGuard 11</span></div><div class="market-summary" id="marketSummary"></div><div class="table-wrap"><table><thead><tr><th>Componente</th><th>Proveedor elegido</th><th>Precio y banda</th><th>Fuente</th><th>Semáforo</th><th>Acción requerida</th></tr></thead><tbody id="marketRows"></tbody></table></div></article>
+        <article class="panel span-2" id="market"><div class="panel-head"><div><h3>11. PriceGuard + mercado y proveedores</h3><p>Semáforo de precios: verde usable, amarillo referencial, rojo bloqueado/RFQ. El sistema evita precios exagerados o sospechosamente bajos.</p></div><span class="badge complete">PriceGuard 12</span></div><div class="market-summary" id="marketSummary"></div><div class="table-wrap"><table><thead><tr><th>Componente</th><th>Proveedor elegido</th><th>Precio y banda</th><th>Fuente</th><th>Semáforo</th><th>Acción requerida</th></tr></thead><tbody id="marketRows"></tbody></table></div></article>
 
-        <article class="panel span-2" id="api-activation"><div class="panel-head"><div><h3>12. Activación de APIs reales</h3><p>Preparado para credenciales reales: Mercado Libre, Google Places, WhatsApp Cloud y SMTP. La app muestra qué falta y no finge datos en vivo.</p></div><span class="badge warn">.env ready</span></div>
+        <article class="panel span-2" id="api-activation"><div class="panel-head"><div><h3>Admin interno · Activación de APIs</h3><p>Solo para administradores del piloto: credenciales, proveedores y conectores reales. El cliente no necesita ver esta capa.</p></div><span class="badge warn">.env ready</span></div>
           <div class="api-layout">
             <div class="api-status" id="apiStatusRows"></div>
             <div><h4>Plantilla .env</h4><textarea id="envTemplate" readonly></textarea><button id="copyEnvBtn" class="btn ghost">Copiar plantilla .env</button></div>

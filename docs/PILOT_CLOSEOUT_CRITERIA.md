@@ -1,4 +1,4 @@
-# Criterios de cierre piloto V11
+# Criterios de cierre piloto V12
 
 Antes de enseñar la app a ingenieros externos:
 

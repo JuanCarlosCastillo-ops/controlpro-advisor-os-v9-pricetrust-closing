@@ -59,7 +59,7 @@ def test_activation_and_cad_exports():
     payload = client.get('/api/example').json()
     status = client.get('/api/integrations/status')
     assert status.status_code == 200
-    assert status.json()['release'] == 'V11 Workshop Lock'
+    assert status.json()['release'] == 'V12 MarketPilot Lock'
     env = client.get('/api/integrations/env-template')
     assert env.status_code == 200
     assert 'MELI_ENABLED' in env.text

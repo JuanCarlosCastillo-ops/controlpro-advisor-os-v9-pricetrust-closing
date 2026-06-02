@@ -138,6 +138,18 @@ class EngineeringPack(BaseModel):
     quote_readiness: Dict[str, Any] = {}
     field_verification_plan: List[Dict[str, Any]] = []
     qa_scorecard: Dict[str, Any] = {}
+    machine_context: Dict[str, Any] = {}
+    review_board: Dict[str, Any] = {}
+    guided_flow: Dict[str, Any] = {}
+    output_quality_contract: Dict[str, Any] = {}
+    cad_outputs: Dict[str, Any] = {}
+    api_activation: Dict[str, Any] = {}
+    priceguard: Dict[str, Any] = {}
+    starter_intelligence: Dict[str, Any] = {}
+    premium_document_contract: Dict[str, Any] = {}
+    client_layer: Dict[str, Any] = {}
+    lead_capture: Dict[str, Any] = {}
+    human_review_notice: str = ""
 
     review_board: Dict[str, Any] = {}
     guided_flow: Dict[str, Any] = {}

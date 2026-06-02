@@ -1,6 +1,6 @@
 # Plan de expansión del catálogo
 
-La V11 trae un catálogo interno piloto editable. Para pasar a producción se debe alimentar con:
+La V12 trae un catálogo interno piloto editable. Para pasar a producción se debe alimentar con:
 
 - Contactores por corriente y bobina.
 - Guardamotores, térmicos y breakers por rango/kAIC.

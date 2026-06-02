@@ -448,7 +448,7 @@ def generate_rfq_message(requirements: Iterable[ComponentRequirement], decisions
 
 def priceguard_methodology() -> Dict[str, Any]:
     return {
-        "name": "PriceGuard 11",
+        "name": "PriceGuard 12",
         "goal": "Evitar cotizaciones débiles, precios exagerados, precios incompatibles, BOM incoherente con la arquitectura y falsas certezas antes de presupuestar trabajos de miles de dólares.",
         "inputs": ["catálogo interno", "fuente de precio", "stock", "vigencia", "proveedor", "banda de mercado", "ubicación", "historial/RFQ", "auditoría de outliers", "estado de credenciales API"],
         "semaforos": {

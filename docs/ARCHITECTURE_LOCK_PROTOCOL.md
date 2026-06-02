@@ -1,6 +1,6 @@
-# ControlPro V11 - Workshop Lock Protocol
+# ControlPro V12 - MarketPilot Lock Protocol
 
-La V11 corrige el error crítico detectado en la exportación: una arquitectura recomendada no puede generar un BOM de otra arquitectura.
+La V12 corrige el error crítico detectado en la exportación: una arquitectura recomendada no puede generar un BOM de otra arquitectura.
 
 ## Regla central
 

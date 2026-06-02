@@ -1,6 +1,9 @@
 from __future__ import annotations
 from pathlib import Path
 from fastapi import FastAPI
+from pydantic import BaseModel, Field
+from datetime import datetime, timezone
+import json, os
 from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 
@@ -16,9 +19,9 @@ BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
 app = FastAPI(
-    title="ControlPro Advisor OS V11 Workshop Lock",
+    title="ControlPro Advisor OS V12 MarketPilot Lock",
     description="Sistema operativo en español para diseño, cotización, CAD-like, mercado, RFQ y activación con credenciales reales.",
-    version="11.0-workshop-lock",
+    version="12.0-marketpilot-lock",
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -28,15 +31,41 @@ def index() -> str:
     return (STATIC_DIR / "index.html").read_text(encoding="utf-8")
 
 
+
+
+class LeadPilot(BaseModel):
+    name: str = Field(default="", max_length=120)
+    email: str = Field(default="", max_length=160)
+    phone: str = Field(default="", max_length=80)
+    company: str = Field(default="", max_length=160)
+    role: str = Field(default="", max_length=120)
+    note: str = Field(default="", max_length=500)
+
+
+@app.post("/api/leads")
+def capture_lead(lead: LeadPilot):
+    row = lead.model_dump()
+    row["captured_at"] = datetime.now(timezone.utc).isoformat()
+    row["source"] = "controlpro_v12_pilot"
+    path = os.environ.get("CONTROLPRO_LEADS_PATH", "/tmp/controlpro_v12_leads.jsonl")
+    try:
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        stored = True
+    except Exception:
+        stored = False
+    return {"status": "ok", "stored_runtime": stored, "message": "Registro de piloto recibido. Para producción conectar base de datos/CRM."}
+
+
 @app.get("/api/health")
 def health():
     return {
         "status": "ok",
-        "product": "ControlPro Advisor OS V11 Workshop Lock",
+        "product": "ControlPro Advisor OS V12 MarketPilot Lock",
         "language": "es",
         "modules": [
             "datos", "fotos", "3d", "unifilar", "control", "calculos", "soluciones",
-            "BOM", "PriceGuard", "semaforo-precios", "mercado", "proveedores", "APIs", "RFQ", "presupuesto", "CRM", "validacion", "CAD-like", "Draw.io", "PDF", "Excel", "entregables"
+            "BOM", "PriceGuard", "semaforo-precios", "mercado", "proveedores", "APIs", "RFQ", "presupuesto", "CRM", "registro_piloto", "capas_cliente", "validacion", "CAD-like", "Draw.io", "PDF", "Excel", "entregables"
         ],
         "safety_boundary": "asesor técnico-comercial; requiere aprobación humana antes de construir o energizar",
     }
