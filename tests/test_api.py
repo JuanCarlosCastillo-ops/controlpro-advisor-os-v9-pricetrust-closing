@@ -60,7 +60,7 @@ def test_activation_and_cad_exports():
     payload = client.get('/api/example').json()
     status = client.get('/api/integrations/status')
     assert status.status_code == 200
-    assert status.json()['release'] == 'V14 MathTrust Pro'
+    assert status.json()['release'] == 'V16 MarketVision Pro'
     env = client.get('/api/integrations/env-template')
     assert env.status_code == 200
     assert 'MELI_ENABLED' in env.text

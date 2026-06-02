@@ -67,26 +67,27 @@ def integration_status() -> Dict[str, Any]:
     configured = sum(1 for s in services if s["configured"])
     enabled = sum(1 for s in services if s["enabled"])
     return {
-        "release": "V14 MathTrust Pro",
+        "release": "V16 MarketVision Pro",
         "configured_count": configured,
         "enabled_count": enabled,
         "services": services,
-        "safe_default": "Sin credenciales reales la app usa catálogo interno, precios por confianza y RFQ manual. No finge mercado en vivo.",
+        "safe_default": "Sin credenciales reales la app usa Market Ledger, catálogo interno, búsquedas públicas referenciales, PriceGuard/FitLock y RFQ. No convierte web en precio cerrado sin confirmación.",
     }
 
 
 def env_template() -> str:
-    return """# ControlPro Advisor OS V14 - credenciales reales
+    return """# ControlPro Advisor OS V16 - credenciales reales
 # Copiar este archivo como .env y reemplazar valores.
 # Nunca subir .env a GitHub.
 
 APP_ENV=pilot
-CONTROLPRO_ENABLE_LIVE_MARKET=false
+CONTROLPRO_ENABLE_LIVE_MARKET=true
 CONTROLPRO_DEFAULT_COUNTRY=Ecuador
 CONTROLPRO_DEFAULT_CURRENCY=USD
 
 # Mercado Libre Ecuador / búsquedas referenciales
 MELI_ENABLED=false
+MELI_PUBLIC_SEARCH_ENABLED=true
 MELI_SITE_ID=MEC
 MELI_ACCESS_TOKEN=
 MELI_MAX_RESULTS=8

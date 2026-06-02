@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.engine import example_intake, generate_engineering_pack, export_pack_markdown, export_client_proposal
 from app.engine.models import ProjectIntake
-from app.engine.pricing import load_price_catalog, load_suppliers, load_canonical_components, load_starter_profiles, priceguard_methodology
+from app.engine.pricing import load_price_catalog, load_suppliers, load_canonical_components, load_starter_profiles, load_market_ledger, priceguard_methodology
 from app.engine.exports import export_bom_csv, export_bom_xlsx, export_pdf_report
 from app.engine.cad import single_line_cad_svg, control_ladder_cad_svg, panel_layout_cad_svg, terminal_schedule, wire_schedule, drawio_xml
 from app.engine.cad_exports import rows_to_csv
@@ -19,9 +19,9 @@ BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
 app = FastAPI(
-    title="ControlPro Advisor OS V15 OptionTrust Pro",
+    title="ControlPro Advisor OS V16 MarketVision Pro",
     description="Sistema operativo en español para diseño, cotización, CAD-like, mercado, RFQ y activación con credenciales reales.",
-    version="15.0-optiontrust-pro",
+    version="16.0-marketvision-pro",
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -46,8 +46,8 @@ class LeadPilot(BaseModel):
 def capture_lead(lead: LeadPilot):
     row = lead.model_dump()
     row["captured_at"] = datetime.now(timezone.utc).isoformat()
-    row["source"] = "controlpro_v13_pilot"
-    path = os.environ.get("CONTROLPRO_LEADS_PATH", "/tmp/controlpro_v15_leads.jsonl")
+    row["source"] = "controlpro_v16_pilot"
+    path = os.environ.get("CONTROLPRO_LEADS_PATH", "/tmp/controlpro_v16_leads.jsonl")
     try:
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
@@ -61,7 +61,7 @@ def capture_lead(lead: LeadPilot):
 def health():
     return {
         "status": "ok",
-        "product": "ControlPro Advisor OS V15 OptionTrust Pro",
+        "product": "ControlPro Advisor OS V16 MarketVision Pro",
         "language": "es",
         "modules": [
             "datos", "fotos", "3d", "unifilar", "control", "calculos", "soluciones",
@@ -89,6 +89,11 @@ def suppliers():
 @app.get("/api/catalog/prices")
 def prices():
     return load_price_catalog()
+
+
+@app.get("/api/catalog/market-ledger")
+def market_ledger():
+    return load_market_ledger()
 
 
 @app.get("/api/catalog/starter-profiles")
@@ -144,6 +149,18 @@ def export_pdf(intake: ProjectIntake):
         media_type="application/pdf",
         headers={"Content-Disposition": "attachment; filename=controlpro_reporte_tecnico_comercial.pdf"},
     )
+
+
+@app.get("/api/market/live/mercadolibre")
+async def live_mercadolibre(q: str, limit: int = 8):
+    from app.integrations.mercadolibre import search_items
+    return await search_items(q, limit=limit)
+
+
+@app.get("/api/market/live/google-places")
+async def live_google_places(q: str):
+    from app.integrations.google_places import search_suppliers
+    return await search_suppliers(q)
 
 
 @app.get("/api/integrations/status")

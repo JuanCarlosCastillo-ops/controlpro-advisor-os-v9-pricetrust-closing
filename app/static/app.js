@@ -71,6 +71,7 @@ function renderPack(pack){
   renderBOM(pack);
   renderMarket(pack);
   renderSupplierQuickLinks(pack);
+  renderMarketLedger(pack);
   renderBudget(pack);
   renderStats(pack);
   renderValidation(pack);
@@ -154,6 +155,29 @@ function renderSupplierQuickLinks(pack){
   el.innerHTML = `<h4>Búsqueda rápida de proveedores — ${links.city || ''}</h4><p>${links.strategy || ''}</p><div class="link-grid">${google}${meli}</div>`;
 }
 
+
+function renderMarketLedger(pack){
+  const box = $('#marketLedgerBox'); if(!box) return;
+  const ledger = pack.market?.market_ledger || {};
+  const refs = ledger.references || [];
+  box.innerHTML = `<h4>Market Ledger · memoria de precios</h4><p>${ledger.truth_rule || 'Referencias robustas por mediana/IQR; no sustituyen proveedor confirmado.'}</p><div class="stat-grid"><div><small>Cobertura ledger</small><b>${pct(ledger.coverage_percent || 0)}</b></div><div><small>Referencias</small><b>${ledger.reference_count || 0}/${ledger.total_components || 0}</b></div></div>` +
+    `<div class="link-grid">${refs.slice(0,6).map(r=>`<a target="_blank" rel="noreferrer" href="${r.source_url || '#'}"><b>${r.component_id}</b><span>mediana ${money(r.median_usd)} · ${r.description || ''}</span></a>`).join('')}</div>`;
+}
+
+async function liveMarketSearch(){
+  if(!currentPack){ showToast('Genera primero el expediente'); return; }
+  const rfq = currentPack.market?.summary?.quote_needed_components || [];
+  const first = rfq[0] || (currentPack.requirements?.[0]?.item || 'materiales eléctricos industriales');
+  const q = encodeURIComponent(first + ' ' + (currentPack.intake?.location_province || 'Ecuador'));
+  const box = $('#liveMarketResults'); if(box) box.innerHTML = '<span>Buscando referencias...</span>';
+  try{
+    const res = await fetch(`/api/market/live/mercadolibre?q=${q}&limit=6`);
+    const data = await res.json();
+    const items = data.items || [];
+    if(box) box.innerHTML = items.length ? items.map(it=>`<a target="_blank" rel="noreferrer" href="${it.permalink}"><b>${it.title}</b><span>${it.currency_id || ''} ${it.price || ''} · cant. ${it.available_quantity ?? '?'}</span></a>`).join('') : `<span>${data.note || 'Sin resultados.'}</span>`;
+  }catch(e){ if(box) box.innerHTML = '<span>No se pudo consultar mercado vivo. Usa los enlaces de búsqueda/RFQ.</span>'; }
+}
+
 function renderSavingsDashboard(pack){
   const st = pack.statistics || {};
   const audit = st.candidate_offer_audit || {};
@@ -200,7 +224,7 @@ function renderGuidedFlow(pack){
 function renderReviewBoard(pack){
   const board = pack.review_board || {};
   const personas = board.personas || [];
-  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V15 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
+  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V16 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
 }
 
 function renderCalculations(pack){
@@ -358,7 +382,7 @@ function setupLayers(){
     const visible = new Set(layerMap[layer] || layerMap.cotizar);
     allIds.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('layer-hidden', !visible.has(id)); });
     $$('.layer-btn').forEach(b=>b.classList.toggle('active', b.dataset.layer===layer));
-    localStorage.setItem('controlpro_v13_layer', layer);
+    localStorage.setItem('controlpro_v16_layer', layer);
     if(targetId){ setTimeout(()=>document.getElementById(targetId)?.scrollIntoView({behavior:'smooth',block:'start'}), 80); }
   }
   window.showControlProLayer = showLayer;
@@ -373,7 +397,7 @@ function setupLayers(){
     if(sectionToLayer[id]){ ev.preventDefault(); showLayer(sectionToLayer[id], id); history.replaceState(null,'','#'+id); }
   }));
   window.addEventListener('hashchange', routeHash);
-  if(!routeHash()) showLayer(localStorage.getItem('controlpro_v13_layer') || 'cotizar');
+  if(!routeHash()) showLayer(localStorage.getItem('controlpro_v16_layer') || 'cotizar');
 }
 
 
@@ -381,7 +405,7 @@ async function saveLead(){
   const form = $('#leadForm'); if(!form) return;
   const data = Object.fromEntries(new FormData(form).entries());
   data.saved_at = new Date().toISOString();
-  localStorage.setItem('controlpro_v13_pilot_lead', JSON.stringify(data));
+  localStorage.setItem('controlpro_v16_pilot_lead', JSON.stringify(data));
   try{
     const res = await fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
     const out = await res.json();
@@ -392,7 +416,7 @@ async function saveLead(){
 
 function restoreLead(){
   try{
-    const data = JSON.parse(localStorage.getItem('controlpro_v13_pilot_lead')||'{}');
+    const data = JSON.parse(localStorage.getItem('controlpro_v16_pilot_lead')||'{}');
     Object.entries(data).forEach(([k,v])=>{ const el=document.querySelector(`#leadForm [name="${k}"]`); if(el) el.value=v; });
   }catch(e){}
 }
@@ -420,4 +444,5 @@ $('#terminalBtn')?.addEventListener('click', ()=>exportBinary('/api/export/cad/t
 $('#copyEnvBtn')?.addEventListener('click', async()=>{ await navigator.clipboard.writeText($('#envTemplate').value || ''); showToast('Plantilla .env copiada'); });
 $$('.quick-chip').forEach(btn=>btn.addEventListener('click', ()=>applyTemplate(btn.dataset.template)));
 $('#copyRfqBtn').addEventListener('click', async()=>{ await navigator.clipboard.writeText($('#rfqMessage').value || ''); showToast('RFQ copiado'); });
+$('#liveMarketBtn')?.addEventListener('click', liveMarketSearch);
 restoreLead(); setupPhotos(); setupNav(); setupLayers(); loadIntegrationStatus(); generate();

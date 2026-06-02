@@ -97,8 +97,13 @@ def _extract_required_current(req: ComponentRequirement, intake: ProjectIntake) 
 def _fitlock_estimate(req: ComponentRequirement, intake: ProjectIntake) -> float:
     """Budgetary placeholder when catalog does not have a technically fitting item.
 
-    This is intentionally marked red/RFQ. It is not a sellable confirmed price.
+    V16 first tries MarketVision Ledger median/IQR references. This is still
+    intentionally marked red/RFQ when FitLock blocks: it is an order-of-magnitude
+    value, not a sellable confirmed price.
     """
+    ref = ledger_reference(req.component_id, intake)
+    if ref.get("available") and ref.get("median_usd"):
+        return float(ref["median_usd"])
     hp = max(float(intake.motor_power_hp or 0), 1.0)
     flc = float(intake.full_load_amps or 0) if intake.full_load_amps else None
     text = (req.item + " " + req.spec + " " + req.component_id).lower()
@@ -224,6 +229,83 @@ def load_starter_profiles() -> List[Dict[str, Any]]:
     if not path.exists():
         return []
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+# -----------------------------
+# MarketVision Ledger / robust reference pricing
+# -----------------------------
+def load_market_ledger() -> List[Dict[str, str]]:
+    path = DATA_DIR / "market_ledger.csv"
+    if not path.exists():
+        return []
+    return _read_csv(path)
+
+
+def _voltage_class(voltage: float) -> str:
+    return "240" if float(voltage or 0) <= 260 else "480"
+
+
+def _ledger_candidates(component_id: str, intake: ProjectIntake) -> List[Dict[str, str]]:
+    out: List[Dict[str, str]] = []
+    hp = float(intake.motor_power_hp or 0)
+    fla = float(intake.full_load_amps or 0) if intake.full_load_amps else 0.0
+    vclass = _voltage_class(float(intake.voltage or 0))
+    for r in load_market_ledger():
+        if r.get("component_id") != component_id:
+            continue
+        vc = (r.get("voltage_class") or "any").strip().lower()
+        if vc not in {"any", vclass}:
+            continue
+        try:
+            hp_min, hp_max = float(r.get("hp_min") or 0), float(r.get("hp_max") or 99999)
+            a_min, a_max = float(r.get("current_min_a") or 0), float(r.get("current_max_a") or 99999)
+        except Exception:
+            continue
+        hp_ok = hp_min <= hp <= hp_max or hp == 0
+        a_ok = a_min <= fla <= a_max or fla == 0
+        if hp_ok or a_ok:
+            out.append(r)
+    return out
+
+
+def ledger_reference(component_id: str, intake: ProjectIntake) -> Dict[str, Any]:
+    rows = _ledger_candidates(component_id, intake)
+    if not rows:
+        return {"available": False, "component_id": component_id, "note": "Sin referencia ledger para este tamaño/tensión."}
+    def f(row: Dict[str,str], key: str, default: float = 0.0) -> float:
+        try: return float(row.get(key) or default)
+        except Exception: return default
+    # Prefer higher confidence and closest HP/current band
+    rows = sorted(rows, key=lambda r: (f(r, "confidence"), -abs((f(r,"hp_min")+f(r,"hp_max"))/2 - float(intake.motor_power_hp or 0))), reverse=True)
+    r = rows[0]
+    return {
+        "available": True,
+        "component_id": component_id,
+        "description": r.get("description", ""),
+        "p25_usd": f(r, "p25_usd"),
+        "median_usd": f(r, "median_usd"),
+        "p75_usd": f(r, "p75_usd"),
+        "confidence": f(r, "confidence", 0.4),
+        "source_type": r.get("source_type", "ledger"),
+        "source_url": r.get("source_url", ""),
+        "last_confirmed": r.get("last_confirmed", ""),
+        "notes": r.get("notes", ""),
+        "policy": "Referencia robusta por mediana/IQR. No reemplaza precio confirmado por proveedor; sirve para evitar perderse cuando no hay API o catálogo compatible.",
+    }
+
+
+def ledger_overview(decisions: List[PriceDecision], intake: ProjectIntake) -> Dict[str, Any]:
+    comps = sorted({d.component_id for d in decisions})
+    refs = [ledger_reference(c, intake) for c in comps]
+    available = [r for r in refs if r.get("available")]
+    return {
+        "enabled": True,
+        "reference_count": len(available),
+        "total_components": len(comps),
+        "coverage_percent": round(len(available) / max(1, len(comps)) * 100, 1),
+        "references": available[:20],
+        "truth_rule": "Market Ledger es memoria de precios por componente/tamaño/ciudad. Si no hay proveedor confirmado, el precio sigue siendo referencial o pre-cotización.",
+    }
 
 
 def _parse_date(value: str) -> date | None:
@@ -660,6 +742,7 @@ def summarize_market(decisions: List[PriceDecision]) -> Dict[str, Any]:
         "mathtrust_score_percent": mathtrust["score_percent"],
         "mathtrust_verdict": mathtrust["verdict"],
         "catalog_scope": "Catálogo piloto ampliado: fuerza, control, seguridad, VFD, soft starter, taller, cables y consumibles. No sustituye precios reales confirmados.",
+        "market_ledger": ledger_overview(decisions, decisions[0].selected_offer and getattr(decisions[0].selected_offer, "_intake", None) or ProjectIntake()) if False else {"note": "Ledger overview attached by MarketVision in advisor layer."},
         "confidence_policy": {
             "precio_confirmado": "Proveedor/stock/vigencia confirmados o fuente interna validada; se puede usar en propuesta revisable.",
             "precio_referencial": "Sirve para armar presupuesto, pero se debe confirmar si afecta margen o plazo.",
@@ -702,9 +785,9 @@ def generate_rfq_message(requirements: Iterable[ComponentRequirement], decisions
 
 def priceguard_methodology() -> Dict[str, Any]:
     return {
-        "name": "PriceGuard 15 + OptionTrust + MathTrust + FitLock",
+        "name": "PriceGuard 16 + MarketVision + OptionTrust + MathTrust + FitLock",
         "goal": "Evitar cotizaciones débiles, precios exagerados, precios incompatibles, BOM incoherente con la arquitectura y falsas certezas antes de presupuestar trabajos de miles de dólares.",
-        "inputs": ["catálogo interno", "fuente de precio", "stock", "vigencia", "proveedor", "banda de mercado", "ubicación", "historial/RFQ", "auditoría de outliers", "estado de credenciales API"],
+        "inputs": ["catálogo interno", "Market Ledger histórico", "fuente de precio", "stock", "vigencia", "proveedor", "banda robusta mediana/IQR", "ubicación", "historial/RFQ", "auditoría de outliers", "estado de credenciales API", "búsqueda web/API cuando esté activada"],
         "semaforos": {
             "verde": "usable en cotización revisable; aun así debe verificarse si el precio es sensible o la oferta vence pronto",
             "amarillo": "referencial; se recomienda RFQ o confirmación antes de enviar propuesta firme",
@@ -714,6 +797,7 @@ def priceguard_methodology() -> Dict[str, Any]:
             "No escoger automáticamente el precio más barato.",
             "No usar precio sospechosamente bajo como definitivo.",
             "No fingir mercado real si las APIs están sin credenciales.",
+            "Usar Market Ledger por mediana/IQR para no perderse cuando no exista precio vivo.",
             "Mostrar catálogo piloto separado de mercado vivo.",
             "Auditar todas las ofertas candidatas, no solo la seleccionada.",
             "Forzar coherencia: solución recomendada, BOM, RFQ, PDF y propuesta deben usar la misma arquitectura.",

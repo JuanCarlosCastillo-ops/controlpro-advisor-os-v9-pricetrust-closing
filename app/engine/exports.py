@@ -44,7 +44,7 @@ def export_bom_xlsx(payload: Dict[str, Any] | ProjectIntake) -> bytes:
     wb = Workbook()
     ws = wb.active
     ws.title = "BOM cotizable"
-    ws.append(["ControlPro Advisor OS V15 - BOM cotizable"])
+    ws.append(["ControlPro Advisor OS V16 - BOM cotizable"])
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=17)
     ws["A1"].font = Font(bold=True, size=16, color="FFFFFF")
     ws["A1"].fill = PatternFill("solid", fgColor="0B1722")
@@ -148,8 +148,8 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
 
     story = []
     story.append(Spacer(1, 0.25 * inch))
-    story.append(Paragraph("ControlPro Advisor OS V15", styles["CoverTitle"]))
-    story.append(Paragraph("OptionTrust Pro - Expediente técnico-comercial para cotización industrial", styles["Subtitle"]))
+    story.append(Paragraph("ControlPro Advisor OS V16", styles["CoverTitle"]))
+    story.append(Paragraph("MarketVision Pro - Expediente técnico-comercial para cotización industrial", styles["Subtitle"]))
     story.append(Spacer(1, 0.22 * inch))
     cover_data = [
         ["Proyecto", pack["intake"]["project_name"]],
@@ -157,7 +157,7 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
         ["Ubicación", f"{pack['intake']['location_city']}, {pack['intake']['location_province']}, {pack['intake']['country']}"],
         ["Aplicación", pack["intake"].get("application", "")],
         ["Motor", f"{pack['intake']['motor_power_hp']} HP · {pack['intake']['voltage']} V · {pack['intake']['phases']}F"],
-        ["Versión / uso", "V15 OptionTrust Pro · Cotización y revisión profesional"],
+        ["Versión / uso", "V16 MarketVision Pro · Cotización y revisión profesional"],
     ]
     cover = Table(cover_data, colWidths=[1.55*inch, 5.05*inch])
     cover.setStyle(TableStyle([
@@ -334,6 +334,23 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
     story.append(bt)
     story.append(PageBreak())
 
+    cb = pack.get("budget", {}).get("cost_breakdown", {})
+    if cb:
+        story.append(Spacer(1, 6))
+        story.append(Paragraph("5.1 Desglose de precio / margen", styles["H2Slate"]))
+        cb_rows = [["Concepto", "Valor"],
+                   ["Costo proveedor / materiales", money(cb.get("supplier_material_cost", 0))],
+                   ["Mano de obra tablero", money(cb.get("panel_labor", 0))],
+                   ["Instalación campo", money(cb.get("field_labor", 0))],
+                   ["Ingeniería", money(cb.get("engineering", 0))],
+                   ["Logística", money(cb.get("transport_logistics", 0))],
+                   ["Contingencia", f"{cb.get('contingency_percent', 0)}% = {money(cb.get('contingency_usd', 0))}"],
+                   ["Margen", f"{cb.get('margin_percent', 0)}% = {money(cb.get('margin_usd', 0))}"]]
+        cbt = Table(cb_rows, colWidths=[2.8*inch, 3.3*inch])
+        cbt.setStyle(TableStyle([("BACKGROUND", (0,0), (-1,0), colors.HexColor("#123044")), ("TEXTCOLOR", (0,0), (-1,0), colors.white), ("GRID", (0,0), (-1,-1), 0.25, colors.HexColor("#CAD7E0")), ("PADDING", (0,0), (-1,-1), 6)]))
+        story.append(cbt)
+        story.append(para(cb.get("why_margin_exists", ""), "Muted"))
+
     story.append(Paragraph("6. BOM cotizable con semáforo", styles["H1Blue"]))
     req_map = {r["component_id"]: r for r in pack["requirements"]}
     rows = [["Componente", "Proveedor / Modelo", "Semáforo", "Unit", "Total", "Acción"]]
@@ -394,7 +411,7 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
         canvas.saveState()
         canvas.setFont("Helvetica", 7)
         canvas.setFillColor(colors.HexColor("#607380"))
-        canvas.drawString(0.55*inch, 0.35*inch, "ControlPro Advisor OS V15 OptionTrust Pro - Documento para cotización/revisión")
+        canvas.drawString(0.55*inch, 0.35*inch, "ControlPro Advisor OS V16 MarketVision Pro - Documento para cotización/revisión")
         canvas.drawRightString(7.95*inch, 0.35*inch, f"Página {doc_.page}")
         canvas.restoreState()
 

@@ -4,12 +4,12 @@ from math import sqrt
 from typing import Any, Dict, List
 
 from .models import ComponentRequirement, EngineeringPack, ProjectIntake
-from .pricing import decide_prices, generate_rfq_message, summarize_market, load_canonical_components, load_starter_profiles, priceguard_methodology
+from .pricing import decide_prices, generate_rfq_message, summarize_market, load_canonical_components, load_starter_profiles, priceguard_methodology, ledger_overview
 from .cad import single_line_cad_svg, control_ladder_cad_svg, panel_layout_cad_svg, terminal_schedule, wire_schedule, drawio_xml
 from app.integrations.config import integration_status
 
-VERSION = "15.0-optiontrust-pro"
-PRODUCT = "ControlPro Advisor OS V15 OptionTrust Pro"
+VERSION = "16.0-marketvision-pro"
+PRODUCT = "ControlPro Advisor OS V16 MarketVision Pro"
 
 
 def example_intake() -> Dict[str, Any]:
@@ -547,7 +547,22 @@ def _build_budget(i: ProjectIntake, material_cost: float, market_summary: Dict[s
     fitlock_blocked = int(market_summary.get("fitlock_blocked_count", 0) or 0)
     mathtrust = market_summary.get("mathtrust", {}) or {}
     commercial_blocked = bool(fitlock_blocked or market_summary.get("red_count", 0) or float(market_summary.get("mathtrust_score_percent", 0) or 0) < 72)
+    cost_basis = subtotal + contingency
+    markup_explain = {
+        "supplier_material_cost": round(material_cost, 2),
+        "panel_labor": round(panel_labor, 2),
+        "field_labor": round(field_labor, 2),
+        "engineering": round(engineering, 2),
+        "transport_logistics": round(transport, 2),
+        "subtotal_before_risk": round(subtotal, 2),
+        "contingency_percent": i.contingency_percent,
+        "contingency_usd": round(contingency, 2),
+        "margin_percent": i.margin_percent,
+        "margin_usd": round(margin, 2),
+        "why_margin_exists": "Cubre horas de cotización no ganadas, garantía, coordinación de compras, riesgo de campo y utilidad. Debe mostrarse separado del costo proveedor.",
+    }
     return {
+        "cost_breakdown": markup_explain,
         "materials": round(material_cost, 2),
         "panel_labor": round(panel_labor, 2),
         "field_labor": round(field_labor, 2),
@@ -633,22 +648,33 @@ def _evaluate_alternative_options(i: ProjectIntake, calc: Dict[str, Any], altern
 
 
 def _provider_quick_links(i: ProjectIntake, requirements: List[ComponentRequirement]) -> Dict[str, Any]:
-    base_terms = sorted({r.item for r in requirements if r.must_have})[:10]
+    base_terms = sorted({r.item for r in requirements if r.must_have})[:12]
     city = f"{i.location_city} {i.location_province} {i.country}".strip()
-    search_terms = [
+    from urllib.parse import quote_plus
+    def enc(s: str) -> str: return quote_plus(s)
+    core_queries = [
         f"materiales eléctricos industriales {city}",
         f"variadores contactores breakers {city}",
         f"tableros eléctricos automatización {city}",
-    ] + [f"cotizar {t} {city}" for t in base_terms[:5]]
-    def enc(s: str) -> str:
-        from urllib.parse import quote_plus
-        return quote_plus(s)
+        f"distribuidor Schneider ABB Siemens Eaton {city}",
+        f"arrancadores suaves variadores industriales Ecuador",
+    ]
+    component_queries = [f"cotizar {t} {city}" for t in base_terms[:8]]
+    meli_queries = [f"{t} Ecuador" for t in base_terms[:8]]
+    supplier_sites = [
+        {"name": "Google Maps - proveedores eléctricos", "url": f"https://www.google.com/maps/search/{enc('materiales eléctricos industriales ' + city)}"},
+        {"name": "Google - distribuidores automatización", "url": f"https://www.google.com/search?q={enc('distribuidor automatización industrial ' + city)}"},
+        {"name": "MercadoLibre Ecuador", "url": f"https://listado.mercadolibre.com.ec/{enc('variador contactor breaker industrial')}"},
+    ]
     return {
         "city": city,
-        "strategy": "MarketPilot no adivina precios vivos: entrega enlaces de búsqueda/RFQ para confirmar proveedor, stock, modelo y vigencia.",
-        "google_searches": [{"label": q, "url": f"https://www.google.com/search?q={enc(q)}"} for q in search_terms],
-        "mercadolibre_searches": [{"label": t, "url": f"https://listado.mercadolibre.com.ec/{enc(t)}"} for t in base_terms[:8]],
-        "rfq_first": [r.component_id for r in requirements if r.category in {"Fuerza", "Instrumentación", "Seguridad"}][:8],
+        "strategy": "MarketVision combina Market Ledger, búsquedas web, RFQ y APIs. Sin credenciales reales no inventa precio vivo; deja rutas verificables para confirmar proveedor, stock, modelo y vigencia.",
+        "google_searches": [{"label": q, "url": f"https://www.google.com/search?q={enc(q)}"} for q in core_queries + component_queries],
+        "google_maps": supplier_sites[:1],
+        "supplier_sites": supplier_sites,
+        "mercadolibre_searches": [{"label": t, "url": f"https://listado.mercadolibre.com.ec/{enc(t)}"} for t in meli_queries],
+        "rfq_first": [r.component_id for r in requirements if r.category in {"Fuerza", "Instrumentación", "Seguridad"}][:10],
+        "api_note": "Para mercado vivo: activar MELI_ENABLED / GOOGLE_PLACES_ENABLED / WHATSAPP_ENABLED / SMTP_ENABLED. La búsqueda pública de MercadoLibre puede usarse como referencia, pero PriceGuard/FitLock siguen bloqueando si no calza.",
     }
 
 def _risks(i: ProjectIntake) -> List[Dict[str, Any]]:
@@ -827,7 +853,7 @@ def _engineer_review_board(i: ProjectIntake, release: Dict[str, Any], market_sum
         {"perfil": "Seguridad/supervisor", "lo_que_exigia": "No liberar construcción si hay riesgo crítico.", "respuesta_v10": "Construction gate separado de quote gate; aprobación humana obligatoria.", "estado": "feliz: no promete construcción automática"},
     ]
     return {
-        "veredicto": "La V15 OptionTrust Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
+        "veredicto": "La V16 MarketVision Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
         "quote_score": quote["score_percent"],
         "personas": personas,
         "regla_de_venta": "Vender ahorro de tiempo y expediente técnico-comercial trazable, no certificación automática.",
@@ -921,7 +947,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
     output_contract = _output_quality_contract(release, quote)
 
     pack = EngineeringPack(
-        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con OptionTrust + MathTrust + FitLock"},
+        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con MarketVision + OptionTrust + MathTrust + FitLock"},
         intake=i.model_dump(),
         executive_verdict={
             "headline": "Cotización industrial inteligente: menos datos, más expediente, cero certezas falsas.",
@@ -939,11 +965,12 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
             "summary": market_summary,
             "price_decisions": [d.model_dump() for d in decisions],
             "supplier_count": len(market_summary["suppliers_used"]),
-            "method": "PriceGuard 14 + OptionTrust + FitLock Pro: validación matemática por compatibilidad técnica, mediana/IQR, dispersión, profundidad de catálogo, fuente/stock/vigencia y RFQ. Sin componente compatible no existe precio cerrable.",
+            "method": "PriceGuard 16 + MarketVision + OptionTrust + FitLock Pro: validación matemática por compatibilidad técnica, mediana/IQR, dispersión, profundidad de catálogo, fuente/stock/vigencia y RFQ. Sin componente compatible no existe precio cerrable.",
             "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
             "priceguard_methodology": priceguard_methodology(),
             "architecture_lock": architecture,
             "provider_quick_links": provider_links,
+            "market_ledger": ledger_overview(decisions, i),
         },
         budget=budget,
         risks=_risks(i),

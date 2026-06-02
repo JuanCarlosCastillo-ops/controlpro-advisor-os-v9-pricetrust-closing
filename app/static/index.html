@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ControlPro Advisor OS V15 OptionTrust Pro</title>
+  <title>ControlPro Advisor OS V16 MarketVision Pro</title>
   <link rel="manifest" href="/static/manifest.json" />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
@@ -11,7 +11,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <img src="/static/assets/brand/controlpro_logo.svg" alt="ControlPro" class="logo" />
-      <p class="version">Advisor OS V15 · OptionTrust Pro</p>
+      <p class="version">Advisor OS V16 · MarketVision Pro</p>
       <nav>
         <a href="#dashboard" class="active">Panel central</a>
         <a href="#intake">Datos</a>
@@ -42,7 +42,7 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">Cotización industrial inteligente + expediente técnico + mercado</p>
-          <h1>ControlPro Advisor OS V15</h1>
+          <h1>ControlPro Advisor OS V16</h1>
           <p>Con pocos datos genera un expediente técnico-comercial revisable: solución, BOM, mercado, RFQ, presupuesto, PDF/Excel y compuertas de calidad.</p>
         </div>
         <div class="actions">
@@ -89,7 +89,7 @@
 
       <section id="pricetrust-dashboard" class="content-grid price-dashboard">
         <article class="panel">
-          <div class="panel-head"><div><h3>PriceGuard + MarketPilot Lock</h3><p>Separa catálogo piloto, mercado vivo, precio confirmado y RFQ; además verifica que solución recomendada, BOM y propuesta coincidan.</p></div><span class="badge complete">PriceGuard 14 + OptionTrust + FitLock</span></div>
+          <div class="panel-head"><div><h3>PriceGuard + MarketPilot Lock</h3><p>Separa catálogo piloto, mercado vivo, precio confirmado y RFQ; además verifica que solución recomendada, BOM y propuesta coincidan.</p></div><span class="badge complete">PriceGuard 16 + MarketVision + OptionTrust + FitLock</span></div>
           <div class="stat-grid" id="priceTrustCards"></div>
           <div id="priceTrustPolicy" class="notice small-notice"></div>
         </article>
@@ -213,7 +213,7 @@
         <article class="panel diagram-panel" id="control"><div class="panel-head"><div><h3>5. Ladder CAD-like</h3><p>Rungs numerados, contactos etiquetados, bobinas, cables preliminares y borneras.</p></div><span class="badge">Ladder</span></div><div class="diagram-slot" id="controlSvg"></div></article>
         <article class="panel diagram-panel" id="panel3d"><div class="panel-head"><div><h3>6. Layout de tablero CAD-like</h3><p>Backplate, riel DIN, canaleta, puerta, borneras y reserva. Exportable como SVG.</p></div><span class="badge">Preview</span></div><div class="diagram-slot" id="panelSvg"></div></article>
 
-        <article class="panel span-2" id="cadshop"><div class="panel-head"><div><h3>7. CAD / Taller</h3><p>Material intermedio para formalizar en CAD: borneras, cables, Draw.io y SVGs. La meta es que el humano revise, no redibuje desde cero.</p></div><span class="badge blue">CAD-like V15</span></div>
+        <article class="panel span-2" id="cadshop"><div class="panel-head"><div><h3>7. CAD / Taller</h3><p>Material intermedio para formalizar en CAD: borneras, cables, Draw.io y SVGs. La meta es que el humano revise, no redibuje desde cero.</p></div><span class="badge blue">CAD-like V16</span></div>
           <div class="cad-actions">
             <button id="singleSvgBtn" class="btn ghost">Exportar unifilar SVG</button>
             <button id="controlSvgBtn" class="btn ghost">Exportar ladder SVG</button>
@@ -230,7 +230,7 @@
         <article class="panel" id="solutions"><div class="panel-head"><div><h3>9. Soluciones comparadas</h3><p>El sistema compara alternativas, no impone una única respuesta.</p></div><span class="badge blue" id="recommendedBadge">Recomendado</span></div><div class="options-grid" id="optionsGrid"></div></article>
         <article class="panel span-2" id="bom"><div class="panel-head"><div><h3>10. BOM técnico</h3><p>Materiales normalizados: especificación, cantidad y chequeos críticos.</p></div><span class="badge">BOM</span></div><div class="table-wrap"><table><thead><tr><th>Categoría</th><th>Ítem</th><th>Cant.</th><th>Especificación</th><th>Chequeos</th></tr></thead><tbody id="bomRows"></tbody></table></div></article>
 
-        <article class="panel span-2" id="market"><div class="panel-head"><div><h3>11. PriceGuard + mercado y proveedores</h3><p>Semáforo de precios: verde usable, amarillo referencial, rojo bloqueado/RFQ. El sistema evita precios exagerados o sospechosamente bajos.</p></div><span class="badge complete">PriceGuard 14 + OptionTrust + FitLock</span></div><div class="market-summary" id="marketSummary"></div><div class="table-wrap"><table><thead><tr><th>Componente</th><th>Proveedor elegido</th><th>Precio y banda</th><th>Fuente</th><th>Semáforo</th><th>Acción requerida</th></tr></thead><tbody id="marketRows"></tbody></table></div><div class="provider-links" id="supplierQuickLinks"></div></article>
+        <article class="panel span-2" id="market"><div class="panel-head"><div><h3>11. PriceGuard + mercado y proveedores</h3><p>Semáforo de precios: verde usable, amarillo referencial, rojo bloqueado/RFQ. El sistema evita precios exagerados o sospechosamente bajos.</p></div><span class="badge complete">PriceGuard 16 + MarketVision + OptionTrust + FitLock</span></div><div class="market-summary" id="marketSummary"></div><div class="table-wrap"><table><thead><tr><th>Componente</th><th>Proveedor elegido</th><th>Precio y banda</th><th>Fuente</th><th>Semáforo</th><th>Acción requerida</th></tr></thead><tbody id="marketRows"></tbody></table></div><div class="provider-links" id="supplierQuickLinks"></div><div class="provider-links" id="marketLedgerBox"></div><div class="provider-links" id="liveMarketBox"><h4>Mercado vivo / APIs</h4><p>Genera primero. Luego puedes consultar publicaciones referenciales de MercadoLibre por componente crítico sin convertirlas en precio cerrado.</p><button class="btn ghost" id="liveMarketBtn" type="button">Buscar mercado vivo del primer RFQ</button><div id="liveMarketResults" class="link-grid"></div></div></article>
 
         <article class="panel span-2" id="api-activation"><div class="panel-head"><div><h3>Admin interno · Activación de APIs</h3><p>Solo para administradores del piloto: credenciales, proveedores y conectores reales. El cliente no necesita ver esta capa.</p></div><span class="badge warn">.env ready</span></div>
           <div class="api-layout">
