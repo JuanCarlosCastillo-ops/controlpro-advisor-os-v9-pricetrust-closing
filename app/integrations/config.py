@@ -67,7 +67,7 @@ def integration_status() -> Dict[str, Any]:
     configured = sum(1 for s in services if s["configured"])
     enabled = sum(1 for s in services if s["enabled"])
     return {
-        "release": "V13 FitLock Pro",
+        "release": "V14 MathTrust Pro",
         "configured_count": configured,
         "enabled_count": enabled,
         "services": services,
@@ -76,7 +76,7 @@ def integration_status() -> Dict[str, Any]:
 
 
 def env_template() -> str:
-    return """# ControlPro Advisor OS V13 - credenciales reales
+    return """# ControlPro Advisor OS V14 - credenciales reales
 # Copiar este archivo como .env y reemplazar valores.
 # Nunca subir .env a GitHub.
 

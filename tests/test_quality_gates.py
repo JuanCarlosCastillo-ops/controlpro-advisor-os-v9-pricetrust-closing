@@ -42,7 +42,7 @@ def test_output_contains_traceability_sections():
     assert data['review_board']['veredicto']
     assert data['cad_outputs']['wire_schedule']
     assert data['cad_outputs']['drawio_available'] is True
-    assert data['priceguard']['methodology']['name'] == 'PriceGuard 13 + FitLock'
+    assert data['priceguard']['methodology']['name'] == 'PriceGuard 14 + MathTrust + FitLock'
     assert data['premium_document_contract']['pdf']
 
 

@@ -1,4 +1,4 @@
-# PriceGuard 13 — metodología de precios confiables
+# PriceGuard 14 — metodología de precios confiables
 
 ControlPro no debe escoger el precio más barato ni fingir certeza. PriceGuard clasifica cada línea del BOM con semáforo:
 
@@ -24,6 +24,6 @@ Si un precio cae en rojo por fuera de banda, ControlPro no lo usa como definitiv
 Un precio no es 100% seguro hasta que exista proveedor confirmado, stock confirmado, modelo exacto, vigencia y forma de entrega. El software siempre debe mostrar el nivel de confianza.
 
 
-## FitLock V13
+## FitLock V14
 
 Esta versión bloquea componentes técnicamente incompatibles con HP, FLA, tensión y arquitectura antes de considerar un precio como usable.

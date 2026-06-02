@@ -24,6 +24,6 @@ Todo precio tiene fuente, vigencia, confianza, proveedor, stock y decisión. Si 
 Si falta información, el sistema debe decir “pendiente” o “requiere RFQ”, no inventar.
 
 
-## FitLock V13
+## FitLock V14
 
 Esta versión bloquea componentes técnicamente incompatibles con HP, FLA, tensión y arquitectura antes de considerar un precio como usable.

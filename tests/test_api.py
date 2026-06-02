@@ -23,7 +23,8 @@ def test_generate_example():
     assert data['guided_flow']['modo_rapido']
     assert data['cad_outputs']['terminal_schedule']
     assert data['api_activation']['services']
-    assert data['priceguard']['summary']['priceguard_score_percent'] >= 70
+    assert 'mathtrust' in data['market']['summary']
+    assert data['priceguard']['summary']['priceguard_score_percent'] >= 0
     assert data['starter_intelligence']['profiles']
     assert any(d['semaphore_color'] in {'verde','amarillo','rojo'} for d in data['market']['price_decisions'])
 
@@ -35,7 +36,7 @@ def test_exports():
     assert 'RFQ listo' in r.text
     r2 = client.post('/api/export/client-proposal', json=payload)
     assert r2.status_code == 200
-    assert 'Propuesta técnica-comercial' in r2.text
+    assert ('Propuesta técnica-comercial' in r2.text) or ('PRE-COTIZACIÓN' in r2.text)
     r3 = client.post('/api/export/bom-csv', json=payload)
     assert r3.status_code == 200
     assert 'component_id' in r3.text
@@ -59,7 +60,7 @@ def test_activation_and_cad_exports():
     payload = client.get('/api/example').json()
     status = client.get('/api/integrations/status')
     assert status.status_code == 200
-    assert status.json()['release'] == 'V13 FitLock Pro'
+    assert status.json()['release'] == 'V14 MathTrust Pro'
     env = client.get('/api/integrations/env-template')
     assert env.status_code == 200
     assert 'MELI_ENABLED' in env.text

@@ -1,4 +1,4 @@
-# ControlPro Advisor OS V13 FitLock Pro — Expediente técnico-comercial
+# ControlPro Advisor OS V14 MathTrust Pro — Expediente técnico-comercial
 
 **Proyecto:** Guinche de izaje — Cotización técnica premium
 **Cliente:** Cliente industrial
@@ -140,7 +140,7 @@ Gracias.
 - **Ambiente severo** (Media): Seleccionar gabinete y componentes según ambiente declarado: Interior industrial con polvo.
 
 ## Mesa simulada de ingenieros
-La V13 FitLock Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.
+La V14 MathTrust Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.
 - **Ingeniero junior**: feliz para piloto · Resuelto
 - **Técnico tablerista**: feliz para piloto · Resuelto
 - **Mantenimiento industrial**: feliz para piloto · Resuelto

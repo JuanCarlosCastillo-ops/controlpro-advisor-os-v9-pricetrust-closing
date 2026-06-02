@@ -1,6 +1,6 @@
 # Estándar de documentos premium
 
-Los PDFs y exportables de ControlPro V13 deben parecer preparados por una oficina técnica profesional:
+Los PDFs y exportables de ControlPro V14 deben parecer preparados por una oficina técnica profesional:
 
 1. Portada con proyecto, cliente, ubicación, motor y versión.
 2. Resumen ejecutivo.

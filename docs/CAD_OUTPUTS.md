@@ -1,6 +1,6 @@
-# ControlPro V13 — Salidas CAD-like y entregables de taller
+# ControlPro V14 — Salidas CAD-like y entregables de taller
 
-La versión V13 mejora los diagramas para que dejen de sentirse como dibujos conceptuales básicos. Ahora el motor entrega salidas intermedias más cercanas a ingeniería:
+La versión V14 mejora los diagramas para que dejen de sentirse como dibujos conceptuales básicos. Ahora el motor entrega salidas intermedias más cercanas a ingeniería:
 
 ## Hojas generadas
 

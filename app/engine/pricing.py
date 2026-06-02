@@ -538,6 +538,58 @@ def _all_offer_anomaly_audit(decisions: List[PriceDecision]) -> Dict[str, Any]:
         "policy": "El motor audita también ofertas no seleccionadas para no caer en precio barato falso ni precio inflado fuera de banda.",
     }
 
+
+
+def _mathtrust_model(decisions: List[PriceDecision]) -> Dict[str, Any]:
+    """Mathematical reliability layer for price decisions.
+
+    This is not a magic oracle. It quantifies when a price can be trusted and when it
+    must be treated as an order-of-magnitude placeholder. It combines:
+    - FitLock compatibility: HP/FLA/voltage/specification must fit.
+    - Robust market band: median/IQR instead of cheapest value.
+    - Source/stock/vigency weighting: confirmed supplier beats weak references.
+    - RFQ consensus rule: red items remain blocked until supplier confirmation.
+    """
+    n = max(1, len(decisions))
+    fit_blocked = sum(1 for d in decisions if any("FitLock" in str(f) for f in (d.anomaly_flags or [])))
+    red = sum(1 for d in decisions if d.semaphore_color == "rojo")
+    yellow = sum(1 for d in decisions if d.semaphore_color == "amarillo")
+    green = sum(1 for d in decisions if d.semaphore_color == "verde")
+    depth_scores = [min(1.0, float(d.market_band.get("sample_size") or 0) / 4.0) for d in decisions]
+    dispersion_scores = []
+    for d in decisions:
+        spread = float(d.market_band.get("spread_percent") or 0)
+        dispersion_scores.append(max(0.15, 1.0 - min(spread, 180.0) / 220.0))
+    priceguard_avg = sum(float(d.priceguard_score or 0) for d in decisions) / n
+    fit_score = 100.0 * (1.0 - fit_blocked / n)
+    depth_score = 100.0 * (sum(depth_scores) / n)
+    dispersion_score = 100.0 * (sum(dispersion_scores) / n)
+    source_score = 100.0 * (green + yellow * 0.55) / n
+    score = round(0.36 * fit_score + 0.26 * priceguard_avg + 0.16 * depth_score + 0.12 * dispersion_score + 0.10 * source_score, 1)
+    if fit_blocked:
+        verdict = "BLOQUEADO: FitLock tiene componentes sin ajuste técnico"
+    elif score >= 88 and red == 0:
+        verdict = "Fuerte para propuesta revisable"
+    elif score >= 72 and red <= 1:
+        verdict = "Revisable con RFQ selectivo"
+    else:
+        verdict = "Débil: solo borrador interno"
+    return {
+        "score_percent": score,
+        "verdict": verdict,
+        "fit_score_percent": round(fit_score, 1),
+        "priceguard_avg_percent": round(priceguard_avg, 1),
+        "catalog_depth_percent": round(depth_score, 1),
+        "dispersion_score_percent": round(dispersion_score, 1),
+        "source_score_percent": round(source_score, 1),
+        "fitlock_blocked_count": fit_blocked,
+        "green_count": green,
+        "yellow_count": yellow,
+        "red_count": red,
+        "formula": "MathTrust = 0.36*FitLock + 0.26*PriceGuard + 0.16*profundidad catálogo + 0.12*dispersión robusta + 0.10*fuente/stock",
+        "robust_policy": "No se usa el precio más barato: se usa mediana/IQR, pesos por fuente/stock/vigencia y bloqueo por compatibilidad. Si falta oferta compatible, el valor es solo orden de magnitud y debe ir a RFQ.",
+    }
+
 def summarize_market(decisions: List[PriceDecision]) -> Dict[str, Any]:
     total = sum(d.extended_cost for d in decisions)
     covered = sum(1 for d in decisions if d.selected_offer)
@@ -551,6 +603,7 @@ def summarize_market(decisions: List[PriceDecision]) -> Dict[str, Any]:
     suppliers = sorted({d.selected_offer.supplier_name for d in decisions if d.selected_offer})
     pg_score = round(sum(d.priceguard_score for d in decisions) / max(1, len(decisions)), 1)
     catalog_depth = round(sum(min(1, (d.market_band.get("sample_size") or 0) / 3) for d in decisions) / max(1, len(decisions)) * 100, 1)
+    mathtrust = _mathtrust_model(decisions)
     return {
         "materials_cost": round(total, 2),
         "items_with_price": covered,
@@ -575,6 +628,9 @@ def summarize_market(decisions: List[PriceDecision]) -> Dict[str, Any]:
         "referential_price_count": sum(1 for d in decisions if d.semaphore_color == "amarillo"),
         "blocked_price_count": sum(1 for d in decisions if d.semaphore_color == "rojo"),
         "priceguard_verdict": "BLOQUEADO POR FITLOCK" if fitlock_blocked else ("Fuerte para piloto" if pg_score >= 85 and red == 0 else ("Revisable con RFQ" if pg_score >= 70 else "Débil: no enviar sin confirmar")),
+        "mathtrust": mathtrust,
+        "mathtrust_score_percent": mathtrust["score_percent"],
+        "mathtrust_verdict": mathtrust["verdict"],
         "catalog_scope": "Catálogo piloto ampliado: fuerza, control, seguridad, VFD, soft starter, taller, cables y consumibles. No sustituye precios reales confirmados.",
         "confidence_policy": {
             "precio_confirmado": "Proveedor/stock/vigencia confirmados o fuente interna validada; se puede usar en propuesta revisable.",
@@ -618,7 +674,7 @@ def generate_rfq_message(requirements: Iterable[ComponentRequirement], decisions
 
 def priceguard_methodology() -> Dict[str, Any]:
     return {
-        "name": "PriceGuard 13 + FitLock",
+        "name": "PriceGuard 14 + MathTrust + FitLock",
         "goal": "Evitar cotizaciones débiles, precios exagerados, precios incompatibles, BOM incoherente con la arquitectura y falsas certezas antes de presupuestar trabajos de miles de dólares.",
         "inputs": ["catálogo interno", "fuente de precio", "stock", "vigencia", "proveedor", "banda de mercado", "ubicación", "historial/RFQ", "auditoría de outliers", "estado de credenciales API"],
         "semaforos": {

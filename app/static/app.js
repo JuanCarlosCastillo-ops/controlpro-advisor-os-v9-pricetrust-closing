@@ -51,7 +51,7 @@ function renderPack(pack){
   $('#verdict').textContent = pack.executive_verdict.verdict;
   $('#kpiCompleteness').textContent = pct(pack.statistics.engineering_completeness_percent);
   $('#kpiMarket').textContent = pct(pack.statistics.market_coverage_percent);
-  $('#kpiPrice').textContent = money(pack.budget.recommended_sell_price);
+  $('#kpiPrice').textContent = pack.budget?.commercial_blocked ? 'BLOQUEADO' : money(pack.budget.recommended_sell_price);
   $('#kpiRFQ').textContent = pack.statistics.rfq_required_items;
   $('#ringMini').textContent = pct(pack.statistics.engineering_completeness_percent);
   $('#statusText').textContent = pack.validation.status;
@@ -129,8 +129,9 @@ function renderPriceTrustDashboard(pack){
   const s = pack.market?.summary || {};
   const audit = s.candidate_offer_audit || {};
   const cards = [
+    ['MathTrust global', pct(s.mathtrust_score_percent || 0)],
     ['PriceGuard global', pct(s.priceguard_score_percent || 0)],
-    ['Veredicto', s.priceguard_verdict || 'Revisable'],
+    ['Veredicto', s.mathtrust_verdict || s.priceguard_verdict || 'Revisable'],
     ['Precios verdes', s.green_count || 0],
     ['Precios amarillos', s.yellow_count || 0],
     ['Precios rojos', s.red_count || 0],
@@ -151,7 +152,8 @@ function renderSavingsDashboard(pack){
     ['Tiempo manual típico', st.estimated_manual_quote_hours || '4–8 h'],
     ['Con ControlPro', st.estimated_controlpro_quote_hours || '35–75 min'],
     ['Ahorro estimado', st.time_saved_estimate || '2–6 h'],
-    ['Valor cotizado', money(b.recommended_sell_price || 0)],
+    ['Estado comercial', b.commercial_blocked ? 'BLOQUEADO' : 'Revisable'],
+    ['Valor/Rango', money(b.recommended_sell_price || 0)],
     ['Margen sugerido', money(b.margin || 0)],
     ['Entregables listos', st.deliverables_ready || 0],
   ];
@@ -188,7 +190,7 @@ function renderGuidedFlow(pack){
 function renderReviewBoard(pack){
   const board = pack.review_board || {};
   const personas = board.personas || [];
-  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V13 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
+  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V14 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
 }
 
 function renderCalculations(pack){

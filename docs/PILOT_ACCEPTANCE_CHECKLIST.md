@@ -1,4 +1,4 @@
-# Checklist de aceptación piloto — ControlPro V13
+# Checklist de aceptación piloto — ControlPro V14
 
 ## Objetivo
 
@@ -40,6 +40,6 @@ La app se vende cuando:
 - 3/10 la usan en un caso real de cotización.
 
 
-## FitLock V13
+## FitLock V14
 
 Esta versión bloquea componentes técnicamente incompatibles con HP, FLA, tensión y arquitectura antes de considerar un precio como usable.

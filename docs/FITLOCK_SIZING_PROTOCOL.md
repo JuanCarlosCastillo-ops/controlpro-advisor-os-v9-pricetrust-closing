@@ -1,4 +1,4 @@
-# FitLock / Sizing Lock — Protocolo V13
+# FitLock / Sizing Lock — Protocolo V14
 
 ControlPro no debe permitir que un precio parezca confiable si el componente no calza técnicamente.
 

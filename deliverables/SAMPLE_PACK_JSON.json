@@ -1,6 +1,6 @@
 {
   "meta": {
-    "product": "ControlPro Advisor OS V13 FitLock Pro",
+    "product": "ControlPro Advisor OS V14 MathTrust Pro",
     "version": "13.0-fitlock-pro",
     "generated_at": "2026-06-02T21:04:06.873959+00:00",
     "language": "es",
@@ -2346,7 +2346,7 @@
     "method": "PriceGuard 12 + MarketPilot Lock: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
     "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
     "priceguard_methodology": {
-      "name": "PriceGuard 13 + FitLock",
+      "name": "PriceGuard 14 + MathTrust + FitLock",
       "goal": "Evitar cotizaciones débiles, precios exagerados, precios incompatibles, BOM incoherente con la arquitectura y falsas certezas antes de presupuestar trabajos de miles de dólares.",
       "inputs": [
         "catálogo interno",
@@ -2960,7 +2960,7 @@
     }
   },
   "review_board": {
-    "veredicto": "La V13 FitLock Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
+    "veredicto": "La V14 MathTrust Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
     "quote_score": 95.2,
     "personas": [
       {
@@ -3180,7 +3180,7 @@
     "upgrade_rule": "Antes de fabricar, convertir a CAD final con marcas/modelos reales, numeración congelada, revisión de SCCR/kAIC y firma responsable."
   },
   "api_activation": {
-    "release": "V13 FitLock Pro",
+    "release": "V14 MathTrust Pro",
     "configured_count": 0,
     "enabled_count": 0,
     "services": [
@@ -3268,7 +3268,7 @@
   },
   "priceguard": {
     "methodology": {
-      "name": "PriceGuard 13 + FitLock",
+      "name": "PriceGuard 14 + MathTrust + FitLock",
       "goal": "Evitar cotizaciones débiles, precios exagerados, precios incompatibles, BOM incoherente con la arquitectura y falsas certezas antes de presupuestar trabajos de miles de dólares.",
       "inputs": [
         "catálogo interno",

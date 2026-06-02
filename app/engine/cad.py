@@ -55,7 +55,7 @@ def revision_block(title: str, project: str, rev: str = "A") -> str:
       <line x1='686' y1='714' x2='1152' y2='714' stroke='#9edcff' stroke-width='1'/>
       <line x1='894' y1='650' x2='894' y2='776' stroke='#9edcff' stroke-width='1'/>
       <line x1='1016' y1='714' x2='1016' y2='776' stroke='#9edcff' stroke-width='1'/>
-      <text x='700' y='672' fill='#55c8ff' font-size='17' font-weight='800'>CONTROLPRO ADVISOR OS V13</text>
+      <text x='700' y='672' fill='#55c8ff' font-size='17' font-weight='800'>CONTROLPRO ADVISOR OS V14</text>
       <text x='700' y='704' fill='#e6f7ff' font-size='14'>PLANO: {_e(title)}</text>
       <text x='700' y='736' fill='#e6f7ff' font-size='13'>PROYECTO: {_e(project)[:50]}</text>
       <text x='700' y='760' fill='#b8d6e8' font-size='12'>USO: COTIZACIÓN / REVISIÓN · NO LIBERA CONSTRUCCIÓN SIN APROBACIÓN</text>
@@ -389,13 +389,13 @@ def drawio_xml(i: ProjectIntake, calc: Dict[str, Any], architecture: Dict[str, A
         <mxCell id="e1" edge="1" parent="1" source="qf" target="km" style="endArrow=block;html=1;rounded=0"><mxGeometry relative="1" as="geometry" /></mxCell>
         <mxCell id="e2" edge="1" parent="1" source="km" target="ol" style="endArrow=block;html=1;rounded=0"><mxGeometry relative="1" as="geometry" /></mxCell>
         <mxCell id="e3" edge="1" parent="1" source="ol" target="m" style="endArrow=block;html=1;rounded=0"><mxGeometry relative="1" as="geometry" /></mxCell>'''
-    return f'''<mxfile host="ControlPro" modified="{datetime.now(timezone.utc).isoformat()}" agent="ControlPro Advisor OS V13" version="24.0.0">
+    return f'''<mxfile host="ControlPro" modified="{datetime.now(timezone.utc).isoformat()}" agent="ControlPro Advisor OS V14" version="24.0.0">
   <diagram id="controlpro-e001" name="E-001 Unifilar {xml_escape(arch)}">
     <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="title" value="ControlPro OS V13 - {project} - {xml_escape(arch)}" style="text;html=1;strokeColor=none;fillColor=none;fontSize=18;fontStyle=1" vertex="1" parent="1"><mxGeometry x="40" y="30" width="700" height="40" as="geometry" /></mxCell>
+        <mxCell id="title" value="ControlPro OS V14 - {project} - {xml_escape(arch)}" style="text;html=1;strokeColor=none;fillColor=none;fontSize=18;fontStyle=1" vertex="1" parent="1"><mxGeometry x="40" y="30" width="700" height="40" as="geometry" /></mxCell>
         {cells}
       </root>
     </mxGraphModel>

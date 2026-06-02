@@ -1,6 +1,6 @@
-# ControlPro V13 - MarketPilot Lock Protocol
+# ControlPro V14 - MarketPilot Lock Protocol
 
-La V13 corrige el error crítico detectado en la exportación: una arquitectura recomendada no puede generar un BOM de otra arquitectura.
+La V14 corrige el error crítico detectado en la exportación: una arquitectura recomendada no puede generar un BOM de otra arquitectura.
 
 ## Regla central
 

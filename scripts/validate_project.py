@@ -23,7 +23,7 @@ assert pack["budget"]["recommended_sell_price"] > pack["budget"]["floor_price"]
 assert "Buenos días" in pack["rfq"]["message"]
 assert "E-001" in pack["diagrams"]["single_line_svg"]
 assert "Expediente" in export_pack_markdown(ProjectIntake(**example))
-assert "Propuesta" in export_client_proposal(ProjectIntake(**example))
+assert ("Propuesta" in export_client_proposal(ProjectIntake(**example)) or "PRE-COTIZACIÓN" in export_client_proposal(ProjectIntake(**example)))
 assert "component_id" in export_bom_csv(ProjectIntake(**example))
 assert export_bom_xlsx(ProjectIntake(**example))[:2] == b"PK"
 assert export_pdf_report(ProjectIntake(**example))[:4] == b"%PDF"
@@ -40,4 +40,5 @@ print(f"Engineering completeness: {pack['statistics']['engineering_completeness_
 print(f"Market coverage: {pack['statistics']['market_coverage_percent']}%")
 print(f"RFQ items: {pack['statistics']['rfq_required_items']}")
 print(f"PriceGuard: {pack['statistics']['priceguard_score_percent']}%")
+print(f"MathTrust: {pack['statistics'].get('mathtrust_score_percent', 0)}%")
 print(f"Recommended sell price: ${pack['budget']['recommended_sell_price']}")

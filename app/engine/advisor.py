@@ -8,8 +8,8 @@ from .pricing import decide_prices, generate_rfq_message, summarize_market, load
 from .cad import single_line_cad_svg, control_ladder_cad_svg, panel_layout_cad_svg, terminal_schedule, wire_schedule, drawio_xml
 from app.integrations.config import integration_status
 
-VERSION = "13.0-fitlock-pro"
-PRODUCT = "ControlPro Advisor OS V13 FitLock Pro"
+VERSION = "14.0-mathtrust-pro"
+PRODUCT = "ControlPro Advisor OS V14 MathTrust Pro"
 
 
 def example_intake() -> Dict[str, Any]:
@@ -244,7 +244,7 @@ def _starter_by_id(alternatives: List[Dict[str, Any]], starter_id: str) -> Dict[
 def _select_architecture(i: ProjectIntake, alternatives: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Selecciona arquitectura antes de armar BOM.
 
-    Regla crítica V13: la solución recomendada, el BOM y la propuesta al cliente
+    Regla crítica V14: la solución recomendada, el BOM y la propuesta al cliente
     deben hablar el mismo idioma. Si el caso es izaje, estrella-triángulo no se
     recomienda por defecto porque puede requerir torque y control fino.
     """
@@ -494,6 +494,9 @@ def _build_budget(i: ProjectIntake, material_cost: float, market_summary: Dict[s
     recommended = subtotal + contingency + margin
     floor = subtotal + contingency + ((subtotal + contingency) * 0.12)
     premium = recommended * 1.22
+    fitlock_blocked = int(market_summary.get("fitlock_blocked_count", 0) or 0)
+    mathtrust = market_summary.get("mathtrust", {}) or {}
+    commercial_blocked = bool(fitlock_blocked or market_summary.get("red_count", 0) or float(market_summary.get("mathtrust_score_percent", 0) or 0) < 72)
     return {
         "materials": round(material_cost, 2),
         "panel_labor": round(panel_labor, 2),
@@ -505,9 +508,14 @@ def _build_budget(i: ProjectIntake, material_cost: float, market_summary: Dict[s
         "floor_price": round(floor, 2),
         "recommended_sell_price": round(recommended, 2),
         "premium_price": round(premium, 2),
-        "price_confidence": "bloqueada por FitLock" if market_summary.get("fitlock_blocked_count", 0) else ("alta" if market_summary.get("priceguard_score_percent", 0) >= 82 and market_summary.get("red_count", 0) == 0 else ("media-alta" if market_summary.get("priceguard_score_percent", 0) >= 70 and market_summary.get("red_count", 0) <= 2 else "media/baja")),
-        "priceguard_status": f"PriceGuard {market_summary.get('priceguard_score_percent', 0)}% · FitLock bloqueados {market_summary.get('fitlock_blocked_count',0)} · verde {market_summary.get('green_count',0)} · amarillo {market_summary.get('yellow_count',0)} · rojo {market_summary.get('red_count',0)}",
-        "commercial_note": "Cotización bloqueada por FitLock: enviar RFQ técnico y confirmar componentes compatibles." if market_summary.get("fitlock_blocked_count",0) else "Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia.",
+        "price_confidence": "bloqueada por FitLock/MathTrust" if commercial_blocked else ("alta" if market_summary.get("priceguard_score_percent", 0) >= 82 and market_summary.get("red_count", 0) == 0 else ("media-alta" if market_summary.get("priceguard_score_percent", 0) >= 70 and market_summary.get("red_count", 0) <= 2 else "media/baja")),
+        "priceguard_status": f"PriceGuard {market_summary.get('priceguard_score_percent', 0)}% · MathTrust {market_summary.get('mathtrust_score_percent',0)}% · FitLock bloqueados {market_summary.get('fitlock_blocked_count',0)} · verde {market_summary.get('green_count',0)} · amarillo {market_summary.get('yellow_count',0)} · rojo {market_summary.get('red_count',0)}",
+        "commercial_blocked": commercial_blocked,
+        "commercial_release_status": "BLOQUEADA: solo pre-cotización interna" if commercial_blocked else "Lista para propuesta revisable",
+        "range_label": "Rango preliminar no confirmado" if commercial_blocked else "Precio recomendado revisable",
+        "mathtrust_score_percent": market_summary.get("mathtrust_score_percent", 0),
+        "mathtrust_verdict": market_summary.get("mathtrust_verdict", ""),
+        "commercial_note": "Pre-cotización bloqueada por FitLock/MathTrust: no enviar como oferta cerrada; solicitar RFQ técnico y confirmar componentes compatibles." if commercial_blocked else "Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia.",
     }
 
 
@@ -630,7 +638,8 @@ def _release_gates(i: ProjectIntake, quality: Dict[str, Any], consistency: Dict[
 
 
 def _quote_readiness(quality: Dict[str, Any], consistency: Dict[str, Any], market_summary: Dict[str, Any], release: Dict[str, Any]) -> Dict[str, Any]:
-    score = round(quality["score_percent"] * 0.25 + consistency["score_percent"] * 0.24 + float(market_summary["coverage_percent"]) * 0.14 + float(market_summary.get("priceguard_score_percent", 0)) * 0.22 + (100 if release["quote_ready"] else 55) * 0.15, 1)
+    mathtrust = float(market_summary.get("mathtrust_score_percent", market_summary.get("priceguard_score_percent", 0)) or 0)
+    score = round(quality["score_percent"] * 0.22 + consistency["score_percent"] * 0.22 + float(market_summary["coverage_percent"]) * 0.10 + float(market_summary.get("priceguard_score_percent", 0)) * 0.16 + mathtrust * 0.18 + (100 if release["quote_ready"] else 45) * 0.12, 1)
     if score >= 92 and release["quote_ready"]:
         status = "Alta: lista para propuesta piloto revisable"
     elif score >= 78:
@@ -640,7 +649,7 @@ def _quote_readiness(quality: Dict[str, Any], consistency: Dict[str, Any], marke
     return {
         "score_percent": score,
         "status": status,
-        "seller_message": "Ahorra tiempo porque arma el 80–90% del expediente; el humano valida, no reconstruye.",
+        "seller_message": "Ahorra tiempo porque arma el expediente; el humano valida. Si MathTrust/FitLock bloquea, la salida es pre-cotización interna, no oferta cerrada.",
         "do_not_send_if": [g["name"] for g in release["gates"] if not g["passed"] and g["name"] in {"Datos críticos", "Mercado/precio", "Coherencia técnica", "FitLock / dimensionamiento"}],
     }
 
@@ -686,7 +695,7 @@ def _engineer_review_board(i: ProjectIntake, release: Dict[str, Any], market_sum
         {"perfil": "Seguridad/supervisor", "lo_que_exigia": "No liberar construcción si hay riesgo crítico.", "respuesta_v10": "Construction gate separado de quote gate; aprobación humana obligatoria.", "estado": "feliz: no promete construcción automática"},
     ]
     return {
-        "veredicto": "La V13 FitLock Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
+        "veredicto": "La V14 MathTrust Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
         "quote_score": quote["score_percent"],
         "personas": personas,
         "regla_de_venta": "Vender ahorro de tiempo y expediente técnico-comercial trazable, no certificación automática.",
@@ -796,7 +805,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
             "summary": market_summary,
             "price_decisions": [d.model_dump() for d in decisions],
             "supplier_count": len(market_summary["suppliers_used"]),
-            "method": "PriceGuard 13 + FitLock Pro: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
+            "method": "PriceGuard 14 + MathTrust + FitLock Pro: validación matemática por compatibilidad técnica, mediana/IQR, dispersión, profundidad de catálogo, fuente/stock/vigencia y RFQ. Sin componente compatible no existe precio cerrable.",
             "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
             "priceguard_methodology": priceguard_methodology(),
             "architecture_lock": architecture,
@@ -828,6 +837,9 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
             "priceguard_yellow": market_summary.get("yellow_count", 0),
             "priceguard_red": market_summary.get("red_count", 0),
             "priceguard_verdict": market_summary.get("priceguard_verdict", "Revisable"),
+            "mathtrust_score_percent": market_summary.get("mathtrust_score_percent", 0),
+            "mathtrust_verdict": market_summary.get("mathtrust_verdict", ""),
+            "mathtrust_model": market_summary.get("mathtrust", {}),
             "locked_price_count": market_summary.get("locked_price_count", 0),
             "referential_price_count": market_summary.get("referential_price_count", 0),
             "blocked_price_count": market_summary.get("blocked_price_count", 0),
@@ -989,13 +1001,26 @@ def export_pack_markdown(payload: Dict[str, Any] | ProjectIntake) -> str:
 def export_client_proposal(payload: Dict[str, Any] | ProjectIntake) -> str:
     pack = generate_engineering_pack(payload).model_dump()
     b = pack['budget']
+    blocked = bool(b.get('commercial_blocked') or not pack.get('release_gates', {}).get('quote_ready'))
     lines = [
-        "# Propuesta técnica-comercial",
+        "# Propuesta técnica-comercial" if not blocked else "# PRE-COTIZACIÓN INTERNA — NO ENVIAR COMO OFERTA CERRADA",
         "",
         f"**Proyecto:** {pack['intake']['project_name']}",
         f"**Cliente:** {pack['intake']['client_name']}",
         f"**Ubicación:** {pack['intake']['location_city']}, {pack['intake']['location_province']}",
         "",
+    ]
+    if blocked:
+        lines += [
+            "## Estado comercial",
+            "**Bloqueada por MathTrust/FitLock.** Esta salida sirve para revisión interna y solicitud de RFQ, no para enviarse como oferta cerrada al cliente.",
+            f"- MathTrust: {pack['market']['summary'].get('mathtrust_score_percent', 0)}% · {pack['market']['summary'].get('mathtrust_verdict', '')}",
+            f"- PriceGuard: {pack['market']['summary'].get('priceguard_score_percent', 0)}% · {pack['market']['summary'].get('priceguard_verdict', '')}",
+            f"- FitLock bloqueados: {pack['market']['summary'].get('fitlock_blocked_count', 0)}",
+            f"- RFQ requeridos: {pack['market']['summary'].get('needs_rfq_count', 0)}",
+            "",
+        ]
+    lines += [
         "## Alcance propuesto",
         "Diseño, selección preliminar de componentes, armado de expediente técnico, lista de materiales, presupuesto, checklist de pruebas y recomendaciones de instalación para sistema de control industrial.",
         "",
@@ -1003,10 +1028,30 @@ def export_client_proposal(payload: Dict[str, Any] | ProjectIntake) -> str:
         f"{pack['recommended_option']['name']}: {pack['recommended_option']['fit']}.",
         f"Criterio de arquitectura: {pack.get('starter_intelligence', {}).get('architecture_lock', {}).get('architecture_reason', '')}",
         "",
-        "## Valores comerciales",
-        f"- Precio piso técnico: ${b['floor_price']:,.2f}",
-        f"- Precio recomendado: ${b['recommended_sell_price']:,.2f}",
-        f"- Opción premium: ${b['premium_price']:,.2f}",
+    ]
+    if blocked:
+        lines += [
+            "## Rango preliminar no confirmado",
+            f"- Orden de magnitud piso: ${b['floor_price']:,.2f}",
+            f"- Orden de magnitud medio: ${b['recommended_sell_price']:,.2f}",
+            f"- Orden de magnitud alto: ${b['premium_price']:,.2f}",
+            "",
+            "**Advertencia:** estos valores NO son precio cerrado. Los componentes críticos deben confirmarse por proveedor con modelo, corriente/HP, tensión, stock, vigencia y compatibilidad técnica.",
+            "",
+            "## Ítems que bloquean oferta cerrada",
+        ]
+        for d in pack['market']['price_decisions']:
+            if d.get('semaphore_color') == 'rojo' or any('FitLock' in str(x) for x in d.get('anomaly_flags', [])):
+                lines.append(f"- **{d['component_id']}**: {d.get('action_required','Enviar RFQ')}")
+        lines += ["", "## Próxima acción", "Enviar RFQ técnico, actualizar precios confirmados y regenerar propuesta."]
+    else:
+        lines += [
+            "## Valores comerciales",
+            f"- Precio piso técnico: ${b['floor_price']:,.2f}",
+            f"- Precio recomendado: ${b['recommended_sell_price']:,.2f}",
+            f"- Opción premium: ${b['premium_price']:,.2f}",
+        ]
+    lines += [
         "",
         "## Vigencia y condiciones",
         "Precio sujeto a confirmación de stock, proveedor, placa real de motor/freno, condiciones de campo y aprobación técnica final.",
