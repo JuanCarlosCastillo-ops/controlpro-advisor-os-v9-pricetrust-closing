@@ -70,6 +70,7 @@ function renderPack(pack){
   renderOptions(pack);
   renderBOM(pack);
   renderMarket(pack);
+  renderSupplierQuickLinks(pack);
   renderBudget(pack);
   renderStats(pack);
   renderValidation(pack);
@@ -129,7 +130,7 @@ function renderPriceTrustDashboard(pack){
   const s = pack.market?.summary || {};
   const audit = s.candidate_offer_audit || {};
   const cards = [
-    ['MathTrust global', pct(s.mathtrust_score_percent || 0)],
+    ['OptionTrust global', pct(s.mathtrust_score_percent || 0)],
     ['PriceGuard global', pct(s.priceguard_score_percent || 0)],
     ['Veredicto', s.mathtrust_verdict || s.priceguard_verdict || 'Revisable'],
     ['Precios verdes', s.green_count || 0],
@@ -142,6 +143,15 @@ function renderPriceTrustDashboard(pack){
   ];
   setHtmlSafe('#priceTrustCards', cards.map(([a,b])=>`<div><small>${a}</small><b>${b}</b></div>`).join(''));
   setHtmlSafe('#priceTrustPolicy', `<b>Regla de verdad:</b> ${s.truth_status || 'Precio cerrado solo con proveedor confirmado.'}<br><b>Alcance:</b> ${s.catalog_scope || 'Catálogo piloto + RFQ.'}`);
+}
+
+
+function renderSupplierQuickLinks(pack){
+  const links = pack.market?.provider_quick_links || {};
+  const el = $('#supplierQuickLinks'); if(!el) return;
+  const google = (links.google_searches || []).slice(0,4).map(x=>`<a target="_blank" rel="noreferrer" href="${x.url}">${x.label}</a>`).join('');
+  const meli = (links.mercadolibre_searches || []).slice(0,4).map(x=>`<a target="_blank" rel="noreferrer" href="${x.url}">${x.label}</a>`).join('');
+  el.innerHTML = `<h4>Búsqueda rápida de proveedores — ${links.city || ''}</h4><p>${links.strategy || ''}</p><div class="link-grid">${google}${meli}</div>`;
 }
 
 function renderSavingsDashboard(pack){
@@ -190,7 +200,7 @@ function renderGuidedFlow(pack){
 function renderReviewBoard(pack){
   const board = pack.review_board || {};
   const personas = board.personas || [];
-  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V14 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
+  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V15 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
 }
 
 function renderCalculations(pack){
@@ -209,16 +219,16 @@ function renderCalculations(pack){
 
 function renderOptions(pack){
   $('#recommendedBadge').textContent = 'Recomendado: ' + pack.recommended_option.name;
-  $('#optionsGrid').innerHTML = pack.alternatives.map(o=>`
-    <div class="option-card">
-      <h4>${o.name}</h4><p>${o.fit}</p>
+  const options = pack.starter_intelligence?.option_matrix || pack.alternatives || [];
+  $('#optionsGrid').innerHTML = options.map(o=>`
+    <div class="option-card ${String(o.status||'').toLowerCase().includes('recomendada')?'recommended':''}">
+      <h4>${o.name}</h4><span class="option-status">${o.status || o.initial_cost || 'Alternativa'}</span><p>${o.fit || ''}</p>
+      <div class="option-price"><b>${o.recommended_sell_price ? money(o.recommended_sell_price) : (o.initial_cost || '')}</b><small>MathTrust ${o.mathtrust ?? o.control_quality ?? 0}% · RFQ ${o.rfq_required ?? 0} · FitLock ${o.fitlock_blocked ?? 0}</small></div>
       <small><b>Cómo funciona:</b> ${o.how_it_works || 'Solución de arranque/control.'}</small>
-      <small><b>Cuándo es mejor:</b> ${o.better_when || o.sell_when}</small>
-      <small><b>Impacto en precio:</b> ${o.price_impact || o.initial_cost}</small>
-      <div class="bar"><span style="width:${o.control_quality}%"></span></div><small>Calidad de control ${o.control_quality}%</small>
-      <div class="bar"><span style="width:${o.safety_depth}%"></span></div><small>Profundidad de seguridad ${o.safety_depth}%</small>
-      <div class="bar"><span style="width:${100-(o.complexity||50)}%"></span></div><small>Facilidad de implementación ${100-(o.complexity||50)}%</small>
-      <p><b>Riesgo:</b> ${o.risk}</p><p><b>Vender cuando:</b> ${o.sell_when}</p>
+      <small><b>Cuándo es mejor:</b> ${o.better_when || o.sell_when || ''}</small>
+      <div class="bar"><span style="width:${o.control_quality||0}%"></span></div><small>Calidad de control ${o.control_quality||0}%</small>
+      <div class="bar"><span style="width:${o.safety_depth||0}%"></span></div><small>Profundidad de seguridad ${o.safety_depth||0}%</small>
+      <p><b>Riesgo:</b> ${o.risk || o.note || ''}</p><p><b>Vender cuando:</b> ${o.sell_when || ''}</p>
     </div>`).join('');
 }
 

@@ -57,6 +57,17 @@ def _extract_kva_values(text: str) -> list[float]:
     return [float(m.group(1)) for m in re.finditer(r"(\d+(?:\.\d+)?)\s*kVA\b", text or "", flags=re.I)]
 
 
+
+
+def _extract_voltage_values(text: str) -> list[float]:
+    return [float(m.group(1)) for m in re.finditer(r"(\d+(?:\.\d+)?)\s*V\b", text or "", flags=re.I)]
+
+
+def _extract_awg(text: str) -> int | None:
+    m = re.search(r"#\s*(\d+)\s*AWG", text or "", flags=re.I)
+    return int(m.group(1)) if m else None
+
+
 def _extract_va_requirement(text: str) -> float | None:
     m = re.search(r"(\d+(?:\.\d+)?)\s*VA\b", text or "", flags=re.I)
     return float(m.group(1)) if m else None
@@ -164,6 +175,23 @@ def _fitlock_offer(req: ComponentRequirement, offer: SupplierOffer, intake: Proj
             flags.append(f"FitLock: transformador {offer_kva:g} kVA menor que {req_va:g} VA requeridos")
         elif req_va and not offer_kva:
             flags.append("FitLock: transformador sin kVA verificable")
+
+    # Voltage compatibility for critical power electronics.
+    if req.component_id in {"vfd", "soft_starter", "line_reactor", "mccb_main", "contactor_fwd", "contactor_rev", "main_contactor", "bypass_contactor"}:
+        vvals = _extract_voltage_values(blob)
+        if vvals:
+            # Allow 460/480 class for 440V, but do not accept 460V equipment as confirmed for 220V jobs.
+            max_v = max(vvals)
+            if intake.voltage <= 240 and max_v > 300:
+                flags.append(f"FitLock: oferta clase {max_v:g} V no corresponde a proyecto {intake.voltage:g} V")
+            elif intake.voltage >= 380 and max_v < 300:
+                flags.append(f"FitLock: oferta clase {max_v:g} V menor que proyecto {intake.voltage:g} V")
+
+    if req.component_id == "power_cable":
+        req_awg = _extract_awg(req.spec)
+        offer_awg = _extract_awg(blob)
+        if req_awg and offer_awg and req_awg != offer_awg:
+            flags.append(f"FitLock: cable ofertado #{offer_awg} AWG no coincide con cálculo preliminar #{req_awg} AWG")
 
     if req.component_id == "cabinet" and hp_required >= 75:
         # The pilot catalog cabinet is 600x400; large VFD jobs must go to RFQ/layout.
@@ -551,7 +579,7 @@ def _mathtrust_model(decisions: List[PriceDecision]) -> Dict[str, Any]:
     - RFQ consensus rule: red items remain blocked until supplier confirmation.
     """
     n = max(1, len(decisions))
-    fit_blocked = sum(1 for d in decisions if any("FitLock" in str(f) for f in (d.anomaly_flags or [])))
+    fit_blocked = sum(1 for d in decisions if d.semaphore_color == "rojo" and any("FitLock" in str(f) for f in (d.anomaly_flags or [])))
     red = sum(1 for d in decisions if d.semaphore_color == "rojo")
     yellow = sum(1 for d in decisions if d.semaphore_color == "amarillo")
     green = sum(1 for d in decisions if d.semaphore_color == "verde")
@@ -599,7 +627,7 @@ def summarize_market(decisions: List[PriceDecision]) -> Dict[str, Any]:
     high_conf = sum(1 for d in decisions if d.confidence_label in {"alta", "media-alta"})
     quote_needed = [d for d in decisions if d.semaphore_color == "rojo" or not d.selected_offer or (d.selected_offer and d.selected_offer.stock_status != "available") or d.confidence_label == "baja"]
     outliers = [d for d in decisions if d.anomaly_flags]
-    fitlock_blocked = [d for d in decisions if any("FitLock" in f for f in (d.anomaly_flags or []))]
+    fitlock_blocked = [d for d in decisions if d.semaphore_color == "rojo" and any("FitLock" in f for f in (d.anomaly_flags or []))]
     suppliers = sorted({d.selected_offer.supplier_name for d in decisions if d.selected_offer})
     pg_score = round(sum(d.priceguard_score for d in decisions) / max(1, len(decisions)), 1)
     catalog_depth = round(sum(min(1, (d.market_band.get("sample_size") or 0) / 3) for d in decisions) / max(1, len(decisions)) * 100, 1)
@@ -674,7 +702,7 @@ def generate_rfq_message(requirements: Iterable[ComponentRequirement], decisions
 
 def priceguard_methodology() -> Dict[str, Any]:
     return {
-        "name": "PriceGuard 14 + MathTrust + FitLock",
+        "name": "PriceGuard 15 + OptionTrust + MathTrust + FitLock",
         "goal": "Evitar cotizaciones débiles, precios exagerados, precios incompatibles, BOM incoherente con la arquitectura y falsas certezas antes de presupuestar trabajos de miles de dólares.",
         "inputs": ["catálogo interno", "fuente de precio", "stock", "vigencia", "proveedor", "banda de mercado", "ubicación", "historial/RFQ", "auditoría de outliers", "estado de credenciales API"],
         "semaforos": {

@@ -8,8 +8,8 @@ from .pricing import decide_prices, generate_rfq_message, summarize_market, load
 from .cad import single_line_cad_svg, control_ladder_cad_svg, panel_layout_cad_svg, terminal_schedule, wire_schedule, drawio_xml
 from app.integrations.config import integration_status
 
-VERSION = "14.0-mathtrust-pro"
-PRODUCT = "ControlPro Advisor OS V14 MathTrust Pro"
+VERSION = "15.0-optiontrust-pro"
+PRODUCT = "ControlPro Advisor OS V15 OptionTrust Pro"
 
 
 def example_intake() -> Dict[str, Any]:
@@ -62,19 +62,34 @@ def _voltage_drop_percent(current: float, voltage: float, distance_m: float, pha
 
 
 def _machine_type(i: ProjectIntake) -> str:
-    text = f"{i.application} {i.load_type} {i.project_name} {i.user_notes}".lower()
-    if any(w in text for w in ["guinche", "winche", "hoist", "izaje", "elevador", "polipasto"]):
-        return "hoist"
-    if any(w in text for w in ["compresor", "compressor", "aire comprimido"]):
+    primary = f"{i.application} {i.load_type} {i.project_name}".lower()
+    notes = f"{i.user_notes}".lower()
+    def has(text: str, words: list[str]) -> bool:
+        return any(w in text for w in words)
+    # La identidad de máquina se toma primero de campos estructurados. Las notas
+    # no deben contaminar un caso nuevo si el usuario cargó una demo anterior.
+    if has(primary, ["compresor", "compressor", "aire comprimido"]):
         return "compressor"
-    if any(w in text for w in ["bomba", "pump", "sumergible", "centrífuga", "centrifuga"]):
+    if has(primary, ["bomba", "pump", "sumergible", "centrífuga", "centrifuga"]):
         return "pump"
-    if any(w in text for w in ["banda", "transportadora", "conveyor", "cinta"]):
+    if has(primary, ["banda", "transportadora", "conveyor", "cinta"]):
         return "conveyor"
-    if any(w in text for w in ["ventilador", "fan", "extractor"]):
+    if has(primary, ["guinche", "winche", "hoist", "izaje", "elevador", "polipasto"]):
+        return "hoist"
+    if has(primary, ["ventilador", "fan", "extractor"]):
+        return "fan"
+    # Solo si los campos principales no alcanzan, se permite que las notas ayuden.
+    if has(notes, ["compresor", "compressor", "aire comprimido"]):
+        return "compressor"
+    if has(notes, ["bomba", "pump", "sumergible", "centrífuga", "centrifuga"]):
+        return "pump"
+    if has(notes, ["banda", "transportadora", "conveyor", "cinta"]):
+        return "conveyor"
+    if has(notes, ["guinche", "winche", "hoist", "izaje", "elevador", "polipasto"]):
+        return "hoist"
+    if has(notes, ["ventilador", "fan", "extractor"]):
         return "fan"
     return "general_motor"
-
 
 def _machine_context(i: ProjectIntake) -> Dict[str, Any]:
     mt = _machine_type(i)
@@ -242,65 +257,91 @@ def _starter_by_id(alternatives: List[Dict[str, Any]], starter_id: str) -> Dict[
 
 
 def _select_architecture(i: ProjectIntake, alternatives: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Selecciona arquitectura antes de armar BOM.
+    """Selecciona arquitectura con OptionTrust.
 
-    Regla crítica V14: la solución recomendada, el BOM y la propuesta al cliente
-    deben hablar el mismo idioma. Si el caso es izaje, estrella-triángulo no se
-    recomienda por defecto porque puede requerir torque y control fino.
+    V15 evita el sesgo de recomendar siempre VFD. Primero entiende máquina,
+    objetivo comercial/técnico y presupuesto; luego escoge una recomendación
+    principal y mantiene las demás como alternativas cotizadas.
     """
-    text = f"{i.budget_profile} {i.user_notes} {i.application} {i.load_type} {i.preferred_quality}".lower()
-    hoist = _is_hoist(i)
+    mt = _machine_type(i)
+    text = f"{i.budget_profile} {getattr(i, 'control_goal', '')} {i.user_notes} {i.application} {i.load_type} {i.preferred_quality} {getattr(i, 'preferred_starter', '')}".lower()
+    preferred = (getattr(i, 'preferred_starter', None) or "auto").lower().strip()
+    explicit = {"dol_basic", "dol_reversing", "star_delta", "soft_starter", "vfd_smart", "plc_hmi_control"}
     explicit_star = any(w in text for w in ["estrella", "triangulo", "triángulo", "star-delta", "star delta"])
-    explicit_soft = any(w in text for w in ["soft", "suave", "arrancador suave"])
-    explicit_vfd = any(w in text for w in ["variador", "vfd", "frecuencia", "premium", "inteligente"])
-    explicit_plc = any(w in text for w in ["plc", "hmi", "scada"])
-    economical = any(w in text for w in ["econ", "barato", "mínimo", "minimo"])
-
+    explicit_soft = any(w in text for w in ["soft", "suave", "arrancador suave", "menos golpe"])
+    negated_variable = any(w in text for w in ["sin presión constante", "sin presion constante", "sin velocidad variable", "sin necesidad de velocidad variable", "no requiere presión", "no requiere presion", "no necesita variador", "sin variador", "sin control de caudal"])
+    explicit_vfd = (not negated_variable) and any(w in text for w in ["variador", "vfd", "frecuencia", "presión constante", "presion constante", "caudal", "ahorro", "velocidad variable"])
+    explicit_plc = any(w in text for w in ["plc", "hmi", "scada", "trazabilidad"])
+    economical = any(w in text for w in ["econ", "barato", "mínimo", "minimo", "costo bajo"])
+    premium = any(w in text for w in ["premium", "inteligente", "diagnóstico", "diagnostico", "alta confiabilidad"])
+    pressure_or_flow = (not negated_variable) and (bool(getattr(i, 'pressure_control_required', False)) or any(w in text for w in ["presión constante", "presion constante", "control de presión", "control de presion", "control de caudal", "caudal variable"]))
+    many_starts = i.starts_per_hour >= 20
+    high_hp = i.motor_power_hp >= 75
     reason: List[str] = []
     warnings: List[str] = []
 
-    if hoist:
-        reason.append("Aplicación de izaje detectada: carga suspendida, inversión, freno y finales de carrera elevan el riesgo.")
+    if preferred in explicit and preferred != "auto":
+        arch = preferred
+        reason.append(f"Arquitectura solicitada por el usuario: {preferred}.")
+    elif explicit_plc:
+        arch = "plc_hmi_control"; reason.append("Se pidió PLC/HMI, diagnóstico o trazabilidad avanzada.")
+    elif mt == "hoist":
+        reason.append("Guinche/izaje: carga suspendida, freno, finales y E-Stop elevan el riesgo.")
+        if economical and i.starts_per_hour < 12 and not explicit_vfd and not premium:
+            arch = "dol_reversing"; reason.append("Perfil económico y pocas maniobras: inversión por contactores es alternativa principal, con seguridad obligatoria.")
+        elif explicit_soft and not explicit_vfd:
+            arch = "soft_starter"; reason.append("Se pidió arranque suave; se mantiene control de freno y enclavamientos como puntos críticos.")
+        else:
+            arch = "vfd_smart"; reason.append("Uso profesional/premium o muchas maniobras: VFD mejora rampa, diagnóstico y control mecánico.")
         if explicit_star:
-            warnings.append("Estrella-triángulo no queda como recomendación principal para este guinche salvo validación explícita: motor de 6 terminales, carga liviana al arranque y torque suficiente.")
-        if explicit_soft and not explicit_vfd:
-            arch = "soft_starter"
-            reason.append("Se pidió arranque suave; se trata como opción intermedia, pero no reemplaza control de freno ni seguridad de izaje.")
-        elif economical and i.starts_per_hour < 12 and not explicit_vfd:
-            arch = "dol_reversing"
-            reason.append("Perfil económico y baja frecuencia: inversión con contactores puede ser cotizable, manteniendo freno/enclavamientos/finales.")
+            warnings.append("Estrella-triángulo no se recomienda por defecto para izaje salvo validación explícita de torque, 6 terminales y secuencia de freno.")
+    elif mt == "pump":
+        reason.append("Bomba: la decisión depende de presión/caudal, ahorro energético, golpe de ariete y presupuesto.")
+        if pressure_or_flow or explicit_vfd or premium:
+            arch = "vfd_smart"; reason.append("Se requiere o conviene control de presión/caudal/ahorro: VFD se vuelve recomendación principal.")
+        elif explicit_soft or many_starts:
+            arch = "soft_starter"; reason.append("Sin control variable declarado, pero con arranques/golpe: soft starter reduce estrés con menor costo que VFD.")
+        elif economical and i.motor_power_hp <= 15:
+            arch = "dol_basic"; reason.append("Bomba pequeña y objetivo económico: DOL puede ser opción principal si la red lo soporta.")
         else:
-            arch = "vfd_smart"
-            reason.append("Para guinche profesional/premium o muchas maniobras, VFD + control inteligente alinea mejor control, rampa, diagnóstico y protección mecánica.")
+            arch = "soft_starter"; reason.append("Por defecto profesional en bomba sin presión variable: soft starter principal y VFD como alternativa premium.")
+    elif mt == "compressor":
+        reason.append("Compresor: validar unloader, presostato, presión, ciclos/hora y ventilación.")
+        if explicit_vfd or premium or pressure_or_flow:
+            arch = "vfd_smart"; reason.append("Control/diagnóstico premium o presión variable: VFD recomendado, validando unloader/presostato.")
+        elif explicit_soft or many_starts or high_hp:
+            arch = "soft_starter"; reason.append("Compresor con arranques/carga relevante: soft starter reduce pico y golpe sin asumir velocidad variable.")
+        elif economical and i.motor_power_hp <= 10:
+            arch = "dol_basic"; reason.append("Compresor pequeño y presupuesto bajo: DOL es opción principal con protecciones y presostato.")
+        else:
+            arch = "soft_starter"; reason.append("Recomendación profesional base: soft starter; VFD queda como mejora premium si hay ahorro/control variable.")
+    elif mt == "conveyor":
+        if premium or explicit_vfd or many_starts:
+            arch = "vfd_smart"; reason.append("Banda con rampa/velocidad/diagnóstico: VFD recomendado.")
+        elif economical:
+            arch = "dol_basic"; reason.append("Banda simple y presupuesto bajo: DOL con pull-cord/guardas es opción base.")
+        else:
+            arch = "soft_starter"; reason.append("Banda estándar: soft starter reduce golpe mecánico y arranque brusco.")
     else:
-        if explicit_plc:
-            arch = "plc_hmi_control"
-            reason.append("Se pidió PLC/HMI o trazabilidad avanzada.")
-        elif explicit_vfd or i.starts_per_hour >= 30:
-            arch = "vfd_smart"
-            reason.append(_machine_context(i)["vfd_note"])
-        elif explicit_soft or i.starts_per_hour >= 15:
-            arch = "soft_starter"
-            reason.append(f"{_machine_context(i)['label']}: arranques moderados; soft starter reduce corriente/golpe sin control de velocidad.")
+        if explicit_vfd or premium:
+            arch = "vfd_smart"; reason.append("Se pidió control premium/variador.")
+        elif explicit_soft or many_starts:
+            arch = "soft_starter"; reason.append("Arranque suave por frecuencia de maniobra o red sensible.")
         elif explicit_star:
-            arch = "star_delta"
-            reason.append("Estrella-triángulo solo si el motor/carga lo permiten y se confirma cableado de 6 terminales.")
+            arch = "star_delta"; reason.append("Estrella-triángulo condicionado a 6 terminales y torque suficiente.")
         elif i.needs_reversing:
-            arch = "dol_reversing"
-            reason.append("Se requiere inversión de giro con costo controlado.")
+            arch = "dol_reversing"; reason.append("Se requiere inversión de giro con costo controlado.")
         else:
-            arch = "dol_basic"
-            reason.append("Caso simple sin inversión ni requerimientos de control avanzado.")
+            arch = "dol_basic"; reason.append("Caso simple: arranque directo con protecciones.")
 
     profile = _starter_by_id(alternatives, arch)
     profile.update({
         "architecture_id": arch,
         "architecture_reason": " ".join(reason),
         "architecture_warnings": warnings,
-        "why": "Seleccionada por coherencia arquitectura-BOM, seguridad de aplicación, presión de cotización y valor comercial defendible.",
+        "why": "Seleccionada por OptionTrust: balance entre necesidad técnica real, costo, riesgos, datos disponibles, FitLock, MathTrust y valor comercial defendible.",
     })
     return profile
-
 
 def _build_requirements(i: ProjectIntake, calc: Dict[str, Any], architecture: Dict[str, Any]) -> List[ComponentRequirement]:
     arch = architecture.get("architecture_id") or architecture.get("id") or "dol_basic"
@@ -360,6 +401,15 @@ def _build_requirements(i: ProjectIntake, calc: Dict[str, Any], architecture: Di
     else:
         _push_spec = "Marcha, paro, reset, pilotos marcha/falla y rotulación"
     add("pushbuttons", "Control", "Botonera de mando", 1, _push_spec, checks=["IP", "contactos", "rotulado"])
+    if _ctx["type"] == "pump":
+        add("dry_run_protection", "Instrumentación", "Protección contra trabajo en seco", 1, "Relé/sensor de nivel o flujo compatible con entrada VFD/relé; definir por hidráulica real", checks=["nivel", "flujo", "contacto", "IP"], risk="Si el riesgo trabajo en seco aparece en el informe, debe existir protección en BOM/control.")
+        add("pressure_sensor", "Instrumentación", "Sensor/presostato de presión", 1, "Presostato o transmisor 4-20 mA según control presión/caudal; rango por proceso", checks=["rango", "salida", "conexión", "IP"], risk="Sin presión/nivel confirmados, el control automático queda como preliminar.")
+    elif _ctx["type"] == "compressor":
+        add("pressure_sensor", "Instrumentación", "Presostato / transmisor de presión", 1, "Rango según tanque/sistema; contacto o 4-20 mA según arquitectura", checks=["rango", "setpoints", "salida"], risk="El control del compresor depende de presostato/unloader correctamente integrados.")
+        add("unloader_control", "Control", "Control de descarga / unloader", 1, "Interfaz para válvula de descarga existente o nueva; tensión/secuencia por verificar", checks=["tensión", "secuencia", "retardo"], risk="No considerar descarga puede causar arranque cargado y sobrecorriente.")
+    elif _ctx["type"] == "conveyor":
+        add("pull_cord_switch", "Seguridad", "Cable de paro / pull-cord", 1, "Paro de emergencia distribuido para banda; longitud y ubicación por campo", checks=["NC", "acción positiva", "ubicación"], risk="Riesgo de atrapamiento exige paro accesible.")
+        add("misalignment_sensor", "Seguridad", "Sensor de desalineación/atasco", 1, "Sensor según tipo de banda; contacto a permisivo/falla", checks=["ubicación", "IP", "señal"], risk="Evita daño mecánico y operación insegura.")
     if i.needs_limit_switches:
         add("limit_switches", "Seguridad", "Finales de carrera", 2, "Superior e inferior, robustos, IP adecuado", checks=["mecánica", "IP", "cableado"], risk="Clave para evitar sobre-recorrido.")
     if i.needs_brake:
@@ -508,16 +558,98 @@ def _build_budget(i: ProjectIntake, material_cost: float, market_summary: Dict[s
         "floor_price": round(floor, 2),
         "recommended_sell_price": round(recommended, 2),
         "premium_price": round(premium, 2),
-        "price_confidence": "bloqueada por FitLock/MathTrust" if commercial_blocked else ("alta" if market_summary.get("priceguard_score_percent", 0) >= 82 and market_summary.get("red_count", 0) == 0 else ("media-alta" if market_summary.get("priceguard_score_percent", 0) >= 70 and market_summary.get("red_count", 0) <= 2 else "media/baja")),
-        "priceguard_status": f"PriceGuard {market_summary.get('priceguard_score_percent', 0)}% · MathTrust {market_summary.get('mathtrust_score_percent',0)}% · FitLock bloqueados {market_summary.get('fitlock_blocked_count',0)} · verde {market_summary.get('green_count',0)} · amarillo {market_summary.get('yellow_count',0)} · rojo {market_summary.get('red_count',0)}",
+        "price_confidence": "bloqueada por FitLock/OptionTrust" if commercial_blocked else ("alta" if market_summary.get("priceguard_score_percent", 0) >= 82 and market_summary.get("red_count", 0) == 0 else ("media-alta" if market_summary.get("priceguard_score_percent", 0) >= 70 and market_summary.get("red_count", 0) <= 2 else "media/baja")),
+        "priceguard_status": f"PriceGuard {market_summary.get('priceguard_score_percent', 0)}% · OptionTrust {market_summary.get('mathtrust_score_percent',0)}% · FitLock bloqueados {market_summary.get('fitlock_blocked_count',0)} · verde {market_summary.get('green_count',0)} · amarillo {market_summary.get('yellow_count',0)} · rojo {market_summary.get('red_count',0)}",
         "commercial_blocked": commercial_blocked,
         "commercial_release_status": "BLOQUEADA: solo pre-cotización interna" if commercial_blocked else "Lista para propuesta revisable",
         "range_label": "Rango preliminar no confirmado" if commercial_blocked else "Precio recomendado revisable",
         "mathtrust_score_percent": market_summary.get("mathtrust_score_percent", 0),
         "mathtrust_verdict": market_summary.get("mathtrust_verdict", ""),
-        "commercial_note": "Pre-cotización bloqueada por FitLock/MathTrust: no enviar como oferta cerrada; solicitar RFQ técnico y confirmar componentes compatibles." if commercial_blocked else "Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia.",
+        "commercial_note": "Pre-cotización bloqueada por FitLock/OptionTrust: no enviar como oferta cerrada; solicitar RFQ técnico y confirmar componentes compatibles." if commercial_blocked else "Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia.",
     }
 
+
+
+def _option_architecture_ids(i: ProjectIntake) -> List[str]:
+    ids = ["dol_basic", "star_delta", "soft_starter", "vfd_smart"]
+    if i.needs_reversing or _machine_type(i) == "hoist":
+        ids.insert(1, "dol_reversing")
+    if ("plc" in (i.user_notes or "").lower()) or ("hmi" in (i.user_notes or "").lower()) or i.preferred_quality.lower().startswith("premium"):
+        ids.append("plc_hmi_control")
+    # preserve order/dedup
+    seen = set(); out=[]
+    for x in ids:
+        if x not in seen:
+            out.append(x); seen.add(x)
+    return out
+
+
+def _evaluate_alternative_options(i: ProjectIntake, calc: Dict[str, Any], alternatives: List[Dict[str, Any]], recommended_arch: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Calcula presupuesto/trust por alternativa, no solo para la recomendada.
+
+    Esto evita que el producto venda una única respuesta. El ingeniero recibe
+    opción económica, intermedia y premium con FitLock/MathTrust/RFQ propios.
+    """
+    rows: List[Dict[str, Any]] = []
+    rec_id = recommended_arch.get("architecture_id") or recommended_arch.get("id")
+    for arch_id in _option_architecture_ids(i):
+        arch = _starter_by_id(alternatives, arch_id)
+        arch.update({"architecture_id": arch_id})
+        reqs = _build_requirements(i, calc, arch)
+        decisions = decide_prices(reqs, i)
+        summary = summarize_market(decisions)
+        budget = _build_budget(i, float(summary.get("materials_cost", 0)), summary)
+        fit_blocked = int(summary.get("fitlock_blocked_count", 0) or 0)
+        rfq_count = int(summary.get("needs_rfq_count", 0) or 0)
+        trust = float(summary.get("mathtrust_score_percent", summary.get("priceguard_score_percent", 0)) or 0)
+        status = "RECOMENDADA" if arch_id == rec_id else ("BLOQUEADA" if budget.get("commercial_blocked") else "ALTERNATIVA")
+        if fit_blocked:
+            status = "BLOQUEADA" if arch_id != rec_id else "RECOMENDADA CON RFQ"
+        rows.append({
+            "id": arch_id,
+            "name": arch.get("name", arch_id),
+            "status": status,
+            "fit": arch.get("fit", ""),
+            "how_it_works": arch.get("how_it_works", ""),
+            "better_when": arch.get("better_when", arch.get("sell_when", "")),
+            "sell_when": arch.get("sell_when", ""),
+            "initial_cost": arch.get("initial_cost", ""),
+            "control_quality": arch.get("control_quality", 0),
+            "safety_depth": arch.get("safety_depth", 0),
+            "complexity": arch.get("complexity", 0),
+            "risk": arch.get("risk", ""),
+            "materials": round(float(summary.get("materials_cost", 0)), 2),
+            "recommended_sell_price": budget.get("recommended_sell_price", 0),
+            "floor_price": budget.get("floor_price", 0),
+            "premium_price": budget.get("premium_price", 0),
+            "mathtrust": trust,
+            "priceguard": summary.get("priceguard_score_percent", 0),
+            "rfq_required": rfq_count,
+            "fitlock_blocked": fit_blocked,
+            "commercial_blocked": bool(budget.get("commercial_blocked")),
+            "note": budget.get("commercial_note", ""),
+        })
+    return rows
+
+
+def _provider_quick_links(i: ProjectIntake, requirements: List[ComponentRequirement]) -> Dict[str, Any]:
+    base_terms = sorted({r.item for r in requirements if r.must_have})[:10]
+    city = f"{i.location_city} {i.location_province} {i.country}".strip()
+    search_terms = [
+        f"materiales eléctricos industriales {city}",
+        f"variadores contactores breakers {city}",
+        f"tableros eléctricos automatización {city}",
+    ] + [f"cotizar {t} {city}" for t in base_terms[:5]]
+    def enc(s: str) -> str:
+        from urllib.parse import quote_plus
+        return quote_plus(s)
+    return {
+        "city": city,
+        "strategy": "MarketPilot no adivina precios vivos: entrega enlaces de búsqueda/RFQ para confirmar proveedor, stock, modelo y vigencia.",
+        "google_searches": [{"label": q, "url": f"https://www.google.com/search?q={enc(q)}"} for q in search_terms],
+        "mercadolibre_searches": [{"label": t, "url": f"https://listado.mercadolibre.com.ec/{enc(t)}"} for t in base_terms[:8]],
+        "rfq_first": [r.component_id for r in requirements if r.category in {"Fuerza", "Instrumentación", "Seguridad"}][:8],
+    }
 
 def _risks(i: ProjectIntake) -> List[Dict[str, Any]]:
     ctx = _machine_context(i)
@@ -649,7 +781,7 @@ def _quote_readiness(quality: Dict[str, Any], consistency: Dict[str, Any], marke
     return {
         "score_percent": score,
         "status": status,
-        "seller_message": "Ahorra tiempo porque arma el expediente; el humano valida. Si MathTrust/FitLock bloquea, la salida es pre-cotización interna, no oferta cerrada.",
+        "seller_message": "Ahorra tiempo porque arma el expediente; el humano valida. Si OptionTrust/FitLock bloquea, la salida es pre-cotización interna, no oferta cerrada.",
         "do_not_send_if": [g["name"] for g in release["gates"] if not g["passed"] and g["name"] in {"Datos críticos", "Mercado/precio", "Coherencia técnica", "FitLock / dimensionamiento"}],
     }
 
@@ -695,7 +827,7 @@ def _engineer_review_board(i: ProjectIntake, release: Dict[str, Any], market_sum
         {"perfil": "Seguridad/supervisor", "lo_que_exigia": "No liberar construcción si hay riesgo crítico.", "respuesta_v10": "Construction gate separado de quote gate; aprobación humana obligatoria.", "estado": "feliz: no promete construcción automática"},
     ]
     return {
-        "veredicto": "La V14 MathTrust Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
+        "veredicto": "La V15 OptionTrust Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
         "quote_score": quote["score_percent"],
         "personas": personas,
         "regla_de_venta": "Vender ahorro de tiempo y expediente técnico-comercial trazable, no certificación automática.",
@@ -777,7 +909,9 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
     assumptions = _assumption_ledger(i, calculations, market_summary)
     recommended = _recommended(i, alternatives, architecture)
     budget = _build_budget(i, float(market_summary["materials_cost"]), market_summary)
+    option_matrix = _evaluate_alternative_options(i, calculations, alternatives, architecture)
     rfq_message = generate_rfq_message(requirements, decisions, i)
+    provider_links = _provider_quick_links(i, requirements)
     completeness = min(99.5, round((quality["score_percent"] * 0.30) + (consistency["score_percent"] * 0.24) + (float(market_summary["coverage_percent"]) * 0.24) + (quote["score_percent"] * 0.22), 1))
     correction_load = "Mínima" if completeness >= 92 and release["quote_ready"] else "Media" if completeness >= 78 else "Alta"
     construction_release = bool(release["construction_ready"])
@@ -787,7 +921,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
     output_contract = _output_quality_contract(release, quote)
 
     pack = EngineeringPack(
-        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con MarketPilot + FitLock"},
+        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con OptionTrust + MathTrust + FitLock"},
         intake=i.model_dump(),
         executive_verdict={
             "headline": "Cotización industrial inteligente: menos datos, más expediente, cero certezas falsas.",
@@ -805,10 +939,11 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
             "summary": market_summary,
             "price_decisions": [d.model_dump() for d in decisions],
             "supplier_count": len(market_summary["suppliers_used"]),
-            "method": "PriceGuard 14 + MathTrust + FitLock Pro: validación matemática por compatibilidad técnica, mediana/IQR, dispersión, profundidad de catálogo, fuente/stock/vigencia y RFQ. Sin componente compatible no existe precio cerrable.",
+            "method": "PriceGuard 14 + OptionTrust + FitLock Pro: validación matemática por compatibilidad técnica, mediana/IQR, dispersión, profundidad de catálogo, fuente/stock/vigencia y RFQ. Sin componente compatible no existe precio cerrable.",
             "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
             "priceguard_methodology": priceguard_methodology(),
             "architecture_lock": architecture,
+            "provider_quick_links": provider_links,
         },
         budget=budget,
         risks=_risks(i),
@@ -898,7 +1033,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
         },
         api_activation=integration_status(),
         priceguard={"methodology": priceguard_methodology(), "summary": market_summary, "anti_garbage_rule": "Si un precio sale fuera de banda, sin stock, vencido o de fuente débil, se marca amarillo/rojo y no se permite precio cerrado sin RFQ.", "catalog_scope": market_summary.get("catalog_scope"), "confidence_policy": market_summary.get("confidence_policy"), "candidate_offer_audit": market_summary.get("candidate_offer_audit")},
-        starter_intelligence={"profiles": alternatives, "recommended": recommended, "architecture_lock": architecture, "didactic_rule": "Cada arranque explica cómo funciona, cuándo conviene, cómo impacta precio/riesgo y por qué el BOM debe coincidir con la arquitectura seleccionada."},
+        starter_intelligence={"profiles": alternatives, "option_matrix": option_matrix, "recommended": recommended, "architecture_lock": architecture, "didactic_rule": "Cada alternativa se calcula con su propio BOM, presupuesto, FitLock, PriceGuard, MathTrust y RFQ. No se obliga VFD si DOL, estrella-triángulo o soft starter son más coherentes."},
         premium_document_contract={"pdf": "portada + resumen ejecutivo + semáforos + supuestos + presupuesto + BOM + anexos + firmas", "spreadsheet": "BOM editable con semáforo y fuente", "cad": "SVG/Draw.io CAD-like para revisión y formalización"},
         human_review_notice="ControlPro reduce tiempo, ordena el expediente y baja la carga de corrección; no reemplaza normativa local, verificación de campo, proveedor confirmado ni aprobación humana antes de fabricar o energizar.",
     )
@@ -942,6 +1077,12 @@ def export_pack_markdown(payload: Dict[str, Any] | ProjectIntake) -> str:
     lines.append("## Solución recomendada")
     lines.append(f"**{pack['recommended_option']['name']}** — {pack['recommended_option']['fit']}")
     lines.append(pack['recommended_option']['why'])
+    opt_rows = pack.get("starter_intelligence", {}).get("option_matrix", [])
+    if opt_rows:
+        lines.append("")
+        lines.append("## Comparación de alternativas calculadas")
+        for o in opt_rows:
+            lines.append(f"- **{o['name']}** · {o['status']} · Precio ref: ${o['recommended_sell_price']:,.2f} · MathTrust {o['mathtrust']}% · RFQ {o['rfq_required']} · FitLock bloqueados {o['fitlock_blocked']} · {o.get('better_when','')}")
     if pack.get("starter_intelligence", {}).get("architecture_lock"):
         arch = pack["starter_intelligence"]["architecture_lock"]
         lines.append(f"FitLock Pro: **{arch.get('architecture_id', arch.get('id',''))}** · {arch.get('architecture_reason','')}")
@@ -964,6 +1105,13 @@ def export_pack_markdown(payload: Dict[str, Any] | ProjectIntake) -> str:
     lines.append("```text")
     lines.append(pack['rfq']['message'])
     lines.append("```")
+    links = pack.get("market", {}).get("provider_quick_links", {})
+    if links:
+        lines.append("")
+        lines.append("## Búsqueda rápida de proveedores")
+        lines.append(f"Ciudad base: {links.get('city','')}")
+        for l in links.get('google_searches', [])[:5]:
+            lines.append(f"- {l['label']}: {l['url']}")
     lines.append("")
     lines.append("## Salidas CAD-like / taller")
     lines.append("- E-001 Unifilar CAD-like SVG")
@@ -1013,8 +1161,8 @@ def export_client_proposal(payload: Dict[str, Any] | ProjectIntake) -> str:
     if blocked:
         lines += [
             "## Estado comercial",
-            "**Bloqueada por MathTrust/FitLock.** Esta salida sirve para revisión interna y solicitud de RFQ, no para enviarse como oferta cerrada al cliente.",
-            f"- MathTrust: {pack['market']['summary'].get('mathtrust_score_percent', 0)}% · {pack['market']['summary'].get('mathtrust_verdict', '')}",
+            "**Bloqueada por OptionTrust/FitLock.** Esta salida sirve para revisión interna y solicitud de RFQ, no para enviarse como oferta cerrada al cliente.",
+            f"- OptionTrust: {pack['market']['summary'].get('mathtrust_score_percent', 0)}% · {pack['market']['summary'].get('mathtrust_verdict', '')}",
             f"- PriceGuard: {pack['market']['summary'].get('priceguard_score_percent', 0)}% · {pack['market']['summary'].get('priceguard_verdict', '')}",
             f"- FitLock bloqueados: {pack['market']['summary'].get('fitlock_blocked_count', 0)}",
             f"- RFQ requeridos: {pack['market']['summary'].get('needs_rfq_count', 0)}",
@@ -1028,7 +1176,11 @@ def export_client_proposal(payload: Dict[str, Any] | ProjectIntake) -> str:
         f"{pack['recommended_option']['name']}: {pack['recommended_option']['fit']}.",
         f"Criterio de arquitectura: {pack.get('starter_intelligence', {}).get('architecture_lock', {}).get('architecture_reason', '')}",
         "",
+        "## Alternativas evaluadas",
     ]
+    for o in pack.get('starter_intelligence', {}).get('option_matrix', [])[:5]:
+        lines.append(f"- **{o['name']}** ({o['status']}): referencia ${o['recommended_sell_price']:,.2f}, MathTrust {o['mathtrust']}%, RFQ {o['rfq_required']}. {o.get('better_when','')}")
+    lines.append("")
     if blocked:
         lines += [
             "## Rango preliminar no confirmado",

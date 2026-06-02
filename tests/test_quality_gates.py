@@ -42,7 +42,7 @@ def test_output_contains_traceability_sections():
     assert data['review_board']['veredicto']
     assert data['cad_outputs']['wire_schedule']
     assert data['cad_outputs']['drawio_available'] is True
-    assert data['priceguard']['methodology']['name'] == 'PriceGuard 14 + MathTrust + FitLock'
+    assert data['priceguard']['methodology']['name'] == 'PriceGuard 15 + OptionTrust + MathTrust + FitLock'
     assert data['premium_document_contract']['pdf']
 
 
@@ -131,3 +131,69 @@ def test_fitlock_blocks_oversized_motor_with_small_catalog_items():
     reds = [d for d in data['market']['price_decisions'] if d['semaphore_color'] == 'rojo']
     assert any(d['component_id'] == 'vfd' for d in reds)
     assert any('FitLock' in ' '.join(d['anomaly_flags']) for d in reds)
+
+
+def test_optiontrust_does_not_force_vfd_for_basic_pump_and_quotes_alternatives():
+    payload = client.get('/api/example').json()
+    payload.update({
+        'project_name': 'Bomba industrial — Arranque protegido',
+        'application': 'Bomba centrífuga industrial',
+        'load_type': 'Bomba',
+        'motor_power_hp': 10,
+        'voltage': 220,
+        'full_load_amps': 14,
+        'needs_reversing': False,
+        'needs_brake': False,
+        'needs_limit_switches': False,
+        'control_goal': 'Costo equilibrado',
+        'user_notes': 'bomba de agua industrial sin presión constante declarada',
+    })
+    data = client.post('/api/generate', json=payload).json()
+    assert data['recommended_option']['architecture_id'] in {'dol_basic', 'soft_starter'}
+    option_ids = {o['id'] for o in data['starter_intelligence']['option_matrix']}
+    assert {'dol_basic', 'star_delta', 'soft_starter', 'vfd_smart'}.issubset(option_ids)
+    assert any(o['id'] == 'vfd_smart' and o['status'] != 'RECOMENDADA' for o in data['starter_intelligence']['option_matrix'])
+
+
+def test_selectiontrust_links_hydraulic_risk_to_bom_and_cable_consistency():
+    payload = client.get('/api/example').json()
+    payload.update({
+        'project_name': 'Bomba industrial — Arranque protegido',
+        'application': 'Bomba centrífuga industrial',
+        'load_type': 'Bomba',
+        'motor_power_hp': 10,
+        'voltage': 220,
+        'full_load_amps': 14,
+        'needs_reversing': False,
+        'needs_brake': False,
+        'needs_limit_switches': False,
+    })
+    data = client.post('/api/generate', json=payload).json()
+    ids = {r['component_id'] for r in data['requirements']}
+    assert 'dry_run_protection' in ids
+    assert 'pressure_sensor' in ids
+    calculated = data['calculations']['conductor_preliminary']
+    wire_text = ' '.join(str(x) for row in data['cad_outputs']['wire_schedule'] for x in row.values())
+    bom_cable = next(r for r in data['requirements'] if r['component_id'] == 'power_cable')
+    assert calculated in bom_cable['spec']
+    assert calculated in wire_text
+
+
+def test_large_compressor_client_proposal_is_internal_precotizacion():
+    payload = client.get('/api/example').json()
+    payload.update({
+        'project_name': 'Compresor industrial',
+        'application': 'Compresor de aire',
+        'load_type': 'Compresor',
+        'motor_power_hp': 180,
+        'voltage': 440,
+        'full_load_amps': 280,
+        'needs_reversing': False,
+        'needs_brake': False,
+        'needs_limit_switches': False,
+        'control_goal': 'arranque suave',
+    })
+    proposal = client.post('/api/export/client-proposal', json=payload).text
+    assert 'PRE-COTIZACIÓN INTERNA' in proposal
+    assert 'Bloqueada por OptionTrust/FitLock' in proposal
+    assert 'no para enviarse como oferta cerrada' in proposal

@@ -44,7 +44,7 @@ def export_bom_xlsx(payload: Dict[str, Any] | ProjectIntake) -> bytes:
     wb = Workbook()
     ws = wb.active
     ws.title = "BOM cotizable"
-    ws.append(["ControlPro Advisor OS V14 - BOM cotizable"])
+    ws.append(["ControlPro Advisor OS V15 - BOM cotizable"])
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=17)
     ws["A1"].font = Font(bold=True, size=16, color="FFFFFF")
     ws["A1"].fill = PatternFill("solid", fgColor="0B1722")
@@ -148,8 +148,8 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
 
     story = []
     story.append(Spacer(1, 0.25 * inch))
-    story.append(Paragraph("ControlPro Advisor OS V14", styles["CoverTitle"]))
-    story.append(Paragraph("MathTrust Pro - Expediente técnico-comercial para cotización industrial", styles["Subtitle"]))
+    story.append(Paragraph("ControlPro Advisor OS V15", styles["CoverTitle"]))
+    story.append(Paragraph("OptionTrust Pro - Expediente técnico-comercial para cotización industrial", styles["Subtitle"]))
     story.append(Spacer(1, 0.22 * inch))
     cover_data = [
         ["Proyecto", pack["intake"]["project_name"]],
@@ -157,7 +157,7 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
         ["Ubicación", f"{pack['intake']['location_city']}, {pack['intake']['location_province']}, {pack['intake']['country']}"],
         ["Aplicación", pack["intake"].get("application", "")],
         ["Motor", f"{pack['intake']['motor_power_hp']} HP · {pack['intake']['voltage']} V · {pack['intake']['phases']}F"],
-        ["Versión / uso", "V14 MathTrust Pro · Cotización y revisión profesional"],
+        ["Versión / uso", "V15 OptionTrust Pro · Cotización y revisión profesional"],
     ]
     cover = Table(cover_data, colWidths=[1.55*inch, 5.05*inch])
     cover.setStyle(TableStyle([
@@ -212,7 +212,7 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
     price_label = "Estado comercial" if blocked else "Precio recomendado"
     price_value = "BLOQUEADO" if blocked else money(pack['budget']['recommended_sell_price'])
     kpi_data = [
-        ["Completitud ingeniería", "Cobertura catálogo", "MathTrust/PriceGuard", price_label],
+        ["Completitud ingeniería", "Cobertura catálogo", "OptionTrust/PriceGuard", price_label],
         [f"{k['engineering_completeness_percent']}%", f"{k['market_coverage_percent']}%", f"{k.get('mathtrust_score_percent', k.get('priceguard_score_percent', 0))}% / {k.get('priceguard_score_percent', 0)}%", price_value],
     ]
     kpi = Table(kpi_data, colWidths=[1.65*inch]*4)
@@ -292,10 +292,14 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
     story.append(para(f"{rec['name']} - {rec.get('fit','')}. {rec.get('why','')}"))
     story.append(para(f"Cómo funciona: {rec.get('how_it_works','')}"))
     story.append(para(f"Impacto en precio/riesgo: {rec.get('price_impact','')}"))
-    alt_rows = [["Alternativa", "Costo", "Control", "Seguridad", "Cuándo conviene"]]
-    for o in pack.get("alternatives", [])[:6]:
-        alt_rows.append([para(o.get("name", "")), o.get("initial_cost", ""), f"{o.get('control_quality',0)}%", f"{o.get('safety_depth',0)}%", para(o.get("better_when", o.get("sell_when", "")))])
-    alt_t = Table(alt_rows, colWidths=[1.55*inch, 0.7*inch, 0.65*inch, 0.75*inch, 3.0*inch], repeatRows=1)
+    option_matrix = pack.get("starter_intelligence", {}).get("option_matrix", [])
+    alt_rows = [["Alternativa", "Estado", "Precio ref.", "Trust", "Cuándo conviene"]]
+    source_rows = option_matrix if option_matrix else pack.get("alternatives", [])[:6]
+    for o in source_rows[:6]:
+        price = money(o.get("recommended_sell_price", 0)) if isinstance(o.get("recommended_sell_price", None), (int, float)) else o.get("initial_cost", "")
+        trust = f"{o.get('mathtrust', o.get('control_quality',0))}%" if o.get('mathtrust') is not None else f"{o.get('control_quality',0)}%"
+        alt_rows.append([para(o.get("name", "")), o.get("status", o.get("initial_cost", "")), price, trust, para(o.get("better_when", o.get("sell_when", "")))])
+    alt_t = Table(alt_rows, colWidths=[1.45*inch, 0.9*inch, 0.9*inch, 0.65*inch, 2.8*inch], repeatRows=1)
     alt_t.setStyle(TableStyle([
         ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#123044")),
         ("TEXTCOLOR", (0,0), (-1,0), colors.white),
@@ -308,7 +312,7 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
 
     story.append(Paragraph("5. Presupuesto", styles["H1Blue"]))
     if pack.get("budget", {}).get("commercial_blocked"):
-        story.append(para("PRE-COTIZACIÓN INTERNA: los valores siguientes son orden de magnitud, no oferta cerrada. MathTrust/FitLock exige RFQ técnico antes de enviar propuesta comercial al cliente."))
+        story.append(para("PRE-COTIZACIÓN INTERNA: los valores siguientes son orden de magnitud, no oferta cerrada. OptionTrust/FitLock exige RFQ técnico antes de enviar propuesta comercial al cliente."))
     budget_names = [
         ("Materiales", "materials"), ("Armado tablero", "panel_labor"), ("Instalación campo", "field_labor"),
         ("Ingeniería", "engineering"), ("Transporte/logística", "transport_logistics"), ("Contingencia", "contingency"),
@@ -390,7 +394,7 @@ def export_pdf_report(payload: Dict[str, Any] | ProjectIntake) -> bytes:
         canvas.saveState()
         canvas.setFont("Helvetica", 7)
         canvas.setFillColor(colors.HexColor("#607380"))
-        canvas.drawString(0.55*inch, 0.35*inch, "ControlPro Advisor OS V14 MathTrust Pro - Documento para cotización/revisión")
+        canvas.drawString(0.55*inch, 0.35*inch, "ControlPro Advisor OS V15 OptionTrust Pro - Documento para cotización/revisión")
         canvas.drawRightString(7.95*inch, 0.35*inch, f"Página {doc_.page}")
         canvas.restoreState()
 

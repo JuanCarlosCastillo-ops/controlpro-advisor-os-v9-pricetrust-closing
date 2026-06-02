@@ -51,6 +51,12 @@ class ProjectIntake(BaseModel):
     installation_scope: str = Field(default="Tablero + instalación en campo")
     quote_valid_days: int = Field(default=7, ge=1, le=60)
     client_budget_limit: Optional[float] = Field(default=None, ge=0)
+
+    control_goal: str = Field(default="Costo equilibrado", description="Objetivo: costo mínimo, arranque suave, presión/caudal constante, ahorro energético, diagnóstico premium")
+    preferred_starter: Optional[str] = Field(default=None, description="dol_basic, star_delta, soft_starter, vfd_smart, plc_hmi_control o auto")
+    pressure_control_required: bool = Field(default=False)
+    dry_run_protection_required: bool = Field(default=True)
+    supplier_search_radius_km: float = Field(default=150, ge=0)
     auto_block_low_confidence: bool = Field(default=True)
     user_notes: str = Field(default="Reemplazar tablero existente del guinche. Mantener huella de montaje. Considerar crecimiento futuro con variador.")
 

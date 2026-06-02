@@ -1,25 +1,19 @@
-# ControlPro Advisor OS V14 MathTrust Pro — Validation Report
+# Validation Report — ControlPro V15 OptionTrust Pro
 
-Validación ejecutada:
-
-```bash
-python -m compileall app scripts tests -q
-PYTHONPATH=. python scripts/validate_project.py
-PYTHONPATH=. pytest -q
-```
-
-Resultado esperado:
-
-```text
 VALIDATION OK
-12 tests passed
-```
 
-Controles principales:
+- Engineering completeness: 97.5%
+- Market coverage: 100.0%
+- RFQ items: 1
+- PriceGuard: 82.7%
+- OptionTrust/MathTrust: 86.3%
+- Automated tests: 15 passed
 
-- MathTrust calcula confiabilidad combinando FitLock, PriceGuard, profundidad de catálogo, dispersión robusta y fuente/stock.
-- FitLock bloquea componentes incompatibles con HP/FLA/tensión.
-- PriceGuard no puede volverse fuerte cuando FitLock está rojo.
-- Propuesta cliente cambia a PRE-COTIZACIÓN INTERNA si la salida está bloqueada.
-- El caso crítico de compresor 180 HP / 440 V / 280 A queda bloqueado y exige RFQ.
-- Los documentos separan precio cerrable, referencial y bloqueado.
+## Critical gates covered
+- Multi-alternative OptionTrust: DOL, star-delta, soft starter, VFD, PLC/HMI.
+- Does not force VFD when a lower-cost architecture is enough.
+- FitLock blocks undersized breaker/VFD/reactor/cable on large motors.
+- SelectionTrust keeps calculated cable aligned with BOM and cable schedule.
+- Machine Context Lock changes risks, sensors and checks by machine type.
+- Client proposal becomes internal pre-quote when MathTrust/FitLock blocks.
+- Supplier quick links + RFQ help confirm real market prices by city.

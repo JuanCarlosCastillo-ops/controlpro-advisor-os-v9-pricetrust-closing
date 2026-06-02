@@ -73,3 +73,24 @@ delta_contactor,Fuerza,Contactor triángulo 32A AC-3 bobina 120V,Schneider,LC1D3
 delta_contactor,Fuerza,Contactor triángulo 32A,ABB,AF30,SUP-003,Cuenca,88,available,4,0.78,reference,2026-08-31,,Alternativa
 star_delta_timer,Control,Temporizador estrella-triángulo 120V,Schneider,RE17RAMU,SUP-001,Guayaquil,54,available,2,0.78,reference,2026-08-31,,Validar tensión de control
 star_delta_timer,Control,Timer estrella-triángulo universal,Genérico industrial,Y-D TIMER,SUP-004,Machala,28,unknown,3,0.54,marketplace,2026-08-31,,Fuente débil para PriceGuard
+power_cable,Cableado,Cable cobre THHN #12 AWG metro,Electrocables,THHN-12AWG-CU,SUP-004,Machala,0.95,available,1,0.84,confirmed,2026-08-31,,Precio por metro
+power_cable,Cableado,Cable cobre THHN #10 AWG metro,Electrocables,THHN-10AWG-CU,SUP-004,Machala,1.45,available,1,0.84,confirmed,2026-08-31,,Precio por metro
+power_cable,Cableado,Cable cobre THHN #6 AWG metro,Electrocables,THHN-6AWG-CU,SUP-004,Machala,4.10,available,1,0.82,reference,2026-08-31,,Precio por metro
+power_cable,Cableado,Cable cobre THHN #4 AWG metro,Electrocables,THHN-4AWG-CU,SUP-004,Machala,6.20,available,1,0.80,reference,2026-08-31,,Precio por metro
+pressure_sensor,Instrumentación,Presostato industrial 0-10 bar contacto,Danfoss,KP36,SUP-004,Machala,68,available,2,0.80,reference,2026-08-31,,Para bomba/compresor; confirmar rango
+pressure_sensor,Instrumentación,Transmisor presión 0-10 bar 4-20mA,Wika,A-10 0-10bar,SUP-007,Quito,145,quote_needed,5,0.78,reference,2026-08-31,,Para control con VFD/PLC
+dry_run_protection,Instrumentación,Protección trabajo en seco por nivel/flujo,Finder,DRY-RUN-KIT,SUP-004,Machala,115,available,2,0.78,reference,2026-08-31,,Validar con hidráulica real
+dry_run_protection,Instrumentación,Relé protección bomba trabajo en seco,Schneider,RM35-LM33MW,SUP-001,Guayaquil,165,quote_needed,4,0.82,reference,2026-08-31,,Confirmar sensor/sondas
+unloader_control,Control,Válvula/control descarga compresor 120V,Genérico industrial,UNLOADER-120,SUP-004,Machala,95,quote_needed,3,0.70,reference,2026-08-31,,Confirmar compresor existente
+pull_cord_switch,Seguridad,Cable de paro emergencia para banda,Schneider,XY2CE,SUP-001,Guayaquil,220,quote_needed,4,0.80,reference,2026-08-31,,Longitud por campo
+misalignment_sensor,Seguridad,Sensor desalineación banda,Genérico industrial,BELT-MISALIGN,SUP-007,Quito,180,quote_needed,5,0.70,reference,2026-08-31,,Validar mecánica
+vfd,Fuerza,Variador 10HP 220V 3F heavy duty,INVT,GD200A-7R5G-2,SUP-004,Machala,560,available,3,0.75,reference,2026-08-31,,220V; validar corriente
+vfd,Fuerza,Variador 10HP 220V 3F premium,Schneider,ATV320U75M3C,SUP-002,Quito,980,quote_needed,5,0.78,reference,2026-08-31,,220V; validar disponibilidad
+soft_starter,Fuerza,Soft starter 10HP 220V 32A,Schneider,ATS01N232QN,SUP-002,Quito,420,quote_needed,4,0.76,reference,2026-08-31,,220V; validar aplicación
+mccb_main,Fuerza,MCCB principal 3P 25A 240V 25kAIC,Schneider,EasyPact CVS 25A 25kA,SUP-001,Guayaquil,88,available,2,0.86,reference,2026-08-31,,Para motores pequeños 220V; validar kAIC
+contactor_fwd,Fuerza,Contactor AC-3 18A bobina 120VAC,Schneider,LC1D18G7,SUP-001,Guayaquil,58,available,2,0.88,confirmed,2026-08-31,,Para motores pequeños
+overload_relay,Fuerza,Relé sobrecarga 13-18A clase 10,Schneider,LRD21,SUP-001,Guayaquil,48,available,2,0.86,reference,2026-08-31,,Rango motores 10HP 220V según FLA real
+soft_starter,Fuerza,Soft starter 10HP 220V 32A disponible,Chint,NJRP2-32-220,SUP-004,Machala,285,available,2,0.72,reference,2026-08-31,,Económico 220V; validar bypass/torque
+soft_starter,Fuerza,Soft starter 10HP 220V 32A premium,ABB,PSE32-220,SUP-003,Cuenca,520,available,4,0.76,reference,2026-08-31,,Validar disponibilidad exacta
+line_reactor,Fuerza,Reactor de línea 3% 220V 10HP,Genérico industrial,LR-10HP-220,SUP-004,Machala,105,available,2,0.72,reference,2026-08-31,,Para VFD 220V; confirmar corriente
+line_reactor,Fuerza,Reactor de línea 3% 220V 10HP,MTE,RL-010HP-220,SUP-002,Quito,180,quote_needed,5,0.75,reference,2026-08-31,,Para VFD 220V; confirmar corriente
