@@ -19,9 +19,9 @@ BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
 app = FastAPI(
-    title="ControlPro Advisor OS V12 MarketPilot Lock",
+    title="ControlPro Advisor OS V13 FitLock Pro",
     description="Sistema operativo en español para diseño, cotización, CAD-like, mercado, RFQ y activación con credenciales reales.",
-    version="12.0-marketpilot-lock",
+    version="13.0-fitlock-pro",
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -46,8 +46,8 @@ class LeadPilot(BaseModel):
 def capture_lead(lead: LeadPilot):
     row = lead.model_dump()
     row["captured_at"] = datetime.now(timezone.utc).isoformat()
-    row["source"] = "controlpro_v12_pilot"
-    path = os.environ.get("CONTROLPRO_LEADS_PATH", "/tmp/controlpro_v12_leads.jsonl")
+    row["source"] = "controlpro_v13_pilot"
+    path = os.environ.get("CONTROLPRO_LEADS_PATH", "/tmp/controlpro_v13_leads.jsonl")
     try:
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
@@ -61,7 +61,7 @@ def capture_lead(lead: LeadPilot):
 def health():
     return {
         "status": "ok",
-        "product": "ControlPro Advisor OS V12 MarketPilot Lock",
+        "product": "ControlPro Advisor OS V13 FitLock Pro",
         "language": "es",
         "modules": [
             "datos", "fotos", "3d", "unifilar", "control", "calculos", "soluciones",

@@ -60,6 +60,7 @@ function renderPack(pack){
   $('#panelSvg').innerHTML = pack.diagrams.panel_preview_svg;
   renderPrecision(pack);
   renderMachineContext(pack);
+  renderDynamicVisual(pack);
   renderPriceTrustDashboard(pack);
   renderSavingsDashboard(pack);
   renderCAD(pack);
@@ -86,6 +87,43 @@ function renderPrecision(pack){
 
 
 
+
+function renderDynamicVisual(pack){
+  const el = $('#dynamicVisual'); if(!el) return;
+  const ctx = pack.machine_context || {};
+  const calc = pack.calculations || {};
+  const rec = pack.recommended_option || {};
+  const market = pack.market?.summary || {};
+  const fitBlocked = Number(market.fitlock_blocked_count || 0);
+  const machine = ctx.label || 'Motor industrial';
+  const hp = pack.intake?.motor_power_hp || '--';
+  const v = pack.intake?.voltage || '--';
+  const flc = calc.full_load_current_a || '--';
+  const conductor = calc.conductor_preliminary || '--';
+  const fitStatus = fitBlocked > 0 ? 'FitLock bloquea componentes' : 'FitLock OK';
+  const fitClass = fitBlocked > 0 ? 'danger' : 'ok';
+  const critical = (pack.market?.price_decisions || []).filter(d=>d.semaphore_color==='rojo' || (d.anomaly_flags||[]).some(x=>String(x).includes('FitLock'))).slice(0,4);
+  const chain = rec.architecture_id === 'vfd_smart' ? ['RED','QF','K1','VFD-01','MTR'] : rec.architecture_id === 'soft_starter' ? ['RED','QF','SS-01','BYP','MTR'] : rec.architecture_id === 'star_delta' ? ['RED','QF','KM-L','KM-Y/Δ','MTR'] : ['RED','QF','KM','MTR'];
+  el.innerHTML = `
+    <div class="dyn-bg"></div>
+    <div class="dyn-top">
+      <div><small>Visual dinámico del caso</small><h4>${machine}</h4><p>${hp} HP · ${v} V · FLA ${flc} A · ${rec.name || rec.architecture_id || 'Arquitectura pendiente'}</p></div>
+      <span class="fit-pill ${fitClass}">${fitStatus}</span>
+    </div>
+    <div class="dyn-canvas">
+      <div class="dyn-motor ${ctx.type || 'general'}"><span></span><b>MTR</b><small>${machine}</small></div>
+      <div class="dyn-panel"><i></i><b>VFD/QF</b><em></em><small>Tablero control</small></div>
+      <div class="dyn-chain">${chain.map(x=>`<span>${x}</span>`).join('<i></i>')}</div>
+    </div>
+    <div class="dyn-bottom">
+      <div><small>Conductor</small><b>${conductor}</b></div>
+      <div><small>Breaker preliminar</small><b>${calc.breaker_size_a || '--'} A</b></div>
+      <div><small>PriceGuard</small><b>${market.priceguard_score_percent || '--'}%</b></div>
+      <div><small>RFQ</small><b>${market.needs_rfq_count || 0}</b></div>
+    </div>
+    ${critical.length ? `<div class="fit-alert"><b>Bloqueos/alertas:</b>${critical.map(d=>`<span>${d.component_id}: ${d.action_required}</span>`).join('')}</div>` : ''}
+  `;
+}
 
 function renderPriceTrustDashboard(pack){
   const s = pack.market?.summary || {};
@@ -150,7 +188,7 @@ function renderGuidedFlow(pack){
 function renderReviewBoard(pack){
   const board = pack.review_board || {};
   const personas = board.personas || [];
-  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V12 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
+  setHtmlSafe('#reviewBoardRows', personas.map(p=>`<div class="review-card"><b>${p.perfil}</b><span>${p.estado}</span><p><b>Pidió:</b> ${p.lo_que_exigia}</p><p><b>V13 responde:</b> ${p.respuesta_v10 || "Resuelto en esta versión"}</p></div>`).join('') + `<div class="review-card strong"><b>Veredicto</b><span>${board.veredicto || ''}</span><p>${board.regla_de_venta || ''}</p><small>${board.pendiente_realista || ''}</small></div>`);
 }
 
 function renderCalculations(pack){
@@ -296,21 +334,42 @@ function setupLayers(){
     entregables: ['statistics','validation','deliverables','pricetrust-dashboard'],
     admin: ['api-activation']
   };
+  const sectionToLayer = {
+    'lead-capture':'cotizar','quick-mode':'cotizar','dashboard':'cotizar','precision':'cotizar','intake':'cotizar','photos':'cotizar',
+    'assembly':'evidencia','singleline':'evidencia','control':'evidencia','panel3d':'evidencia','cadshop':'evidencia',
+    'calculations':'mercado','solutions':'mercado','bom':'mercado','market':'mercado','rfq':'mercado','budget':'mercado',
+    'statistics':'entregables','validation':'entregables','deliverables':'entregables','pricetrust-dashboard':'entregables',
+    'api-activation':'admin'
+  };
   const allIds = [...new Set(Object.values(layerMap).flat())];
-  function showLayer(layer){
-    allIds.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('layer-hidden', !(layerMap[layer]||[]).includes(id)); });
+  function showLayer(layer, targetId=null){
+    const visible = new Set(layerMap[layer] || layerMap.cotizar);
+    allIds.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('layer-hidden', !visible.has(id)); });
     $$('.layer-btn').forEach(b=>b.classList.toggle('active', b.dataset.layer===layer));
-    localStorage.setItem('controlpro_v12_layer', layer);
+    localStorage.setItem('controlpro_v13_layer', layer);
+    if(targetId){ setTimeout(()=>document.getElementById(targetId)?.scrollIntoView({behavior:'smooth',block:'start'}), 80); }
+  }
+  window.showControlProLayer = showLayer;
+  function routeHash(){
+    const id = (location.hash || '').replace('#','');
+    if(id && sectionToLayer[id]) { showLayer(sectionToLayer[id], id); return true; }
+    return false;
   }
   $$('.layer-btn').forEach(btn=>btn.addEventListener('click',()=>showLayer(btn.dataset.layer)));
-  showLayer(localStorage.getItem('controlpro_v12_layer') || 'cotizar');
+  $$('.sidebar a').forEach(a=>a.addEventListener('click',(ev)=>{
+    const id=(a.getAttribute('href')||'').replace('#','');
+    if(sectionToLayer[id]){ ev.preventDefault(); showLayer(sectionToLayer[id], id); history.replaceState(null,'','#'+id); }
+  }));
+  window.addEventListener('hashchange', routeHash);
+  if(!routeHash()) showLayer(localStorage.getItem('controlpro_v13_layer') || 'cotizar');
 }
+
 
 async function saveLead(){
   const form = $('#leadForm'); if(!form) return;
   const data = Object.fromEntries(new FormData(form).entries());
   data.saved_at = new Date().toISOString();
-  localStorage.setItem('controlpro_v12_pilot_lead', JSON.stringify(data));
+  localStorage.setItem('controlpro_v13_pilot_lead', JSON.stringify(data));
   try{
     const res = await fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
     const out = await res.json();
@@ -321,7 +380,7 @@ async function saveLead(){
 
 function restoreLead(){
   try{
-    const data = JSON.parse(localStorage.getItem('controlpro_v12_pilot_lead')||'{}');
+    const data = JSON.parse(localStorage.getItem('controlpro_v13_pilot_lead')||'{}');
     Object.entries(data).forEach(([k,v])=>{ const el=document.querySelector(`#leadForm [name="${k}"]`); if(el) el.value=v; });
   }catch(e){}
 }

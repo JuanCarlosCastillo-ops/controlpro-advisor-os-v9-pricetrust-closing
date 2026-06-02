@@ -1,21 +1,21 @@
-# ControlPro Advisor OS V12 - MarketPilot Lock
+# ControlPro Advisor OS V13 - FitLock Pro
 
 Sistema web en español para cotizar trabajos de control industrial con flujo por capas, PriceGuard, Machine Context Lock, BOM, mercado/RFQ, CAD-like, PDF, Excel y registro piloto.
 
-## Qué trae V12
+## Qué trae V13
 
 - Interfaz premium por capas: cotizar rápido, evidencia/CAD, mercado, entregables y admin interno.
 - Registro piloto para capturar interesados.
 - Machine Context Lock: guinche, compresor, bomba, banda o motor general generan riesgos, checklist, RFQ y taller diferentes.
 - Architecture Lock + Workshop Lock: solución recomendada = BOM = CAD/taller = PDF = propuesta.
-- PriceGuard 12: semáforos de precio, outliers, autocorrección, RFQ y fuente/vigencia.
+- PriceGuard 13 + FitLock: semáforos de precio, outliers, autocorrección, RFQ y fuente/vigencia.
 - Exportables: PDF, Markdown, propuesta cliente, BOM CSV/XLSX, Draw.io, unifilar/ladder/layout SVG, cables/borneras CSV.
 - APIs listas por `.env`: Mercado Libre, Google Places, WhatsApp Cloud API y SMTP.
 
 ## Ejecutar local
 
 ```powershell
-cd C:\AGENTES\controlpro_advisor_os_v12_marketpilot_final
+cd C:\AGENTES\controlpro_advisor_os_v13_fitlock_pro
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
@@ -46,7 +46,7 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
 ```powershell
 git add .
-git commit -m "Actualizar a ControlPro V12 MarketPilot Lock"
+git commit -m "Actualizar a ControlPro V13 FitLock Pro"
 git push
 ```
 

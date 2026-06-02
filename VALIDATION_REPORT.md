@@ -1,32 +1,31 @@
-# Validation Report - ControlPro Advisor OS V12 MarketPilot Lock
+# ControlPro Advisor OS V13 FitLock Pro — Validation Report
 
-## Resultado
-VALIDATION OK.
-
-## Validaciones ejecutadas
-
-```bash
-python -m compileall app scripts tests -q
-PYTHONPATH=. python scripts/validate_project.py
-PYTHONPATH=. pytest -q
+```text
+VALIDATION OK
+Engineering completeness: 97.7%
+Market coverage: 100.0%
+RFQ items: 1
+PriceGuard: 82.7%
+Recommended sell price: $5506.1
+Tests: 12 passed
 ```
 
-## Resultado esperado
-- Engineering completeness: >= 80%
-- Market coverage: >= 80%
-- PriceGuard: >= 70%
-- API health: OK
-- Exportables: Markdown, propuesta cliente, PDF, BOM CSV/XLSX, SVG, Draw.io, listas CSV
-- Tests: 11 passed
+## Prueba crítica de escala
 
-## Cierre V12
-La V12 agrega **Machine Context Lock** y **Layered UX**:
+Caso: compresor 180 HP · 440 V · 280 A.
 
-1. El texto, riesgos, checklist, CAD/taller y RFQ cambian según la máquina: guinche, compresor, bomba, banda o motor general.
-2. La web se usa por capas: registro piloto, datos mínimos, evidencia/CAD, mercado, entregables y admin interno.
-3. El panel de APIs queda oculto para el cliente normal; solo sirve para activación interna.
-4. La vista 3D didáctica se reemplaza por un visual premium de producto.
-5. Se agrega captura de lead piloto con endpoint `/api/leads` y almacenamiento temporal/local.
+```text
+FitLock blocked: 6
+PriceGuard verdict: BLOQUEADO POR FITLOCK
+Quote ready: False
+Quote readiness: Baja: solo borrador interno
+Price confidence: bloqueada por FitLock
+```
 
-## Límite profesional
-ControlPro reduce tiempo y ordena el expediente. No reemplaza normativa local, verificación de campo, proveedor confirmado ni aprobación humana antes de fabricar o energizar.
+La prueba confirma que el sistema ya no usa VFD 25 HP, MCCB 60 A, reactor 25 HP ni cable #8 como si fueran válidos para motores grandes. Si el catálogo piloto no tiene componente compatible, FitLock bloquea y exige RFQ técnico.
+
+## Validaciones de interfaz
+
+- Capas: cotizar, evidencia/CAD, mercado, entregables y admin.
+- Hash routing: abrir `#control`, `#bom`, `#api-activation`, etc. cambia de capa antes de hacer scroll.
+- Visual dinámico: actualiza máquina, potencia, FLA, arquitectura, conductor, PriceGuard y FitLock.

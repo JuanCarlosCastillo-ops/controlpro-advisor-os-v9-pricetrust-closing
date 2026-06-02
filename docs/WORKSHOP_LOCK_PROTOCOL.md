@@ -1,6 +1,6 @@
-# ControlPro V12 - MarketPilot Lock Protocol
+# ControlPro V13 - MarketPilot Lock Protocol
 
-La V12 corrige el último arrastre detectado: si la arquitectura principal es VFD + control inteligente, las salidas de taller no pueden conservar lenguaje de inversión por contactores como KM1/KM2.
+La V13 corrige el último arrastre detectado: si la arquitectura principal es VFD + control inteligente, las salidas de taller no pueden conservar lenguaje de inversión por contactores como KM1/KM2.
 
 ## Regla de cierre
 

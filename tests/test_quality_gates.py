@@ -42,7 +42,7 @@ def test_output_contains_traceability_sections():
     assert data['review_board']['veredicto']
     assert data['cad_outputs']['wire_schedule']
     assert data['cad_outputs']['drawio_available'] is True
-    assert data['priceguard']['methodology']['name'] == 'PriceGuard 12'
+    assert data['priceguard']['methodology']['name'] == 'PriceGuard 13 + FitLock'
     assert data['premium_document_contract']['pdf']
 
 
@@ -104,3 +104,30 @@ def test_machine_context_lock_for_compressor_removes_hoist_language():
     terminal_text = ' '.join(str(x) for row in data['cad_outputs']['terminal_schedule'] for x in row.values())
     assert 'PRESOSTATO' in terminal_text or 'TERM' in terminal_text
     assert 'SUBIR' not in terminal_text and 'BAJAR' not in terminal_text
+
+
+def test_fitlock_blocks_oversized_motor_with_small_catalog_items():
+    payload = client.get('/api/example').json()
+    payload.update({
+        'project_name': 'Compresor industrial — Control y protección',
+        'application': 'Compresor de aire',
+        'load_type': 'Compresor',
+        'motor_power_hp': 180,
+        'voltage': 440,
+        'full_load_amps': 280,
+        'needs_reversing': False,
+        'needs_brake': False,
+        'needs_limit_switches': False,
+        'needs_estop': True,
+        'needs_phase_monitor': True,
+        'user_notes': 'Compresor grande con VFD y control de presión.',
+    })
+    r = client.post('/api/generate', json=payload)
+    assert r.status_code == 200
+    data = r.json()
+    assert data['market']['summary']['fitlock_blocked_count'] >= 3
+    assert data['release_gates']['quote_ready'] is False
+    assert any(g['name'] == 'FitLock / dimensionamiento' and not g['passed'] for g in data['release_gates']['gates'])
+    reds = [d for d in data['market']['price_decisions'] if d['semaphore_color'] == 'rojo']
+    assert any(d['component_id'] == 'vfd' for d in reds)
+    assert any('FitLock' in ' '.join(d['anomaly_flags']) for d in reds)

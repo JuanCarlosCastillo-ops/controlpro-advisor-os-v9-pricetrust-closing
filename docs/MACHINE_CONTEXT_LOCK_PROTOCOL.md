@@ -1,6 +1,6 @@
-# Machine Context Lock - V12
+# Machine Context Lock - V13
 
-ControlPro no puede usar la misma plantilla para todo. La V12 clasifica la máquina y ajusta salidas:
+ControlPro no puede usar la misma plantilla para todo. La V13 clasifica la máquina y ajusta salidas:
 
 - Guinche / izaje: freno, finales, carga suspendida, E-Stop, rampas y pruebas con carga supervisada.
 - Compresor: presostato, unloader/descarga, válvula de alivio, temperatura, ventilación y arranques por hora.

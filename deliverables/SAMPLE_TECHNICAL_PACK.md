@@ -1,9 +1,9 @@
-# ControlPro Advisor OS V12 MarketPilot Lock — Expediente técnico-comercial
+# ControlPro Advisor OS V13 FitLock Pro — Expediente técnico-comercial
 
 **Proyecto:** Guinche de izaje — Cotización técnica premium
 **Cliente:** Cliente industrial
 **Ubicación:** Zaruma, El Oro, Ecuador
-**Generado:** 2026-06-02T19:14:05.561159+00:00
+**Generado:** 2026-06-02T21:04:06.918464+00:00
 
 ## Veredicto ejecutivo
 El sistema guía la entrada, genera solución, cálculos, BOM normalizado, precios por confianza, RFQ, presupuesto, riesgos, compuertas de calidad, exportables y acciones pendientes para que el ingeniero revise en vez de reconstruir.
@@ -22,7 +22,7 @@ Estado: **cotización revisable; exige RFQ/verificación antes de oferta cerrada
 - FALTA · **Cortocircuito disponible** · impacto Alta · Si no se conoce, marcar SCCR/kAIC como pendiente y no liberar construcción.
 
 ## Semáforo de precisión
-Preparación cotización: **Alta: lista para propuesta piloto revisable** · Score: **95.3%**
+Preparación cotización: **Alta: lista para propuesta piloto revisable** · Score: **95.2%**
 Liberación construcción: **No liberada para construcción automática**
 
 ## Auditoría de coherencia
@@ -35,7 +35,7 @@ Liberación construcción: **No liberada para construcción automática**
 
 ## Libro de supuestos
 - **SCCR/kAIC** · No se conoce corriente de cortocircuito; el breaker se trata como preliminar. · Confianza: baja · Verificación: Solicitar dato de transformador/red o medir/calcular antes de construir.
-- **Precio de materiales** · Cobertura catálogo 100.0%; PriceGuard 83.0%; verdes 15, amarillos 1, rojos 1; RFQ requerido en 1 ítems. · Confianza: según fuente · Verificación: Confirmar stock/vigencia; el precio 100% cerrado solo existe con proveedor confirmado.
+- **Precio de materiales** · Cobertura catálogo 100.0%; PriceGuard 82.7%; FitLock bloqueados 0; verdes 14, amarillos 1, rojos 1; RFQ requerido en 1 ítems. · Confianza: según fuente · Verificación: Confirmar stock/vigencia y compatibilidad técnica; el precio 100% cerrado solo existe con proveedor confirmado y componente que calza.
 - **Mano de obra** · Se asumen 1.5 días tablero y 1.5 días campo. · Confianza: media · Verificación: Ajustar con visita técnica y alcance final.
 - **Alcance** · Tablero + instalación en campo · Confianza: media · Verificación: Definir exclusiones: obra civil, canalización extra, parada de producción, permisos.
 - **Izaje** · Se trata como equipo crítico por carga suspendida; se exige revisión superior. · Confianza: alta · Verificación: Probar sin carga, con carga supervisada y firmar checklist.
@@ -46,7 +46,7 @@ Liberación construcción: **No liberada para construcción automática**
 - **overload_setting_a:** 38.0
 - **conductor_preliminary:** #8 AWG Cu
 - **voltage_drop_percent:** 0.42
-- **control_transformer_va:** 2000
+- **control_transformer_va:** 1000
 - **starting_current_estimate:** 182.4 A aprox. en arranque directo
 - **short_circuit_available_ka:** pendiente
 - **calculation_basis:** FLA de placa si existe; si no, estimación desde HP, V, fp y eficiencia.
@@ -59,7 +59,6 @@ MarketPilot Lock: **vfd_smart** · Aplicación de izaje detectada: carga suspend
 
 ## BOM cotizable
 - **mccb_main** · Cant. 1.0 · Schneider EasyPact CVS 60A 25kA · ElectroIndustrial Guayaquil · $145.0 · confianza alta · PriceGuard: VERDE (88.0%). Schneider EasyPact CVS 60A 25kA, ElectroIndustrial Guayaquil, Guayaquil.
-- **overload_relay** · Cant. 1.0 · Schneider LRD3357 · ElectroIndustrial Guayaquil · $66.0 · confianza alta · PriceGuard: VERDE (88.1%). Schneider LRD3357, ElectroIndustrial Guayaquil, Guayaquil.
 - **contactor_fwd** · Cant. 1.0 · Schneider LC1D32G7 · ElectroIndustrial Guayaquil · $82.0 · confianza alta · PriceGuard: VERDE (91.4%). Schneider LC1D32G7, ElectroIndustrial Guayaquil, Guayaquil.
 - **vfd** · Cant. 1.0 · ABB ACS580-01-039A-4 · Cuenca Control Supply · $1180.0 · confianza media-alta · PriceGuard: VERDE (80.7%). ABB ACS580-01-039A-4, Cuenca Control Supply, Cuenca.
 - **line_reactor** · Cant. 1.0 · Genérico industrial LR-25HP-460 · Suministros El Oro · $168.0 · confianza media · PriceGuard: AMARILLO (75.0%). Genérico industrial LR-25HP-460, Suministros El Oro, Machala.
@@ -77,18 +76,18 @@ MarketPilot Lock: **vfd_smart** · Aplicación de izaje detectada: carga suspend
 - **power_cable** · Cant. 53.1 · Electrocables THHN-8AWG-CU · Suministros El Oro · $2.45 · confianza alta · PriceGuard: VERDE (88.7%). Electrocables THHN-8AWG-CU, Suministros El Oro, Machala.
 
 ## Presupuesto
-- **materials:** 2854.59
+- **materials:** 2788.59
 - **panel_labor:** 270.0
 - **field_labor:** 330.0
 - **engineering:** 570.0
 - **transport_logistics:** 120.0
-- **contingency:** 331.57
-- **margin:** 1119.04
-- **floor_price:** 5013.3
-- **recommended_sell_price:** 5595.2
-- **premium_price:** 6826.14
+- **contingency:** 326.29
+- **margin:** 1101.22
+- **floor_price:** 4933.46
+- **recommended_sell_price:** 5506.1
+- **premium_price:** 6717.44
 - **price_confidence:** media-alta
-- **priceguard_status:** PriceGuard 83.0% · verde 15 · amarillo 1 · rojo 1
+- **priceguard_status:** PriceGuard 82.7% · FitLock bloqueados 0 · verde 14 · amarillo 1 · rojo 1
 - **commercial_note:** Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia.
 
 ## RFQ listo para enviar
@@ -141,13 +140,13 @@ Gracias.
 - **Ambiente severo** (Media): Seleccionar gabinete y componentes según ambiente declarado: Interior industrial con polvo.
 
 ## Mesa simulada de ingenieros
-La V12 MarketPilot Lock está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.
-- **Ingeniero junior**: feliz para piloto · Flujo guiado, modo rápido, semáforo de precisión y compuertas de salida.
-- **Técnico tablerista**: feliz para piloto · BOM normalizado por categoría, tabla cotizable, CSV/XLSX y notas de riesgo por componente.
-- **Mantenimiento industrial**: feliz para piloto · Checklist de taller/campo, plan de verificación y diagnóstico de fallas típicas.
-- **Diseñador eléctrico**: Satisfecho para piloto · Libro de supuestos, auditoría de coherencia, export PDF, Markdown y bloqueo SCCR/kAIC.
-- **Cotizador/compras**: feliz para piloto · Market engine, price confidence, RFQ, CSV/XLSX BOM y fuente/vigencia por línea.
-- **Seguridad/supervisor**: feliz: no promete construcción automática · Construction gate separado de quote gate; aprobación humana obligatoria.
+La V13 FitLock Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.
+- **Ingeniero junior**: feliz para piloto · Resuelto
+- **Técnico tablerista**: feliz para piloto · Resuelto
+- **Mantenimiento industrial**: feliz para piloto · Resuelto
+- **Diseñador eléctrico**: Satisfecho para piloto · Resuelto
+- **Cotizador/compras**: feliz para piloto · Resuelto
+- **Seguridad/supervisor**: feliz: no promete construcción automática · Resuelto
 
 ## Próximas acciones guiadas
 - Si no se conoce, marcar SCCR/kAIC como pendiente y no liberar construcción.

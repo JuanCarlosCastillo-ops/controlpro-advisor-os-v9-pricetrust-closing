@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import statistics
 from datetime import date, datetime
 from pathlib import Path
@@ -25,6 +26,152 @@ STOCK_WEIGHT = {
     "unknown": 0.50,
     "unavailable": 0.12,
 }
+
+
+# -----------------------------
+# FitLock / Sizing Lock helpers
+# -----------------------------
+def _num(v: str) -> float | None:
+    try:
+        return float(v)
+    except Exception:
+        return None
+
+
+def _extract_amp_values(text: str) -> list[float]:
+    text = text or ""
+    vals: list[float] = []
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*A\b", text, flags=re.I):
+        vals.append(float(m.group(1)))
+    # Model strings like ACS580-01-039A-4
+    for m in re.finditer(r"(?<![A-Z0-9])(\d{2,4})A(?![A-Z])", text, flags=re.I):
+        vals.append(float(m.group(1).lstrip('0') or 0))
+    return vals
+
+
+def _extract_hp_values(text: str) -> list[float]:
+    return [float(m.group(1)) for m in re.finditer(r"(\d+(?:\.\d+)?)\s*HP\b", text or "", flags=re.I)]
+
+
+def _extract_kva_values(text: str) -> list[float]:
+    return [float(m.group(1)) for m in re.finditer(r"(\d+(?:\.\d+)?)\s*kVA\b", text or "", flags=re.I)]
+
+
+def _extract_va_requirement(text: str) -> float | None:
+    m = re.search(r"(\d+(?:\.\d+)?)\s*VA\b", text or "", flags=re.I)
+    return float(m.group(1)) if m else None
+
+
+def _extract_required_current(req: ComponentRequirement, intake: ProjectIntake) -> float | None:
+    spec = req.spec or ""
+    # Corriente >= X A / compatible con X A / ajuste X A / preliminar X A
+    patterns = [
+        r">=\s*(\d+(?:\.\d+)?)\s*A",
+        r"compatible con\s*(\d+(?:\.\d+)?)\s*A",
+        r"ajuste\s*(\d+(?:\.\d+)?)\s*A",
+        r"(\d+(?:\.\d+)?)\s*A\s*preliminar",
+        r"rango que cubra ajuste\s*(\d+(?:\.\d+)?)\s*A",
+    ]
+    for pat in patterns:
+        m = re.search(pat, spec, flags=re.I)
+        if m:
+            return float(m.group(1))
+    # Fallback for power components
+    if req.component_id in {"vfd", "soft_starter", "line_reactor", "braking_resistor", "power_cable"}:
+        if intake.full_load_amps:
+            return float(intake.full_load_amps)
+    return None
+
+
+def _fitlock_estimate(req: ComponentRequirement, intake: ProjectIntake) -> float:
+    """Budgetary placeholder when catalog does not have a technically fitting item.
+
+    This is intentionally marked red/RFQ. It is not a sellable confirmed price.
+    """
+    hp = max(float(intake.motor_power_hp or 0), 1.0)
+    flc = float(intake.full_load_amps or 0) if intake.full_load_amps else None
+    text = (req.item + " " + req.spec + " " + req.component_id).lower()
+    if req.component_id == "vfd":
+        return max(1200.0, hp * 95.0)
+    if req.component_id == "soft_starter":
+        return max(750.0, hp * 55.0)
+    if req.component_id in {"mccb_main"}:
+        req_a = _extract_required_current(req, intake) or flc or 60
+        return max(160.0, req_a * 6.5)
+    if "contactor" in text or req.component_id in {"contactor_fwd", "contactor_rev", "main_contactor", "bypass_contactor"}:
+        req_a = _extract_required_current(req, intake) or flc or 32
+        return max(90.0, req_a * 7.0)
+    if req.component_id == "overload_relay":
+        req_a = _extract_required_current(req, intake) or flc or 30
+        return max(80.0, req_a * 3.5)
+    if req.component_id == "line_reactor":
+        return max(220.0, hp * 13.0)
+    if req.component_id == "braking_resistor":
+        return max(260.0, hp * 10.0)
+    if req.component_id == "control_transformer":
+        va = _extract_va_requirement(req.spec) or max(750, hp * 80)
+        return max(140.0, va / 1000.0 * 180.0)
+    if req.component_id == "cabinet":
+        return 135.0 if hp <= 30 else (450.0 if hp <= 100 else 950.0)
+    if req.component_id == "power_cable":
+        length = max(float(req.qty or 1), 1.0)
+        unit = 2.5 if (flc or 0) <= 45 else (8.0 if (flc or 0) <= 120 else 25.0)
+        return unit
+    return estimate_fallback(req)
+
+
+def _fitlock_offer(req: ComponentRequirement, offer: SupplierOffer, intake: ProjectIntake) -> tuple[bool, list[str]]:
+    """Hard technical compatibility check between BOM requirement and catalog offer.
+
+    If this fails, PriceGuard cannot turn green regardless of price.
+    """
+    flags: list[str] = []
+    blob = f"{offer.description} {offer.brand} {offer.model}".upper()
+    req_current = _extract_required_current(req, intake)
+    hp_required = float(intake.motor_power_hp or 0)
+    current_values = _extract_amp_values(blob)
+    hp_values = _extract_hp_values(blob)
+    kva_values = _extract_kva_values(blob)
+
+    def max_or_none(vals):
+        return max(vals) if vals else None
+
+    offer_a = max_or_none(current_values)
+    offer_hp = max_or_none(hp_values)
+
+    # Dedicated conductor sizing is a blocker; do not use #8 or any stock cable as if it were valid.
+    if req.component_id == "power_cable" and "REQUIERE CÁLCULO DEDICADO" in (req.spec or "").upper():
+        flags.append("FitLock: conductor requiere cálculo dedicado; catálogo piloto no puede cerrar calibre/precio")
+
+    if req.component_id in {"mccb_main", "contactor_fwd", "contactor_rev", "main_contactor", "star_contactor", "delta_contactor", "bypass_contactor", "overload_relay", "soft_starter", "line_reactor"}:
+        if req_current and offer_a and offer_a < req_current * 0.95:
+            flags.append(f"FitLock: corriente ofertada {offer_a:g} A menor que requerida {req_current:g} A")
+        elif req_current and not offer_a and req.component_id not in {"line_reactor"}:
+            flags.append(f"FitLock: oferta sin corriente verificable para requerimiento {req_current:g} A")
+
+    if req.component_id in {"vfd", "soft_starter", "line_reactor", "braking_resistor"}:
+        if offer_hp and hp_required and offer_hp < hp_required * 0.90:
+            flags.append(f"FitLock: oferta {offer_hp:g} HP menor que motor {hp_required:g} HP")
+        if req_current and offer_a and offer_a < req_current * 0.90:
+            flags.append(f"FitLock: corriente ofertada {offer_a:g} A menor que FLA/requerida {req_current:g} A")
+        if not offer_hp and not offer_a:
+            flags.append("FitLock: oferta sin HP/A verificable para componente crítico")
+
+    if req.component_id == "control_transformer":
+        req_va = _extract_va_requirement(req.spec)
+        offer_kva = max_or_none(kva_values)
+        if req_va and offer_kva and offer_kva * 1000 < req_va * 0.90:
+            flags.append(f"FitLock: transformador {offer_kva:g} kVA menor que {req_va:g} VA requeridos")
+        elif req_va and not offer_kva:
+            flags.append("FitLock: transformador sin kVA verificable")
+
+    if req.component_id == "cabinet" and hp_required >= 75:
+        # The pilot catalog cabinet is 600x400; large VFD jobs must go to RFQ/layout.
+        if any(token in blob for token in ["600X400", "604025", "600 X 400"]):
+            flags.append("FitLock: gabinete piloto 600x400 no validado para VFD/motor de alta potencia")
+
+    return len(flags) == 0, flags
+
 
 
 def _read_csv(path: Path) -> List[Dict[str, str]]:
@@ -244,37 +391,56 @@ def _select_offer(offers: List[SupplierOffer], intake: ProjectIntake) -> Tuple[S
 def decide_prices(requirements: Iterable[ComponentRequirement], intake: ProjectIntake) -> List[PriceDecision]:
     decisions: List[PriceDecision] = []
     for req in requirements:
-        offers = find_offers(req.component_id, intake)
-        selected, band, pg_score, flags, auto_corrected = _select_offer(offers, intake)
+        all_offers = find_offers(req.component_id, intake)
+        compatible: List[SupplierOffer] = []
+        fit_rejects: List[str] = []
+        for offer in all_offers:
+            ok, fflags = _fitlock_offer(req, offer, intake)
+            if ok:
+                compatible.append(offer)
+            else:
+                if len(fit_rejects) < 4:
+                    fit_rejects.append(f"{offer.brand} {offer.model}: " + "; ".join(fflags))
+        selected, band, pg_score, flags, auto_corrected = _select_offer(compatible, intake)
         if selected:
             color, risk_label, action = _semaphore(pg_score, flags, selected.source_type)
             ptype, label = confidence_label(pg_score, selected.source_type)
             unit_cost = selected.price_usd
             if color == "rojo" and band.get("median"):
-                # PriceGuard does not pretend certainty: it uses robust median as temporary budget reference and forces RFQ.
                 unit_cost = float(band["median"])
                 auto_corrected = True
                 ptype, label = "estimado corregido", "baja"
                 action = "Precio fuera de confianza. Usar mediana temporal y enviar RFQ a varios proveedores."
             note = f"PriceGuard: {color.upper()} ({pg_score}%). {selected.brand} {selected.model}, {selected.supplier_name}, {selected.city}."
+            if fit_rejects:
+                note += " FitLock rechazó ofertas incompatibles: " + " | ".join(fit_rejects) + "."
             if flags:
                 note += " Alertas: " + "; ".join(flags) + "."
             if auto_corrected:
                 note += " Se aplicó autocorrección por banda de mercado."
             explanation = _price_explanation(req, selected, band, color)
+            anomaly_flags = flags + (["FitLock rechazó ofertas incompatibles"] if fit_rejects else [])
         else:
-            color, label, action = "rojo", "baja", "Sin precio confiable: enviar RFQ y usar rango de contingencia."
-            ptype = "estimado"
-            unit_cost = estimate_fallback(req)
-            pg_score = 28.0
-            flags = ["sin ofertas en catálogo"]
-            band = {"min": unit_cost * 0.75, "p25": unit_cost * 0.9, "median": unit_cost, "p75": unit_cost * 1.15, "max": unit_cost * 1.35, "sample_size": 0, "spread_percent": 0}
-            note = "Sin precio en catálogo; se usa estimación conservadora y se debe enviar RFQ."
-            explanation = "Estimación temporal sin proveedor. No debe usarse como precio final."
+            color, label, action = "rojo", "baja", "FitLock bloqueó el precio: no hay oferta técnicamente compatible. Enviar RFQ con especificación real."
+            ptype = "RFQ obligatorio / estimación presupuestaria"
+            unit_cost = _fitlock_estimate(req, intake)
+            pg_score = 12.0 if fit_rejects else 25.0
+            flags = ["FitLock: sin oferta compatible en catálogo piloto"] + fit_rejects
+            # Band based on rejected market if available; otherwise conservative RFQ placeholder band.
+            band = _market_band(all_offers) if all_offers else {
+                "min": round(unit_cost * 0.75, 2), "p25": round(unit_cost * 0.9, 2), "median": round(unit_cost, 2),
+                "p75": round(unit_cost * 1.2, 2), "max": round(unit_cost * 1.45, 2), "sample_size": 0, "spread_percent": 0,
+            }
+            note = "FitLock: ningún producto del catálogo piloto calza con HP/FLA/tensión/especificación. Se muestra solo una estimación presupuestaria y se exige RFQ."
+            if fit_rejects:
+                note += " Rechazos: " + " | ".join(fit_rejects) + "."
+            explanation = "FitLock bloqueó el uso comercial de catálogo: el precio no es cerrable hasta que un proveedor confirme modelo compatible, stock, vigencia y especificación."
+            auto_corrected = False
+            anomaly_flags = flags
         decisions.append(PriceDecision(
             component_id=req.component_id,
             selected_offer=selected,
-            offers=offers[:5],
+            offers=all_offers[:5],
             qty=req.qty,
             unit_cost=round(unit_cost, 2),
             extended_cost=round(unit_cost * req.qty, 2),
@@ -284,7 +450,7 @@ def decide_prices(requirements: Iterable[ComponentRequirement], intake: ProjectI
             semaphore_color=color,
             priceguard_score=pg_score,
             market_band=band,
-            anomaly_flags=flags,
+            anomaly_flags=anomaly_flags,
             action_required=action,
             auto_corrected=auto_corrected,
             rfq_priority="alta" if color == "rojo" else ("media" if color == "amarillo" else "baja"),
@@ -381,6 +547,7 @@ def summarize_market(decisions: List[PriceDecision]) -> Dict[str, Any]:
     high_conf = sum(1 for d in decisions if d.confidence_label in {"alta", "media-alta"})
     quote_needed = [d for d in decisions if d.semaphore_color == "rojo" or not d.selected_offer or (d.selected_offer and d.selected_offer.stock_status != "available") or d.confidence_label == "baja"]
     outliers = [d for d in decisions if d.anomaly_flags]
+    fitlock_blocked = [d for d in decisions if any("FitLock" in f for f in (d.anomaly_flags or []))]
     suppliers = sorted({d.selected_offer.supplier_name for d in decisions if d.selected_offer})
     pg_score = round(sum(d.priceguard_score for d in decisions) / max(1, len(decisions)), 1)
     catalog_depth = round(sum(min(1, (d.market_band.get("sample_size") or 0) / 3) for d in decisions) / max(1, len(decisions)) * 100, 1)
@@ -398,13 +565,16 @@ def summarize_market(decisions: List[PriceDecision]) -> Dict[str, Any]:
         "yellow_count": yellow,
         "red_count": red,
         "outlier_count": len(outliers),
+        "fitlock_blocked_count": len(fitlock_blocked),
+        "fitlock_blocked_components": [d.component_id for d in fitlock_blocked],
+        "fitlock_status": "OK" if not fitlock_blocked else "BLOQUEADO: componentes sin compatibilidad técnica confirmada",
         "auto_corrected_count": sum(1 for d in decisions if d.auto_corrected),
         "catalog_depth_score_percent": catalog_depth,
         "candidate_offer_audit": _all_offer_anomaly_audit(decisions),
         "locked_price_count": sum(1 for d in decisions if d.semaphore_color == "verde" and d.confidence_label in {"alta", "media-alta"}),
         "referential_price_count": sum(1 for d in decisions if d.semaphore_color == "amarillo"),
         "blocked_price_count": sum(1 for d in decisions if d.semaphore_color == "rojo"),
-        "priceguard_verdict": "Fuerte para piloto" if pg_score >= 85 and red == 0 else ("Revisable con RFQ" if pg_score >= 70 else "Débil: no enviar sin confirmar"),
+        "priceguard_verdict": "BLOQUEADO POR FITLOCK" if fitlock_blocked else ("Fuerte para piloto" if pg_score >= 85 and red == 0 else ("Revisable con RFQ" if pg_score >= 70 else "Débil: no enviar sin confirmar")),
         "catalog_scope": "Catálogo piloto ampliado: fuerza, control, seguridad, VFD, soft starter, taller, cables y consumibles. No sustituye precios reales confirmados.",
         "confidence_policy": {
             "precio_confirmado": "Proveedor/stock/vigencia confirmados o fuente interna validada; se puede usar en propuesta revisable.",
@@ -448,7 +618,7 @@ def generate_rfq_message(requirements: Iterable[ComponentRequirement], decisions
 
 def priceguard_methodology() -> Dict[str, Any]:
     return {
-        "name": "PriceGuard 12",
+        "name": "PriceGuard 13 + FitLock",
         "goal": "Evitar cotizaciones débiles, precios exagerados, precios incompatibles, BOM incoherente con la arquitectura y falsas certezas antes de presupuestar trabajos de miles de dólares.",
         "inputs": ["catálogo interno", "fuente de precio", "stock", "vigencia", "proveedor", "banda de mercado", "ubicación", "historial/RFQ", "auditoría de outliers", "estado de credenciales API"],
         "semaforos": {
@@ -463,6 +633,7 @@ def priceguard_methodology() -> Dict[str, Any]:
             "Mostrar catálogo piloto separado de mercado vivo.",
             "Auditar todas las ofertas candidatas, no solo la seleccionada.",
             "Forzar coherencia: solución recomendada, BOM, RFQ, PDF y propuesta deben usar la misma arquitectura.",
+            "FitLock: bloquear precios si breaker/VFD/reactor/cable/protecciones no calzan con HP, FLA y tensión.",
             "Separar precio estimado, referencial, referencial fuerte y confirmado.",
             "Bloquear salida fuerte cuando hay demasiados rojos o stock sin confirmar.",
         ],

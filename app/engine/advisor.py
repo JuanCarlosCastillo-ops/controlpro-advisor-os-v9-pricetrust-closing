@@ -8,8 +8,8 @@ from .pricing import decide_prices, generate_rfq_message, summarize_market, load
 from .cad import single_line_cad_svg, control_ladder_cad_svg, panel_layout_cad_svg, terminal_schedule, wire_schedule, drawio_xml
 from app.integrations.config import integration_status
 
-VERSION = "12.0-marketpilot-lock"
-PRODUCT = "ControlPro Advisor OS V12 MarketPilot Lock"
+VERSION = "13.0-fitlock-pro"
+PRODUCT = "ControlPro Advisor OS V13 FitLock Pro"
 
 
 def example_intake() -> Dict[str, Any]:
@@ -43,9 +43,9 @@ def _conductor_size_awg(current: float, distance_m: float) -> str:
 
 
 def _breaker_size(current: float) -> int:
-    standard = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 125, 150, 175, 200, 225, 250, 300, 350, 400]
+    standard = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 700, 800, 1000, 1200]
     target = max(15, current * 1.75)
-    return next((s for s in standard if s >= target), standard[-1])
+    return next((std for std in standard if std >= target), standard[-1])
 
 
 def _overload_setting(current: float, service_factor: float) -> float:
@@ -244,7 +244,7 @@ def _starter_by_id(alternatives: List[Dict[str, Any]], starter_id: str) -> Dict[
 def _select_architecture(i: ProjectIntake, alternatives: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Selecciona arquitectura antes de armar BOM.
 
-    Regla crítica V12: la solución recomendada, el BOM y la propuesta al cliente
+    Regla crítica V13: la solución recomendada, el BOM y la propuesta al cliente
     deben hablar el mismo idioma. Si el caso es izaje, estrella-triángulo no se
     recomienda por defecto porque puede requerir torque y control fino.
     """
@@ -311,7 +311,6 @@ def _build_requirements(i: ProjectIntake, calc: Dict[str, Any], architecture: Di
 
     # Protección y seguridad comunes
     add("mccb_main", "Fuerza", "MCCB principal", 1, f"3P, {calc['breaker_size_a']} A preliminar, tensión {int(i.voltage)} V, SCCR/kAIC por verificar", checks=["corriente", "tensión", "SCCR", "curva"], risk="No seleccionar sin verificar cortocircuito disponible.")
-    add("overload_relay", "Fuerza", "Relé de sobrecarga", 1, f"Rango que cubra ajuste {calc['overload_setting_a']} A", checks=["rango", "clase", "compatibilidad"], risk="Ajuste incorrecto puede disparar falso o no proteger.")
 
     # Componentes dependientes de arquitectura: aquí se evita mezclar VFD con estrella-triángulo.
     if arch == "vfd_smart" or arch == "plc_hmi_control":
@@ -324,19 +323,23 @@ def _build_requirements(i: ProjectIntake, calc: Dict[str, Any], architecture: Di
         if arch == "plc_hmi_control":
             add("plc_basic", "Control", "PLC básico", 1, "Entradas/salidas suficientes para mando, finales, freno, fallas y reserva", must_have=False, checks=["IO", "tensión", "programación", "backup"], risk="Sube ingeniería, pero mejora diagnóstico y expansión.")
     elif arch == "soft_starter":
+        add("overload_relay", "Fuerza", "Relé de sobrecarga", 1, f"Rango que cubra ajuste {calc['overload_setting_a']} A", checks=["rango", "clase", "compatibilidad"], risk="Ajuste incorrecto puede disparar falso o no proteger.")
         add("contactor_fwd", "Fuerza", "Contactor principal", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"])
         add("soft_starter", "Fuerza", "Soft starter", 1, f"Para {i.motor_power_hp:g} HP, {int(i.voltage)} V, corriente >= {calc['full_load_current_a']} A", checks=["corriente", "bypass", "torque", "rampa"], risk="Validar torque de arranque y compatibilidad con freno.")
         add("bypass_contactor", "Fuerza", "Contactor bypass", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", must_have=False, checks=["AC-3", "bobina", "coordinación"], risk="Puede requerirse para reducir pérdidas/temperatura en soft starter.")
     elif arch == "star_delta":
+        add("overload_relay", "Fuerza", "Relé de sobrecarga", 1, f"Rango que cubra ajuste {calc['overload_setting_a']} A", checks=["rango", "clase", "compatibilidad"], risk="Ajuste incorrecto puede disparar falso o no proteger.")
         add("main_contactor", "Fuerza", "Contactor principal estrella-triángulo", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"] )
         add("star_contactor", "Fuerza", "Contactor estrella", 1, "Compatible con esquema estrella-triángulo y temporizador", checks=["coordinación", "enclavamiento"] )
         add("delta_contactor", "Fuerza", "Contactor triángulo", 1, "Compatible con esquema estrella-triángulo y temporizador", checks=["coordinación", "enclavamiento"] )
         add("star_delta_timer", "Control", "Temporizador estrella-triángulo", 1, "Rango ajustable y contactos para conmutación segura", checks=["tiempo", "contactos", "tensión control"], risk="No usar si el motor no tiene 6 terminales accesibles o la carga requiere alto torque inicial.")
     elif arch == "dol_reversing":
+        add("overload_relay", "Fuerza", "Relé de sobrecarga", 1, f"Rango que cubra ajuste {calc['overload_setting_a']} A", checks=["rango", "clase", "compatibilidad"], risk="Ajuste incorrecto puede disparar falso o no proteger.")
         add("contactor_fwd", "Fuerza", "Contactor subir", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"], risk="Verificar compatibilidad con enclavamiento.")
         add("contactor_rev", "Fuerza", "Contactor bajar", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"], risk="Verificar compatibilidad con enclavamiento.")
         add("mechanical_interlock", "Seguridad", "Enclavamiento mecánico", 1, "Compatible con ambos contactores de inversión", checks=["compatibilidad física", "bloqueo real"], risk="Obligatorio para evitar inversión simultánea.")
     else:
+        add("overload_relay", "Fuerza", "Relé de sobrecarga", 1, f"Rango que cubra ajuste {calc['overload_setting_a']} A", checks=["rango", "clase", "compatibilidad"], risk="Ajuste incorrecto puede disparar falso o no proteger.")
         add("contactor_fwd", "Fuerza", "Contactor principal", 1, f"AC-3, corriente >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", checks=["AC-3", "bobina", "corriente"])
 
     if i.needs_phase_monitor:
@@ -502,9 +505,9 @@ def _build_budget(i: ProjectIntake, material_cost: float, market_summary: Dict[s
         "floor_price": round(floor, 2),
         "recommended_sell_price": round(recommended, 2),
         "premium_price": round(premium, 2),
-        "price_confidence": "alta" if market_summary.get("priceguard_score_percent", 0) >= 82 and market_summary.get("red_count", 0) == 0 else ("media-alta" if market_summary.get("priceguard_score_percent", 0) >= 70 and market_summary.get("red_count", 0) <= 2 else "media/baja"),
-        "priceguard_status": f"PriceGuard {market_summary.get('priceguard_score_percent', 0)}% · verde {market_summary.get('green_count',0)} · amarillo {market_summary.get('yellow_count',0)} · rojo {market_summary.get('red_count',0)}",
-        "commercial_note": "Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia.",
+        "price_confidence": "bloqueada por FitLock" if market_summary.get("fitlock_blocked_count", 0) else ("alta" if market_summary.get("priceguard_score_percent", 0) >= 82 and market_summary.get("red_count", 0) == 0 else ("media-alta" if market_summary.get("priceguard_score_percent", 0) >= 70 and market_summary.get("red_count", 0) <= 2 else "media/baja")),
+        "priceguard_status": f"PriceGuard {market_summary.get('priceguard_score_percent', 0)}% · FitLock bloqueados {market_summary.get('fitlock_blocked_count',0)} · verde {market_summary.get('green_count',0)} · amarillo {market_summary.get('yellow_count',0)} · rojo {market_summary.get('red_count',0)}",
+        "commercial_note": "Cotización bloqueada por FitLock: enviar RFQ técnico y confirmar componentes compatibles." if market_summary.get("fitlock_blocked_count",0) else "Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia.",
     }
 
 
@@ -589,7 +592,7 @@ def _assumption_ledger(i: ProjectIntake, calc: Dict[str, Any], market_summary: D
         add("SCCR/kAIC", "No se conoce corriente de cortocircuito; el breaker se trata como preliminar.", "baja", "Solicitar dato de transformador/red o medir/calcular antes de construir.")
     if not i.full_load_amps:
         add("Corriente de motor", f"Se estima FLC = {calc['full_load_current_a']} A desde HP, tensión, fp y eficiencia.", "media-baja", "Confirmar placa real.")
-    add("Precio de materiales", f"Cobertura catálogo {market_summary['coverage_percent']}%; PriceGuard {market_summary.get('priceguard_score_percent',0)}%; verdes {market_summary.get('green_count',0)}, amarillos {market_summary.get('yellow_count',0)}, rojos {market_summary.get('red_count',0)}; RFQ requerido en {market_summary['needs_rfq_count']} ítems.", "según fuente", "Confirmar stock/vigencia; el precio 100% cerrado solo existe con proveedor confirmado.")
+    add("Precio de materiales", f"Cobertura catálogo {market_summary['coverage_percent']}%; PriceGuard {market_summary.get('priceguard_score_percent',0)}%; FitLock bloqueados {market_summary.get('fitlock_blocked_count',0)}; verdes {market_summary.get('green_count',0)}, amarillos {market_summary.get('yellow_count',0)}, rojos {market_summary.get('red_count',0)}; RFQ requerido en {market_summary['needs_rfq_count']} ítems.", "según fuente", "Confirmar stock/vigencia y compatibilidad técnica; el precio 100% cerrado solo existe con proveedor confirmado y componente que calza.")
     add("Mano de obra", f"Se asumen {i.labor_days_panel} días tablero y {i.labor_days_field} días campo.", "media", "Ajustar con visita técnica y alcance final.")
     add("Alcance", i.installation_scope, "media", "Definir exclusiones: obra civil, canalización extra, parada de producción, permisos.")
     if _is_hoist(i):
@@ -603,7 +606,9 @@ def _release_gates(i: ProjectIntake, quality: Dict[str, Any], consistency: Dict[
         gates.append({"name": name, "passed": passed, "consequence": consequence, "required_action": required_action})
     gate("Datos críticos", not quality["critical_missing"], "Sin datos críticos no se puede construir ni cerrar precio técnico.", "Completar placa, tensión/fases, aplicación y seguridad.")
     gate("Coherencia técnica", len(consistency["blockers"]) == 0, "Bloqueadores elevan revisión humana y bajan confianza.", "Resolver auditoría de coherencia.")
-    gate("Mercado/precio", market_summary.get("needs_rfq_count", 99) <= 3 and market_summary.get("priceguard_score_percent", 0) >= 70, "Ítems en rojo o PriceGuard bajo obligan a RFQ antes de precio cerrado.", "Confirmar proveedores/stock y corregir outliers de precio.")
+    fitlock_ok = market_summary.get("fitlock_blocked_count", 0) == 0
+    gate("FitLock / dimensionamiento", fitlock_ok, "Componentes que no calzan con HP/FLA/tensión bloquean precio y BOM fuerte.", "Enviar RFQ técnico y seleccionar breaker/VFD/reactor/cable compatibles.")
+    gate("Mercado/precio", market_summary.get("needs_rfq_count", 99) <= 3 and market_summary.get("priceguard_score_percent", 0) >= 70 and fitlock_ok, "Ítems en rojo, FitLock o PriceGuard bajo obligan a RFQ antes de precio cerrado.", "Confirmar proveedores/stock, compatibilidad y corregir outliers de precio.")
     gate("SCCR/kAIC", bool(i.short_circuit_available_ka and i.short_circuit_available_ka > 0), "No liberar fabricación sin capacidad interruptiva verificada.", "Solicitar corto disponible o criterio de protección.")
     ctx = _machine_context(i)
     if _is_hoist(i):
@@ -613,7 +618,7 @@ def _release_gates(i: ProjectIntake, quality: Dict[str, Any], consistency: Dict[
         passed_ctx = i.needs_estop and ((i.phases != 3) or i.needs_phase_monitor)
         consequence = f"{ctx['label']} sin protecciones mínimas aumenta riesgo de falla y reclamo."
     gate(ctx["safety_gate"], passed_ctx, consequence, ctx["safety_fix"])
-    quote_ready = all(g["passed"] for g in gates[:3])
+    quote_ready = all(g["passed"] for g in gates[:4])
     construction_ready = all(g["passed"] for g in gates)
     return {
         "quote_ready": quote_ready,
@@ -636,7 +641,7 @@ def _quote_readiness(quality: Dict[str, Any], consistency: Dict[str, Any], marke
         "score_percent": score,
         "status": status,
         "seller_message": "Ahorra tiempo porque arma el 80–90% del expediente; el humano valida, no reconstruye.",
-        "do_not_send_if": [g["name"] for g in release["gates"] if not g["passed"] and g["name"] in {"Datos críticos", "Mercado/precio", "Coherencia técnica"}],
+        "do_not_send_if": [g["name"] for g in release["gates"] if not g["passed"] and g["name"] in {"Datos críticos", "Mercado/precio", "Coherencia técnica", "FitLock / dimensionamiento"}],
     }
 
 
@@ -681,7 +686,7 @@ def _engineer_review_board(i: ProjectIntake, release: Dict[str, Any], market_sum
         {"perfil": "Seguridad/supervisor", "lo_que_exigia": "No liberar construcción si hay riesgo crítico.", "respuesta_v10": "Construction gate separado de quote gate; aprobación humana obligatoria.", "estado": "feliz: no promete construcción automática"},
     ]
     return {
-        "veredicto": "La V12 MarketPilot Lock está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
+        "veredicto": "La V13 FitLock Pro está lista para prueba piloto cerrada con ingenieros: arquitectura, BOM, CAD/taller, RFQ, PDF y propuesta obedecen la misma solución principal.",
         "quote_score": quote["score_percent"],
         "personas": personas,
         "regla_de_venta": "Vender ahorro de tiempo y expediente técnico-comercial trazable, no certificación automática.",
@@ -717,6 +722,7 @@ def _output_quality_contract(release: Dict[str, Any], quote: Dict[str, Any]) -> 
             "Separar dato confirmado, supuesto y pendiente.",
             "No ocultar baja confianza de precio.",
             "Bloquear construcción si faltan seguridad, SCCR/kAIC o coherencia crítica.",
+            "FitLock: bloquear propuesta fuerte si breaker, VFD, reactor, cable o protecciones no calzan con HP/FLA/tensión.",
             "Mostrar acciones concretas para cerrar cada pendiente.",
             "Entregar archivos exportables y trazables.",
         ],
@@ -744,7 +750,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
         "overload_setting_a": _overload_setting(flc, i.service_factor),
         "conductor_preliminary": _conductor_size_awg(flc, i.cable_run_m),
         "voltage_drop_percent": _voltage_drop_percent(flc, i.voltage, i.cable_run_m, i.phases),
-        "control_transformer_va": max(750, int(i.motor_power_hp * 80)),
+        "control_transformer_va": 1000 if i.control_voltage <= 120 else 1500,
         "starting_current_estimate": f"{round(flc * 6, 1)} A aprox. en arranque directo",
         "short_circuit_available_ka": i.short_circuit_available_ka or "pendiente",
         "calculation_basis": "FLA de placa si existe; si no, estimación desde HP, V, fp y eficiencia.",
@@ -772,7 +778,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
     output_contract = _output_quality_contract(release, quote)
 
     pack = EngineeringPack(
-        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con MarketPilot Lock"},
+        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release con MarketPilot + FitLock"},
         intake=i.model_dump(),
         executive_verdict={
             "headline": "Cotización industrial inteligente: menos datos, más expediente, cero certezas falsas.",
@@ -790,7 +796,7 @@ def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> Engine
             "summary": market_summary,
             "price_decisions": [d.model_dump() for d in decisions],
             "supplier_count": len(market_summary["suppliers_used"]),
-            "method": "PriceGuard 12 + MarketPilot Lock: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
+            "method": "PriceGuard 13 + FitLock Pro: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
             "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
             "priceguard_methodology": priceguard_methodology(),
             "architecture_lock": architecture,
@@ -926,7 +932,7 @@ def export_pack_markdown(payload: Dict[str, Any] | ProjectIntake) -> str:
     lines.append(pack['recommended_option']['why'])
     if pack.get("starter_intelligence", {}).get("architecture_lock"):
         arch = pack["starter_intelligence"]["architecture_lock"]
-        lines.append(f"MarketPilot Lock: **{arch.get('architecture_id', arch.get('id',''))}** · {arch.get('architecture_reason','')}")
+        lines.append(f"FitLock Pro: **{arch.get('architecture_id', arch.get('id',''))}** · {arch.get('architecture_reason','')}")
         for w in arch.get('architecture_warnings', []):
             lines.append(f"- Advertencia arquitectura: {w}")
     lines.append("")
@@ -969,7 +975,7 @@ def export_pack_markdown(payload: Dict[str, Any] | ProjectIntake) -> str:
     lines.append("## Mesa simulada de ingenieros")
     lines.append(pack["review_board"]["veredicto"])
     for p in pack["review_board"]["personas"]:
-        lines.append(f"- **{p['perfil']}**: {p['estado']} · {p.get('respuesta_v10', 'Resuelto')}")
+        lines.append(f"- **{p['perfil']}**: {p['estado']} · {p.get('respuesta_v13', 'Resuelto')}")
     lines.append("")
     lines.append("## Próximas acciones guiadas")
     for n in pack["guided_flow"]["next_best_actions"]:
