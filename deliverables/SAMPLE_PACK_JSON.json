@@ -1,0 +1,3868 @@
+{
+  "meta": {
+    "product": "ControlPro Advisor OS V9 PriceTrust Closing",
+    "version": "9.0-pricetrust-closing",
+    "generated_at": "2026-06-02T01:00:17.585249+00:00",
+    "language": "es",
+    "release_type": "pilot release cerrado para mesa de ingenieros"
+  },
+  "intake": {
+    "project_name": "Guinche de izaje — Cotización técnica premium",
+    "client_name": "Cliente industrial",
+    "location_city": "Zaruma",
+    "location_province": "El Oro",
+    "country": "Ecuador",
+    "application": "Guinche / winche de izaje",
+    "motor_power_hp": 25.0,
+    "voltage": 460.0,
+    "phases": 3,
+    "frequency_hz": 60.0,
+    "full_load_amps": 30.4,
+    "efficiency": 0.936,
+    "power_factor": 0.86,
+    "service_factor": 1.15,
+    "rpm": 1765,
+    "enclosure": "TEFC",
+    "load_type": "Izaje / guinche",
+    "duty_cycle": "Intermitente",
+    "starts_per_hour": 30,
+    "inertia": "Media",
+    "environment": "Interior industrial con polvo",
+    "ambient_temp_c": 40.0,
+    "altitude_m": 1000.0,
+    "hazard_area": "Ninguna declarada",
+    "cable_run_m": 45.0,
+    "control_voltage": 120.0,
+    "needs_reversing": true,
+    "needs_brake": true,
+    "needs_limit_switches": true,
+    "needs_estop": true,
+    "needs_phase_monitor": true,
+    "budget_profile": "Profesional",
+    "quote_speed": "Rápida pero segura",
+    "preferred_quality": "Industrial confiable",
+    "labor_days_panel": 1.5,
+    "labor_days_field": 1.5,
+    "margin_percent": 25.0,
+    "contingency_percent": 8.0,
+    "load_capacity_ton": 10.0,
+    "field_photos_count": 3,
+    "nameplate_photo_confirmed": true,
+    "panel_photo_confirmed": true,
+    "site_photo_confirmed": true,
+    "short_circuit_available_ka": null,
+    "installation_scope": "Tablero + instalación en campo",
+    "quote_valid_days": 7,
+    "client_budget_limit": null,
+    "auto_block_low_confidence": true,
+    "user_notes": "Reemplazar tablero existente del guinche. Mantener huella de montaje. Considerar crecimiento futuro con variador."
+  },
+  "executive_verdict": {
+    "headline": "Cotización industrial inteligente: menos datos, más expediente, cero certezas falsas.",
+    "verdict": "El sistema guía la entrada, genera solución, cálculos, BOM normalizado, precios por confianza, RFQ, presupuesto, riesgos, compuertas de calidad, exportables y acciones pendientes para que el ingeniero revise en vez de reconstruir.",
+    "business_pain": "Reduce horas perdidas en cotizaciones de miles de dólares que quizá no se ganen.",
+    "release_gate": "Lista para cotización piloto"
+  },
+  "data_quality": {
+    "score_percent": 96.0,
+    "status": "cotización revisable; exige RFQ/verificación antes de oferta cerrada",
+    "critical_missing": [],
+    "high_missing": [
+      {
+        "check": "Cortocircuito disponible",
+        "ok": false,
+        "impact": "Alta",
+        "fix": "Si no se conoce, marcar SCCR/kAIC como pendiente y no liberar construcción.",
+        "weight": 4
+      }
+    ],
+    "checks": [
+      {
+        "check": "Corriente de placa / FLA",
+        "ok": true,
+        "impact": "Crítica",
+        "fix": "Subir foto de placa o confirmar FLA medido antes de enviar precio cerrado.",
+        "weight": 16
+      },
+      {
+        "check": "Datos eléctricos base",
+        "ok": true,
+        "impact": "Crítica",
+        "fix": "Confirmar tensión real, fases y frecuencia.",
+        "weight": 12
+      },
+      {
+        "check": "Potencia y aplicación",
+        "ok": true,
+        "impact": "Crítica",
+        "fix": "Indicar máquina, potencia y uso real.",
+        "weight": 10
+      },
+      {
+        "check": "Evidencia fotográfica",
+        "ok": true,
+        "impact": "Alta",
+        "fix": "Cargar placa, tablero actual/ruta y ambiente de instalación.",
+        "weight": 12
+      },
+      {
+        "check": "Seguridad de izaje",
+        "ok": true,
+        "impact": "Crítica",
+        "fix": "Para guinche/izaje exigir freno, finales de carrera y paro de emergencia.",
+        "weight": 16
+      },
+      {
+        "check": "Protección ante falla de fase",
+        "ok": true,
+        "impact": "Alta",
+        "fix": "En motores trifásicos de trabajo crítico usar monitor de fase/secuencia.",
+        "weight": 8
+      },
+      {
+        "check": "Distancia y ambiente",
+        "ok": true,
+        "impact": "Alta",
+        "fix": "Medir ruta real, temperatura, polvo/humedad y canalización.",
+        "weight": 10
+      },
+      {
+        "check": "Ubicación comercial",
+        "ok": true,
+        "impact": "Media",
+        "fix": "Indicar ciudad/provincia para proveedores, logística y vigencia.",
+        "weight": 6
+      },
+      {
+        "check": "Alcance y margen",
+        "ok": true,
+        "impact": "Media",
+        "fix": "Definir si incluye tablero, instalación, pruebas, transporte y margen mínimo.",
+        "weight": 6
+      },
+      {
+        "check": "Cortocircuito disponible",
+        "ok": false,
+        "impact": "Alta",
+        "fix": "Si no se conoce, marcar SCCR/kAIC como pendiente y no liberar construcción.",
+        "weight": 4
+      }
+    ],
+    "rule": "Todo dato no confirmado aparece como supuesto o compuerta. La app no convierte desconocidos en certeza."
+  },
+  "agents": [
+    {
+      "name": "Arquitecto de datos",
+      "mission": "Limpia entrada, detecta faltantes y baja confianza si hay datos flojos.",
+      "output": "Ficha técnica revisable"
+    },
+    {
+      "name": "Ingeniero de fuerza",
+      "mission": "Define rama de potencia, protecciones y componentes críticos.",
+      "output": "Unifilar + requerimientos"
+    },
+    {
+      "name": "Diseñador de control",
+      "mission": "Arma lógica con enclavamientos, finales, paro y freno.",
+      "output": "Ladder conceptual"
+    },
+    {
+      "name": "Normalizador de materiales",
+      "mission": "Convierte pedidos ambiguos en componentes canónicos comprables.",
+      "output": "BOM inteligente"
+    },
+    {
+      "name": "Comprador técnico",
+      "mission": "Compara proveedor, marca, stock, entrega, precio y riesgo.",
+      "output": "Decisiones de precio"
+    },
+    {
+      "name": "Agente RFQ",
+      "mission": "Genera mensaje listo para pedir precios reales y confirmar stock.",
+      "output": "Solicitud a proveedores"
+    },
+    {
+      "name": "Comercial Shark",
+      "mission": "Calcula margen, riesgo, precio piso/recomendado/premium.",
+      "output": "Cotización defendible"
+    },
+    {
+      "name": "Revisor brutal",
+      "mission": "Bloquea certezas falsas y exige validación humana antes de construir.",
+      "output": "Compuertas de seguridad"
+    }
+  ],
+  "calculations": {
+    "full_load_current_a": 30.4,
+    "breaker_size_a": 60,
+    "overload_setting_a": 38.0,
+    "conductor_preliminary": "#8 AWG Cu",
+    "voltage_drop_percent": 0.42,
+    "control_transformer_va": 2000,
+    "starting_current_estimate": "182.4 A aprox. en arranque directo",
+    "short_circuit_available_ka": "pendiente",
+    "calculation_basis": "FLA de placa si existe; si no, estimación desde HP, V, fp y eficiencia.",
+    "notice": "Cálculos preliminares para cotización. Para construcción se requiere placa real, tablas/códigos aplicables, temperatura, canalización, coordinación y verificación de campo."
+  },
+  "requirements": [
+    {
+      "component_id": "mccb_main",
+      "category": "Fuerza",
+      "item": "MCCB principal",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "3P, 60 A preliminar, tensión 460 V, SCCR/kAIC por verificar",
+      "must_have": true,
+      "critical_checks": [
+        "corriente",
+        "tensión",
+        "SCCR",
+        "curva"
+      ],
+      "risk_note": "No seleccionar sin verificar cortocircuito disponible."
+    },
+    {
+      "component_id": "overload_relay",
+      "category": "Fuerza",
+      "item": "Relé de sobrecarga",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Rango que cubra ajuste 38.0 A",
+      "must_have": true,
+      "critical_checks": [
+        "rango",
+        "clase",
+        "compatibilidad"
+      ],
+      "risk_note": "Ajuste incorrecto puede disparar falso o no proteger."
+    },
+    {
+      "component_id": "contactor_fwd",
+      "category": "Fuerza",
+      "item": "Contactor subir",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "AC-3, corriente mínima >= 30.4 A, bobina 120 V",
+      "must_have": true,
+      "critical_checks": [
+        "AC-3",
+        "bobina",
+        "corriente"
+      ],
+      "risk_note": "Verificar compatibilidad con enclavamiento."
+    },
+    {
+      "component_id": "contactor_rev",
+      "category": "Fuerza",
+      "item": "Contactor bajar",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "AC-3, corriente mínima >= 30.4 A, bobina 120 V",
+      "must_have": true,
+      "critical_checks": [
+        "AC-3",
+        "bobina",
+        "corriente"
+      ],
+      "risk_note": "Verificar compatibilidad con enclavamiento."
+    },
+    {
+      "component_id": "mechanical_interlock",
+      "category": "Seguridad",
+      "item": "Enclavamiento mecánico",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Compatible con ambos contactores de inversión",
+      "must_have": true,
+      "critical_checks": [
+        "compatibilidad física",
+        "bloqueo real"
+      ],
+      "risk_note": "Obligatorio para evitar inversión simultánea."
+    },
+    {
+      "component_id": "phase_monitor",
+      "category": "Seguridad",
+      "item": "Relé monitor de fase",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Para red 460 V trifásica; falla y secuencia de fase",
+      "must_have": true,
+      "critical_checks": [
+        "tensión",
+        "secuencia",
+        "ajustes"
+      ],
+      "risk_note": "Recomendado para proteger guinche/motor ante pérdida de fase."
+    },
+    {
+      "component_id": "control_transformer",
+      "category": "Control",
+      "item": "Transformador de control",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "460 V a 120 V, 2000 VA preliminar",
+      "must_have": true,
+      "critical_checks": [
+        "VA",
+        "fusibles",
+        "aislamiento"
+      ],
+      "risk_note": ""
+    },
+    {
+      "component_id": "cabinet",
+      "category": "Tablero",
+      "item": "Gabinete industrial",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "NEMA/IP según polvo, humedad y temperatura; tamaño con 25% de reserva",
+      "must_have": true,
+      "critical_checks": [
+        "grado IP/NEMA",
+        "espacio",
+        "ventilación"
+      ],
+      "risk_note": ""
+    },
+    {
+      "component_id": "estop",
+      "category": "Seguridad",
+      "item": "Paro de emergencia",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Hongo 22mm, contacto NC, rotulado y accesible",
+      "must_have": true,
+      "critical_checks": [
+        "contacto NC",
+        "acción positiva",
+        "ubicación"
+      ],
+      "risk_note": ""
+    },
+    {
+      "component_id": "pushbuttons",
+      "category": "Control",
+      "item": "Botonera de mando",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Subir, bajar, stop, pilotos y rotulación",
+      "must_have": true,
+      "critical_checks": [
+        "IP",
+        "contactos",
+        "rotulado"
+      ],
+      "risk_note": ""
+    },
+    {
+      "component_id": "limit_switches",
+      "category": "Seguridad",
+      "item": "Finales de carrera",
+      "qty": 2.0,
+      "unit": "u",
+      "spec": "Superior e inferior, robustos, IP adecuado",
+      "must_have": true,
+      "critical_checks": [
+        "mecánica",
+        "IP",
+        "cableado"
+      ],
+      "risk_note": "Clave para evitar sobre-recorrido."
+    },
+    {
+      "component_id": "brake_rectifier",
+      "category": "Control",
+      "item": "Control/rectificador de freno",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Según placa del freno; validar tensión y corriente",
+      "must_have": true,
+      "critical_checks": [
+        "tensión freno",
+        "corriente",
+        "secuencia lógica"
+      ],
+      "risk_note": "No comprar sin confirmar placa del freno."
+    },
+    {
+      "component_id": "vfd",
+      "category": "Fuerza",
+      "item": "Variador de frecuencia",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Para 25 HP, 460 V, heavy duty, con criterio de frenado y seguridad",
+      "must_have": false,
+      "critical_checks": [
+        "corriente",
+        "freno",
+        "resistencia",
+        "seguridad",
+        "parametrización"
+      ],
+      "risk_note": "Opción premium; no reemplaza seguridad de izaje por sí sola."
+    },
+    {
+      "component_id": "line_reactor",
+      "category": "Fuerza",
+      "item": "Reactor de línea",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "3%, 460 V, corriente compatible con 30.4 A",
+      "must_have": false,
+      "critical_checks": [
+        "corriente",
+        "tensión",
+        "temperatura"
+      ],
+      "risk_note": "Mejora robustez de variador/red; validar necesidad según instalación."
+    },
+    {
+      "component_id": "braking_resistor",
+      "category": "Fuerza",
+      "item": "Resistencia de frenado",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Dimensionar por ciclo de carga, energía de frenado y especificación del VFD",
+      "must_have": false,
+      "critical_checks": [
+        "ohmios",
+        "watts",
+        "ciclo",
+        "ventilación"
+      ],
+      "risk_note": "En izaje no usar genérica sin cálculo térmico y validación del fabricante."
+    },
+    {
+      "component_id": "label_package",
+      "category": "Taller",
+      "item": "Etiquetado premium",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Marcadores de cables, borneras, componentes y láminas de tablero",
+      "must_have": false,
+      "critical_checks": [
+        "legibilidad",
+        "durabilidad",
+        "numeración"
+      ],
+      "risk_note": "Ahorra horas de mantenimiento y da presentación profesional."
+    },
+    {
+      "component_id": "terminal_blocks",
+      "category": "Cableado",
+      "item": "Borneras, puentes y marcadores",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Paquete industrial para control/fuerza con rotulación",
+      "must_have": true,
+      "critical_checks": [
+        "sección",
+        "corriente",
+        "marcado"
+      ],
+      "risk_note": ""
+    },
+    {
+      "component_id": "wiring_pack",
+      "category": "Cableado",
+      "item": "Consumibles de cableado de tablero",
+      "qty": 1.0,
+      "unit": "u",
+      "spec": "Canaleta, punteras, etiquetas, cable control, amarras",
+      "must_have": true,
+      "critical_checks": [
+        "orden",
+        "calibre",
+        "colores"
+      ],
+      "risk_note": ""
+    },
+    {
+      "component_id": "power_cable",
+      "category": "Cableado",
+      "item": "Conductor de fuerza",
+      "qty": 53.1,
+      "unit": "m",
+      "spec": "#8 AWG Cu preliminar, longitud con reserva incluida",
+      "must_have": true,
+      "critical_checks": [
+        "calibre",
+        "temperatura",
+        "caída de tensión",
+        "canalización"
+      ],
+      "risk_note": ""
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "dol_basic",
+      "name": "Arranque directo DOL",
+      "fit": "La opción más simple para motor sin inversión y con pocas maniobras.",
+      "how_it_works": "El contactor conecta el motor directamente a la red. El motor recibe tensión plena y desarrolla alto torque y alta corriente de arranque.",
+      "better_when": "Motor pequeño/mediano, red robusta, bajo número de arranques y cliente con presupuesto ajustado.",
+      "price_impact": "Menor costo inicial y menor ingeniería. Puede subir costos indirectos por golpe mecánico, picos de corriente y desgaste.",
+      "initial_cost": "Bajo",
+      "control_quality": 45,
+      "safety_depth": 58,
+      "complexity": 30,
+      "risk": "Alta corriente de arranque y poco control; no ideal para cargas críticas o red débil.",
+      "sell_when": "Cliente solo necesita encender/apagar con protección básica y presupuesto bajo."
+    },
+    {
+      "id": "dol_reversing",
+      "name": "DOL + contactores de inversión",
+      "fit": "Rápido y robusto para subir/bajar o adelante/atrás con costo controlado.",
+      "how_it_works": "Usa dos contactores enclavados para invertir fases. Debe llevar enclavamiento mecánico y eléctrico para evitar cierre simultáneo.",
+      "better_when": "Guinche simple, baja/mediana frecuencia de maniobra y cuando se acepta golpe mecánico.",
+      "price_impact": "Costo inicial bajo-medio. El precio sube por contactor doble, enclavamiento, finales de carrera, freno y seguridad.",
+      "initial_cost": "Bajo-medio",
+      "control_quality": 58,
+      "safety_depth": 72,
+      "complexity": 45,
+      "risk": "Si se arma mal, puede permitir inversión simultánea o errores de control.",
+      "sell_when": "Cliente quiere solución confiable sin pagar variador, pero con seguridad mínima seria."
+    },
+    {
+      "id": "star_delta",
+      "name": "Estrella-triángulo",
+      "fit": "Reduce corriente de arranque en motores aptos y cargas con bajo torque inicial.",
+      "how_it_works": "Arranca el motor en estrella para bajar tensión/corriente y luego conmuta a triángulo para operación normal.",
+      "better_when": "Motores con seis terminales accesibles, carga liviana al arranque y red sensible a picos.",
+      "price_impact": "Costo medio por tres contactores, temporizador y más cableado. No sirve si la carga necesita alto torque inicial.",
+      "initial_cost": "Medio",
+      "control_quality": 62,
+      "safety_depth": 64,
+      "complexity": 62,
+      "risk": "Puede fallar si el motor/carga no es apto; conmutación mal ajustada genera golpes eléctricos/mecánicos.",
+      "sell_when": "Cliente pide reducción de corriente sin llegar a soft starter/variador y el motor lo permite."
+    },
+    {
+      "id": "soft_starter",
+      "name": "Soft starter + bypass/protección",
+      "fit": "Intermedio para reducir corriente/golpe sin control de velocidad.",
+      "how_it_works": "Controla tensión durante arranque/parada. Puede usar bypass para operar con menores pérdidas luego del arranque.",
+      "better_when": "Arranques frecuentes moderados, red débil o se quiere menor estrés mecánico sin complejidad de VFD.",
+      "price_impact": "Costo medio-alto. Ahorra desgaste, pero requiere coordinación térmica, bypass y verificación de torque.",
+      "initial_cost": "Medio",
+      "control_quality": 73,
+      "safety_depth": 78,
+      "complexity": 60,
+      "risk": "No da velocidad variable ni diagnóstico profundo. Validar compatibilidad con freno/torque.",
+      "sell_when": "Cliente quiere mejora técnica clara sobre DOL y acepta pagar por menor estrés."
+    },
+    {
+      "id": "vfd_smart",
+      "name": "Variador + control inteligente",
+      "fit": "Premium para rampas, diagnóstico, control, crecimiento y diferenciación técnica.",
+      "how_it_works": "Controla frecuencia/tensión del motor, limita corriente, permite rampas, alarmas y lógica más avanzada. En izaje exige coordinación con freno y seguridad.",
+      "better_when": "Equipo crítico, muchas maniobras, necesidad de control suave o propuesta de alta confiabilidad.",
+      "price_impact": "Mayor costo inicial por VFD, reactor, resistencia, parametrización y pruebas. Puede reducir paradas, reclamos y desgaste.",
+      "initial_cost": "Alto",
+      "control_quality": 95,
+      "safety_depth": 90,
+      "complexity": 78,
+      "risk": "Requiere parametrización, revisión de freno, compatibilidad EMC y pruebas de seguridad.",
+      "sell_when": "Cliente valora confiabilidad, control, diagnóstico y menor riesgo operativo."
+    },
+    {
+      "id": "plc_hmi_control",
+      "name": "PLC/HMI + control avanzado",
+      "fit": "Capa superior cuando se requiere operación guiada, diagnóstico, históricos o crecimiento.",
+      "how_it_works": "El PLC gestiona lógica, enclavamientos, alarmas y señales; HMI muestra estados, fallas y operación. Se integra con contactores/VFD/sensores.",
+      "better_when": "Sistema crítico, varios sensores, operación por personal no técnico o necesidad de trazabilidad.",
+      "price_impact": "Sube ingeniería y componentes, pero aumenta valor percibido, diagnóstico y posibilidad de mantenimiento preventivo.",
+      "initial_cost": "Muy alto",
+      "control_quality": 98,
+      "safety_depth": 92,
+      "complexity": 86,
+      "risk": "Requiere programación, documentación y pruebas funcionales rigurosas.",
+      "sell_when": "Cliente quiere solución premium, escalable y con operación profesional."
+    }
+  ],
+  "recommended_option": {
+    "id": "star_delta",
+    "name": "Estrella-triángulo",
+    "fit": "Reduce corriente de arranque en motores aptos y cargas con bajo torque inicial.",
+    "how_it_works": "Arranca el motor en estrella para bajar tensión/corriente y luego conmuta a triángulo para operación normal.",
+    "better_when": "Motores con seis terminales accesibles, carga liviana al arranque y red sensible a picos.",
+    "price_impact": "Costo medio por tres contactores, temporizador y más cableado. No sirve si la carga necesita alto torque inicial.",
+    "initial_cost": "Medio",
+    "control_quality": 62,
+    "safety_depth": 64,
+    "complexity": 62,
+    "risk": "Puede fallar si el motor/carga no es apto; conmutación mal ajustada genera golpes eléctricos/mecánicos.",
+    "sell_when": "Cliente pide reducción de corriente sin llegar a soft starter/variador y el motor lo permite.",
+    "why": "Seleccionada por equilibrio entre seguridad, tiempo de cotización, control del riesgo y valor comercial defendible."
+  },
+  "market": {
+    "summary": {
+      "materials_cost": 2963.59,
+      "items_with_price": 19,
+      "total_items": 19,
+      "coverage_percent": 100.0,
+      "high_confidence_items": 16,
+      "needs_rfq_count": 1,
+      "suppliers_used": [
+        "Automatización Andina",
+        "Cuenca Control Supply",
+        "ElectroIndustrial Guayaquil",
+        "Proveedor Premium Quito",
+        "Suministros El Oro"
+      ],
+      "quote_needed_components": [
+        "braking_resistor"
+      ],
+      "priceguard_score_percent": 83.8,
+      "green_count": 17,
+      "yellow_count": 1,
+      "red_count": 1,
+      "outlier_count": 1,
+      "auto_corrected_count": 1,
+      "catalog_depth_score_percent": 94.7,
+      "candidate_offer_audit": {
+        "total_candidate_offers": 58,
+        "suspicious_low_rejected": 4,
+        "suspicious_high_flagged": 0,
+        "expired_rejected": 0,
+        "weak_source_flagged": 5,
+        "blocked_examples": [
+          {
+            "component_id": "mccb_main",
+            "supplier": "Marketplace Referencial",
+            "brand_model": "Genérico No verificado",
+            "price_usd": 28.0,
+            "market_median": 108.5,
+            "flags": [
+              "precio sospechosamente bajo",
+              "stock no confirmado",
+              "fuente débil"
+            ]
+          },
+          {
+            "component_id": "contactor_fwd",
+            "supplier": "Suministros El Oro",
+            "brand_model": "Chint NC1-3210 120V",
+            "price_usd": 43.0,
+            "market_median": 85.0,
+            "flags": [
+              "precio sospechosamente bajo"
+            ]
+          },
+          {
+            "component_id": "contactor_rev",
+            "supplier": "Suministros El Oro",
+            "brand_model": "Chint NC1-3210 120V",
+            "price_usd": 43.0,
+            "market_median": 85.0,
+            "flags": [
+              "precio sospechosamente bajo"
+            ]
+          },
+          {
+            "component_id": "cabinet",
+            "supplier": "Marketplace Referencial",
+            "brand_model": "Genérico GAB-604025",
+            "price_usd": 79.0,
+            "market_median": 135.0,
+            "flags": [
+              "stock no confirmado",
+              "fuente débil"
+            ]
+          },
+          {
+            "component_id": "brake_rectifier",
+            "supplier": "Automatización Andina",
+            "brand_model": "Kendrion BR120-2A",
+            "price_usd": 118.0,
+            "market_median": 118.0,
+            "flags": [
+              "stock no confirmado"
+            ]
+          },
+          {
+            "component_id": "brake_rectifier",
+            "supplier": "Marketplace Referencial",
+            "brand_model": "Genérico BR-120",
+            "price_usd": 48.0,
+            "market_median": 118.0,
+            "flags": [
+              "stock no confirmado",
+              "fuente débil"
+            ]
+          },
+          {
+            "component_id": "vfd",
+            "supplier": "Automatización Andina",
+            "brand_model": "Schneider ATV930D18N4",
+            "price_usd": 1280.0,
+            "market_median": 1230.0,
+            "flags": [
+              "stock no confirmado"
+            ]
+          },
+          {
+            "component_id": "vfd",
+            "supplier": "Suministros El Oro",
+            "brand_model": "INVT GD200A-022G/030P-4",
+            "price_usd": 690.0,
+            "market_median": 1230.0,
+            "flags": [
+              "precio sospechosamente bajo"
+            ]
+          }
+        ],
+        "policy": "El motor audita también ofertas no seleccionadas para no caer en precio barato falso ni precio inflado fuera de banda."
+      },
+      "locked_price_count": 16,
+      "referential_price_count": 1,
+      "blocked_price_count": 1,
+      "priceguard_verdict": "Revisable con RFQ",
+      "catalog_scope": "Catálogo piloto ampliado: fuerza, control, seguridad, VFD, soft starter, taller, cables y consumibles. No sustituye precios reales confirmados.",
+      "confidence_policy": {
+        "precio_confirmado": "Proveedor/stock/vigencia confirmados o fuente interna validada; se puede usar en propuesta revisable.",
+        "precio_referencial": "Sirve para armar presupuesto, pero se debe confirmar si afecta margen o plazo.",
+        "precio_bloqueado": "No usar para cerrar propuesta; enviar RFQ y esperar respuesta."
+      },
+      "semaphore_method": "Verde = precio usable en cotización revisable; amarillo = referencia con RFQ recomendado; rojo = no cerrar precio, autocorregir/consultar proveedor.",
+      "truth_status": "Precio 100% cerrado solo cuando proveedor confirma modelo, stock, vigencia y condiciones. Sin eso, se muestra como referencial o bloqueado."
+    },
+    "price_decisions": [
+      {
+        "component_id": "mccb_main",
+        "selected_offer": {
+          "component_id": "mccb_main",
+          "category": "Fuerza",
+          "description": "MCCB principal 3P 60A 600V 25kAIC",
+          "brand": "Schneider",
+          "model": "EasyPact CVS 60A 25kA",
+          "supplier_id": "SUP-001",
+          "supplier_name": "ElectroIndustrial Guayaquil",
+          "city": "Guayaquil",
+          "price_usd": 145.0,
+          "stock_status": "available",
+          "lead_time_days": 2,
+          "confidence": 0.88,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Precio piloto confirmado; validar curva/SCCR final",
+          "score": 1.642
+        },
+        "offers": [
+          {
+            "component_id": "mccb_main",
+            "category": "Fuerza",
+            "description": "MCCB principal 3P 60A 600V 25kAIC",
+            "brand": "Schneider",
+            "model": "EasyPact CVS 60A 25kA",
+            "supplier_id": "SUP-001",
+            "supplier_name": "ElectroIndustrial Guayaquil",
+            "city": "Guayaquil",
+            "price_usd": 145.0,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.88,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Precio piloto confirmado; validar curva/SCCR final",
+            "score": 1.642
+          },
+          {
+            "component_id": "mccb_main",
+            "category": "Fuerza",
+            "description": "MCCB principal 3P 60A 600V 25kAIC",
+            "brand": "ABB",
+            "model": "Tmax XT1 60A",
+            "supplier_id": "SUP-003",
+            "supplier_name": "Cuenca Control Supply",
+            "city": "Cuenca",
+            "price_usd": 168.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.84,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Opción premium",
+            "score": 1.379
+          },
+          {
+            "component_id": "mccb_main",
+            "category": "Fuerza",
+            "description": "MCCB principal 3P 60A 600V 10kAIC",
+            "brand": "Chint",
+            "model": "NXM-63S 60A",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 72.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.7,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Económico; no usar si SCCR exige más",
+            "score": 1.335
+          },
+          {
+            "component_id": "mccb_main",
+            "category": "Fuerza",
+            "description": "MCCB 3P 60A precio sospechoso",
+            "brand": "Genérico",
+            "model": "No verificado",
+            "supplier_id": "SUP-008",
+            "supplier_name": "Marketplace Referencial",
+            "city": "Ecuador",
+            "price_usd": 28.0,
+            "stock_status": "unknown",
+            "lead_time_days": 7,
+            "confidence": 0.32,
+            "source_type": "marketplace",
+            "valid_until": "2026-07-15",
+            "url": "",
+            "notes": "Outlier bajo para PriceGuard",
+            "score": 0.216
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 145.0,
+        "extended_cost": 145.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (88.0%). Schneider EasyPact CVS 60A 25kA, ElectroIndustrial Guayaquil, Guayaquil.",
+        "semaphore_color": "verde",
+        "priceguard_score": 88.0,
+        "market_band": {
+          "min": 28.0,
+          "p25": 61.0,
+          "median": 108.5,
+          "p75": 150.75,
+          "max": 168.0,
+          "sample_size": 4,
+          "spread_percent": 129.0
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "MCCB principal: se compara precio unitario contra banda catálogo min 28.0 / mediana 108.5 / max 168.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "overload_relay",
+        "selected_offer": {
+          "component_id": "overload_relay",
+          "category": "Fuerza",
+          "description": "Relé sobrecarga 24-36A clase 10",
+          "brand": "Schneider",
+          "model": "LRD3357",
+          "supplier_id": "SUP-001",
+          "supplier_name": "ElectroIndustrial Guayaquil",
+          "city": "Guayaquil",
+          "price_usd": 66.0,
+          "stock_status": "available",
+          "lead_time_days": 2,
+          "confidence": 0.88,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Rango cubre FLA piloto",
+          "score": 1.643
+        },
+        "offers": [
+          {
+            "component_id": "overload_relay",
+            "category": "Fuerza",
+            "description": "Relé sobrecarga 24-36A clase 10",
+            "brand": "Schneider",
+            "model": "LRD3357",
+            "supplier_id": "SUP-001",
+            "supplier_name": "ElectroIndustrial Guayaquil",
+            "city": "Guayaquil",
+            "price_usd": 66.0,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.88,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Rango cubre FLA piloto",
+            "score": 1.643
+          },
+          {
+            "component_id": "overload_relay",
+            "category": "Fuerza",
+            "description": "Relé sobrecarga 24-36A",
+            "brand": "ABB",
+            "model": "TF42-32",
+            "supplier_id": "SUP-003",
+            "supplier_name": "Cuenca Control Supply",
+            "city": "Cuenca",
+            "price_usd": 72.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.8,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Validar clase",
+            "score": 1.348
+          },
+          {
+            "component_id": "overload_relay",
+            "category": "Fuerza",
+            "description": "Relé térmico 23-32A",
+            "brand": "Chint",
+            "model": "NR2-36",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 34.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.73,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Confirmar rango exacto",
+            "score": 1.36
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 66.0,
+        "extended_cost": 66.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (88.1%). Schneider LRD3357, ElectroIndustrial Guayaquil, Guayaquil.",
+        "semaphore_color": "verde",
+        "priceguard_score": 88.1,
+        "market_band": {
+          "min": 34.0,
+          "p25": 34.0,
+          "median": 66.0,
+          "p75": 72.0,
+          "max": 72.0,
+          "sample_size": 3,
+          "spread_percent": 57.6
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Relé de sobrecarga: se compara precio unitario contra banda catálogo min 34.0 / mediana 66.0 / max 72.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "contactor_fwd",
+        "selected_offer": {
+          "component_id": "contactor_fwd",
+          "category": "Fuerza",
+          "description": "Contactor AC-3 32A bobina 120VAC",
+          "brand": "Schneider",
+          "model": "LC1D32G7",
+          "supplier_id": "SUP-001",
+          "supplier_name": "ElectroIndustrial Guayaquil",
+          "city": "Guayaquil",
+          "price_usd": 82.0,
+          "stock_status": "available",
+          "lead_time_days": 2,
+          "confidence": 0.9,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Subir/adelante",
+          "score": 1.683
+        },
+        "offers": [
+          {
+            "component_id": "contactor_fwd",
+            "category": "Fuerza",
+            "description": "Contactor AC-3 32A bobina 120VAC",
+            "brand": "Schneider",
+            "model": "LC1D32G7",
+            "supplier_id": "SUP-001",
+            "supplier_name": "ElectroIndustrial Guayaquil",
+            "city": "Guayaquil",
+            "price_usd": 82.0,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.9,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Subir/adelante",
+            "score": 1.683
+          },
+          {
+            "component_id": "contactor_fwd",
+            "category": "Fuerza",
+            "description": "Contactor AC-3 32A bobina 120VAC",
+            "brand": "Siemens",
+            "model": "3RT2035-1AP00",
+            "supplier_id": "SUP-007",
+            "supplier_name": "Proveedor Premium Quito",
+            "city": "Quito",
+            "price_usd": 98.0,
+            "stock_status": "available",
+            "lead_time_days": 5,
+            "confidence": 0.84,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium",
+            "score": 1.405
+          },
+          {
+            "component_id": "contactor_fwd",
+            "category": "Fuerza",
+            "description": "Contactor AC-3 32A bobina 120VAC",
+            "brand": "ABB",
+            "model": "AF38-30-00-11",
+            "supplier_id": "SUP-003",
+            "supplier_name": "Cuenca Control Supply",
+            "city": "Cuenca",
+            "price_usd": 88.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.82,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Verificar bobina exacta",
+            "score": 1.389
+          },
+          {
+            "component_id": "contactor_fwd",
+            "category": "Fuerza",
+            "description": "Contactor AC-3 32A bobina 120VAC",
+            "brand": "Chint",
+            "model": "NC1-3210 120V",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 43.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.73,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Opción económica",
+            "score": 1.164
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 82.0,
+        "extended_cost": 82.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (91.4%). Schneider LC1D32G7, ElectroIndustrial Guayaquil, Guayaquil.",
+        "semaphore_color": "verde",
+        "priceguard_score": 91.4,
+        "market_band": {
+          "min": 43.0,
+          "p25": 72.25,
+          "median": 85.0,
+          "p75": 90.5,
+          "max": 98.0,
+          "sample_size": 4,
+          "spread_percent": 64.7
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Contactor subir: se compara precio unitario contra banda catálogo min 43.0 / mediana 85.0 / max 98.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "contactor_rev",
+        "selected_offer": {
+          "component_id": "contactor_rev",
+          "category": "Fuerza",
+          "description": "Contactor AC-3 32A bobina 120VAC",
+          "brand": "Schneider",
+          "model": "LC1D32G7",
+          "supplier_id": "SUP-001",
+          "supplier_name": "ElectroIndustrial Guayaquil",
+          "city": "Guayaquil",
+          "price_usd": 82.0,
+          "stock_status": "available",
+          "lead_time_days": 2,
+          "confidence": 0.9,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Bajar/reversa",
+          "score": 1.683
+        },
+        "offers": [
+          {
+            "component_id": "contactor_rev",
+            "category": "Fuerza",
+            "description": "Contactor AC-3 32A bobina 120VAC",
+            "brand": "Schneider",
+            "model": "LC1D32G7",
+            "supplier_id": "SUP-001",
+            "supplier_name": "ElectroIndustrial Guayaquil",
+            "city": "Guayaquil",
+            "price_usd": 82.0,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.9,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Bajar/reversa",
+            "score": 1.683
+          },
+          {
+            "component_id": "contactor_rev",
+            "category": "Fuerza",
+            "description": "Contactor AC-3 32A bobina 120VAC",
+            "brand": "Siemens",
+            "model": "3RT2035-1AP00",
+            "supplier_id": "SUP-007",
+            "supplier_name": "Proveedor Premium Quito",
+            "city": "Quito",
+            "price_usd": 98.0,
+            "stock_status": "available",
+            "lead_time_days": 5,
+            "confidence": 0.84,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium",
+            "score": 1.405
+          },
+          {
+            "component_id": "contactor_rev",
+            "category": "Fuerza",
+            "description": "Contactor AC-3 32A bobina 120VAC",
+            "brand": "ABB",
+            "model": "AF38-30-00-11",
+            "supplier_id": "SUP-003",
+            "supplier_name": "Cuenca Control Supply",
+            "city": "Cuenca",
+            "price_usd": 88.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.82,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Verificar bobina exacta",
+            "score": 1.389
+          },
+          {
+            "component_id": "contactor_rev",
+            "category": "Fuerza",
+            "description": "Contactor AC-3 32A bobina 120VAC",
+            "brand": "Chint",
+            "model": "NC1-3210 120V",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 43.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.73,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Opción económica",
+            "score": 1.164
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 82.0,
+        "extended_cost": 82.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (91.4%). Schneider LC1D32G7, ElectroIndustrial Guayaquil, Guayaquil.",
+        "semaphore_color": "verde",
+        "priceguard_score": 91.4,
+        "market_band": {
+          "min": 43.0,
+          "p25": 72.25,
+          "median": 85.0,
+          "p75": 90.5,
+          "max": 98.0,
+          "sample_size": 4,
+          "spread_percent": 64.7
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Contactor bajar: se compara precio unitario contra banda catálogo min 43.0 / mediana 85.0 / max 98.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "mechanical_interlock",
+        "selected_offer": {
+          "component_id": "mechanical_interlock",
+          "category": "Seguridad",
+          "description": "Enclavamiento mecánico compatible LC1D/AF/NC1",
+          "brand": "Schneider",
+          "model": "LAD9R1V",
+          "supplier_id": "SUP-001",
+          "supplier_name": "ElectroIndustrial Guayaquil",
+          "city": "Guayaquil",
+          "price_usd": 27.0,
+          "stock_status": "available",
+          "lead_time_days": 2,
+          "confidence": 0.88,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Debe coincidir con contactores",
+          "score": 1.643
+        },
+        "offers": [
+          {
+            "component_id": "mechanical_interlock",
+            "category": "Seguridad",
+            "description": "Enclavamiento mecánico compatible LC1D/AF/NC1",
+            "brand": "Schneider",
+            "model": "LAD9R1V",
+            "supplier_id": "SUP-001",
+            "supplier_name": "ElectroIndustrial Guayaquil",
+            "city": "Guayaquil",
+            "price_usd": 27.0,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.88,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Debe coincidir con contactores",
+            "score": 1.643
+          },
+          {
+            "component_id": "mechanical_interlock",
+            "category": "Seguridad",
+            "description": "Enclavamiento mecánico compatible ABB",
+            "brand": "ABB",
+            "model": "VM4",
+            "supplier_id": "SUP-003",
+            "supplier_name": "Cuenca Control Supply",
+            "city": "Cuenca",
+            "price_usd": 31.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.78,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Verificar serie AF",
+            "score": 1.333
+          },
+          {
+            "component_id": "mechanical_interlock",
+            "category": "Seguridad",
+            "description": "Enclavamiento mecánico Chint",
+            "brand": "Chint",
+            "model": "NC1-Interlock",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 16.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.7,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Económico",
+            "score": 1.337
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 27.0,
+        "extended_cost": 27.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (88.2%). Schneider LAD9R1V, ElectroIndustrial Guayaquil, Guayaquil.",
+        "semaphore_color": "verde",
+        "priceguard_score": 88.2,
+        "market_band": {
+          "min": 16.0,
+          "p25": 16.0,
+          "median": 27.0,
+          "p75": 31.0,
+          "max": 31.0,
+          "sample_size": 3,
+          "spread_percent": 55.6
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Enclavamiento mecánico: se compara precio unitario contra banda catálogo min 16.0 / mediana 27.0 / max 31.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "phase_monitor",
+        "selected_offer": {
+          "component_id": "phase_monitor",
+          "category": "Seguridad",
+          "description": "Relé monitor de fase 3F 460V",
+          "brand": "Schneider",
+          "model": "RM22TR33",
+          "supplier_id": "SUP-001",
+          "supplier_name": "ElectroIndustrial Guayaquil",
+          "city": "Guayaquil",
+          "price_usd": 94.0,
+          "stock_status": "available",
+          "lead_time_days": 2,
+          "confidence": 0.86,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Protección por pérdida/secuencia",
+          "score": 1.616
+        },
+        "offers": [
+          {
+            "component_id": "phase_monitor",
+            "category": "Seguridad",
+            "description": "Relé monitor de fase 3F 460V",
+            "brand": "Schneider",
+            "model": "RM22TR33",
+            "supplier_id": "SUP-001",
+            "supplier_name": "ElectroIndustrial Guayaquil",
+            "city": "Guayaquil",
+            "price_usd": 94.0,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.86,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Protección por pérdida/secuencia",
+            "score": 1.616
+          },
+          {
+            "component_id": "phase_monitor",
+            "category": "Seguridad",
+            "description": "Monitor fase/secuencia 380-480V",
+            "brand": "Carlo Gavazzi",
+            "model": "DPA51CM44",
+            "supplier_id": "SUP-007",
+            "supplier_name": "Proveedor Premium Quito",
+            "city": "Quito",
+            "price_usd": 118.0,
+            "stock_status": "available",
+            "lead_time_days": 5,
+            "confidence": 0.8,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium",
+            "score": 1.337
+          },
+          {
+            "component_id": "phase_monitor",
+            "category": "Seguridad",
+            "description": "Monitor fase 3F",
+            "brand": "Chint",
+            "model": "XJ3-D",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 38.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.7,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Validar tensión",
+            "score": 1.325
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 94.0,
+        "extended_cost": 94.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (86.3%). Schneider RM22TR33, ElectroIndustrial Guayaquil, Guayaquil.",
+        "semaphore_color": "verde",
+        "priceguard_score": 86.3,
+        "market_band": {
+          "min": 38.0,
+          "p25": 38.0,
+          "median": 94.0,
+          "p75": 118.0,
+          "max": 118.0,
+          "sample_size": 3,
+          "spread_percent": 85.1
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Relé monitor de fase: se compara precio unitario contra banda catálogo min 38.0 / mediana 94.0 / max 118.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "control_transformer",
+        "selected_offer": {
+          "component_id": "control_transformer",
+          "category": "Control",
+          "description": "Transformador control 460/120V 2kVA",
+          "brand": "Genérico industrial",
+          "model": "TC-2KVA",
+          "supplier_id": "SUP-004",
+          "supplier_name": "Suministros El Oro",
+          "city": "Machala",
+          "price_usd": 125.0,
+          "stock_status": "available",
+          "lead_time_days": 1,
+          "confidence": 0.76,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Precio piloto confirmado",
+          "score": 1.586
+        },
+        "offers": [
+          {
+            "component_id": "control_transformer",
+            "category": "Control",
+            "description": "Transformador control 460/120V 2kVA",
+            "brand": "Genérico industrial",
+            "model": "TC-2KVA",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 125.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.76,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Precio piloto confirmado",
+            "score": 1.586
+          },
+          {
+            "component_id": "control_transformer",
+            "category": "Control",
+            "description": "Transformador de control 460/120V 2kVA",
+            "brand": "Hammond",
+            "model": "C2F002KLES",
+            "supplier_id": "SUP-002",
+            "supplier_name": "Automatización Andina",
+            "city": "Quito",
+            "price_usd": 210.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.84,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium",
+            "score": 1.388
+          },
+          {
+            "component_id": "control_transformer",
+            "category": "Control",
+            "description": "Transformador control 460/120V 2kVA",
+            "brand": "Weg",
+            "model": "TR2K-460-120",
+            "supplier_id": "SUP-003",
+            "supplier_name": "Cuenca Control Supply",
+            "city": "Cuenca",
+            "price_usd": 168.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.8,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Referencial",
+            "score": 1.351
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 125.0,
+        "extended_cost": 125.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (86.2%). Genérico industrial TC-2KVA, Suministros El Oro, Machala.",
+        "semaphore_color": "verde",
+        "priceguard_score": 86.2,
+        "market_band": {
+          "min": 125.0,
+          "p25": 125.0,
+          "median": 168.0,
+          "p75": 210.0,
+          "max": 210.0,
+          "sample_size": 3,
+          "spread_percent": 50.6
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Transformador de control: se compara precio unitario contra banda catálogo min 125.0 / mediana 168.0 / max 210.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "cabinet",
+        "selected_offer": {
+          "component_id": "cabinet",
+          "category": "Tablero",
+          "description": "Gabinete metálico industrial 600x400x250",
+          "brand": "Metálico Nacional",
+          "model": "MN-604025",
+          "supplier_id": "SUP-004",
+          "supplier_name": "Suministros El Oro",
+          "city": "Machala",
+          "price_usd": 135.0,
+          "stock_status": "available",
+          "lead_time_days": 2,
+          "confidence": 0.82,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Opción local",
+          "score": 1.605
+        },
+        "offers": [
+          {
+            "component_id": "cabinet",
+            "category": "Tablero",
+            "description": "Gabinete metálico industrial 600x400x250",
+            "brand": "Metálico Nacional",
+            "model": "MN-604025",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 135.0,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.82,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Opción local",
+            "score": 1.605
+          },
+          {
+            "component_id": "cabinet",
+            "category": "Tablero",
+            "description": "Gabinete metálico NEMA 12/IP54 600x400x250",
+            "brand": "Rittal",
+            "model": "AX 600x400x250",
+            "supplier_id": "SUP-007",
+            "supplier_name": "Proveedor Premium Quito",
+            "city": "Quito",
+            "price_usd": 245.0,
+            "stock_status": "available",
+            "lead_time_days": 5,
+            "confidence": 0.82,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium",
+            "score": 1.339
+          },
+          {
+            "component_id": "cabinet",
+            "category": "Tablero",
+            "description": "Gabinete metálico 600x400x250",
+            "brand": "Genérico",
+            "model": "GAB-604025",
+            "supplier_id": "SUP-008",
+            "supplier_name": "Marketplace Referencial",
+            "city": "Ecuador",
+            "price_usd": 79.0,
+            "stock_status": "unknown",
+            "lead_time_days": 7,
+            "confidence": 0.5,
+            "source_type": "marketplace",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Verificar calibre/IP",
+            "score": 0.556
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 135.0,
+        "extended_cost": 135.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (84.9%). Metálico Nacional MN-604025, Suministros El Oro, Machala.",
+        "semaphore_color": "verde",
+        "priceguard_score": 84.9,
+        "market_band": {
+          "min": 79.0,
+          "p25": 79.0,
+          "median": 135.0,
+          "p75": 245.0,
+          "max": 245.0,
+          "sample_size": 3,
+          "spread_percent": 123.0
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Gabinete industrial: se compara precio unitario contra banda catálogo min 79.0 / mediana 135.0 / max 245.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "estop",
+        "selected_offer": {
+          "component_id": "estop",
+          "category": "Seguridad",
+          "description": "Paro emergencia 22mm NC acción positiva",
+          "brand": "Schneider",
+          "model": "XB4BS542",
+          "supplier_id": "SUP-001",
+          "supplier_name": "ElectroIndustrial Guayaquil",
+          "city": "Guayaquil",
+          "price_usd": 24.0,
+          "stock_status": "available",
+          "lead_time_days": 2,
+          "confidence": 0.88,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Hongo NC",
+          "score": 1.634
+        },
+        "offers": [
+          {
+            "component_id": "estop",
+            "category": "Seguridad",
+            "description": "Paro emergencia 22mm NC acción positiva",
+            "brand": "Schneider",
+            "model": "XB4BS542",
+            "supplier_id": "SUP-001",
+            "supplier_name": "ElectroIndustrial Guayaquil",
+            "city": "Guayaquil",
+            "price_usd": 24.0,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.88,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Hongo NC",
+            "score": 1.634
+          },
+          {
+            "component_id": "estop",
+            "category": "Seguridad",
+            "description": "Paro emergencia 22mm NC",
+            "brand": "Siemens",
+            "model": "3SU1000-1HB20",
+            "supplier_id": "SUP-007",
+            "supplier_name": "Proveedor Premium Quito",
+            "city": "Quito",
+            "price_usd": 28.0,
+            "stock_status": "available",
+            "lead_time_days": 5,
+            "confidence": 0.8,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium",
+            "score": 1.34
+          },
+          {
+            "component_id": "estop",
+            "category": "Seguridad",
+            "description": "Paro emergencia 22mm NC",
+            "brand": "Chint",
+            "model": "NP2-BS542",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 9.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.74,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Económico",
+            "score": 1.36
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 24.0,
+        "extended_cost": 24.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (87.2%). Schneider XB4BS542, ElectroIndustrial Guayaquil, Guayaquil.",
+        "semaphore_color": "verde",
+        "priceguard_score": 87.2,
+        "market_band": {
+          "min": 9.0,
+          "p25": 9.0,
+          "median": 24.0,
+          "p75": 28.0,
+          "max": 28.0,
+          "sample_size": 3,
+          "spread_percent": 79.2
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Paro de emergencia: se compara precio unitario contra banda catálogo min 9.0 / mediana 24.0 / max 28.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "pushbuttons",
+        "selected_offer": {
+          "component_id": "pushbuttons",
+          "category": "Control",
+          "description": "Botonera subir/bajar/stop + pilotos 22mm",
+          "brand": "Schneider",
+          "model": "XB4 Kit",
+          "supplier_id": "SUP-001",
+          "supplier_name": "ElectroIndustrial Guayaquil",
+          "city": "Guayaquil",
+          "price_usd": 72.0,
+          "stock_status": "available",
+          "lead_time_days": 2,
+          "confidence": 0.86,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Incluye accesorios básicos",
+          "score": 1.617
+        },
+        "offers": [
+          {
+            "component_id": "pushbuttons",
+            "category": "Control",
+            "description": "Botonera subir/bajar/stop + pilotos 22mm",
+            "brand": "Schneider",
+            "model": "XB4 Kit",
+            "supplier_id": "SUP-001",
+            "supplier_name": "ElectroIndustrial Guayaquil",
+            "city": "Guayaquil",
+            "price_usd": 72.0,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.86,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Incluye accesorios básicos",
+            "score": 1.617
+          },
+          {
+            "component_id": "pushbuttons",
+            "category": "Control",
+            "description": "Kit pulsadores y pilotos 22mm",
+            "brand": "Siemens",
+            "model": "3SU Kit",
+            "supplier_id": "SUP-007",
+            "supplier_name": "Proveedor Premium Quito",
+            "city": "Quito",
+            "price_usd": 86.0,
+            "stock_status": "available",
+            "lead_time_days": 5,
+            "confidence": 0.8,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium",
+            "score": 1.339
+          },
+          {
+            "component_id": "pushbuttons",
+            "category": "Control",
+            "description": "Pulsadores/pilotos 22mm",
+            "brand": "Chint",
+            "model": "NP2 Kit",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 28.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.75,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Económico",
+            "score": 1.367
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 72.0,
+        "extended_cost": 72.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (86.5%). Schneider XB4 Kit, ElectroIndustrial Guayaquil, Guayaquil.",
+        "semaphore_color": "verde",
+        "priceguard_score": 86.5,
+        "market_band": {
+          "min": 28.0,
+          "p25": 28.0,
+          "median": 72.0,
+          "p75": 86.0,
+          "max": 86.0,
+          "sample_size": 3,
+          "spread_percent": 80.6
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Botonera de mando: se compara precio unitario contra banda catálogo min 28.0 / mediana 72.0 / max 86.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "limit_switches",
+        "selected_offer": {
+          "component_id": "limit_switches",
+          "category": "Seguridad",
+          "description": "Final carrera industrial palanca rodillo IP65",
+          "brand": "Schneider",
+          "model": "XCK-M",
+          "supplier_id": "SUP-001",
+          "supplier_name": "ElectroIndustrial Guayaquil",
+          "city": "Guayaquil",
+          "price_usd": 38.0,
+          "stock_status": "available",
+          "lead_time_days": 2,
+          "confidence": 0.86,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Precio unitario",
+          "score": 1.62
+        },
+        "offers": [
+          {
+            "component_id": "limit_switches",
+            "category": "Seguridad",
+            "description": "Final carrera industrial palanca rodillo IP65",
+            "brand": "Schneider",
+            "model": "XCK-M",
+            "supplier_id": "SUP-001",
+            "supplier_name": "ElectroIndustrial Guayaquil",
+            "city": "Guayaquil",
+            "price_usd": 38.0,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.86,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Precio unitario",
+            "score": 1.62
+          },
+          {
+            "component_id": "limit_switches",
+            "category": "Seguridad",
+            "description": "Final carrera industrial IP65",
+            "brand": "Telemecanique",
+            "model": "XCKP",
+            "supplier_id": "SUP-003",
+            "supplier_name": "Cuenca Control Supply",
+            "city": "Cuenca",
+            "price_usd": 42.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.79,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Precio unitario",
+            "score": 1.334
+          },
+          {
+            "component_id": "limit_switches",
+            "category": "Seguridad",
+            "description": "Final carrera industrial",
+            "brand": "Chint",
+            "model": "YBLX-ME",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 14.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.7,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Verificar IP y mecánica",
+            "score": 1.33
+          }
+        ],
+        "qty": 2.0,
+        "unit_cost": 38.0,
+        "extended_cost": 76.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (86.8%). Schneider XCK-M, ElectroIndustrial Guayaquil, Guayaquil.",
+        "semaphore_color": "verde",
+        "priceguard_score": 86.8,
+        "market_band": {
+          "min": 14.0,
+          "p25": 14.0,
+          "median": 38.0,
+          "p75": 42.0,
+          "max": 42.0,
+          "sample_size": 3,
+          "spread_percent": 73.7
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Finales de carrera: se compara precio unitario contra banda catálogo min 14.0 / mediana 38.0 / max 42.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "brake_rectifier",
+        "selected_offer": {
+          "component_id": "brake_rectifier",
+          "category": "Control",
+          "description": "Rectificador freno industrial 110/120VAC",
+          "brand": "Bonfiglioli",
+          "model": "BRE120",
+          "supplier_id": "SUP-007",
+          "supplier_name": "Proveedor Premium Quito",
+          "city": "Quito",
+          "price_usd": 142.0,
+          "stock_status": "available",
+          "lead_time_days": 5,
+          "confidence": 0.78,
+          "source_type": "reference",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Confirmar corriente",
+          "score": 1.323
+        },
+        "offers": [
+          {
+            "component_id": "brake_rectifier",
+            "category": "Control",
+            "description": "Rectificador freno industrial 110/120VAC",
+            "brand": "Bonfiglioli",
+            "model": "BRE120",
+            "supplier_id": "SUP-007",
+            "supplier_name": "Proveedor Premium Quito",
+            "city": "Quito",
+            "price_usd": 142.0,
+            "stock_status": "available",
+            "lead_time_days": 5,
+            "confidence": 0.78,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Confirmar corriente",
+            "score": 1.323
+          },
+          {
+            "component_id": "brake_rectifier",
+            "category": "Control",
+            "description": "Rectificador/control de freno 110/120VAC",
+            "brand": "Kendrion",
+            "model": "BR120-2A",
+            "supplier_id": "SUP-002",
+            "supplier_name": "Automatización Andina",
+            "city": "Quito",
+            "price_usd": 118.0,
+            "stock_status": "quote_needed",
+            "lead_time_days": 4,
+            "confidence": 0.74,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Confirmar placa de freno",
+            "score": 0.998
+          },
+          {
+            "component_id": "brake_rectifier",
+            "category": "Control",
+            "description": "Rectificador freno genérico",
+            "brand": "Genérico",
+            "model": "BR-120",
+            "supplier_id": "SUP-008",
+            "supplier_name": "Marketplace Referencial",
+            "city": "Ecuador",
+            "price_usd": 48.0,
+            "stock_status": "unknown",
+            "lead_time_days": 8,
+            "confidence": 0.52,
+            "source_type": "marketplace",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Solo referencial",
+            "score": 0.575
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 142.0,
+        "extended_cost": 142.0,
+        "price_type": "referencial",
+        "confidence_label": "media",
+        "decision_note": "PriceGuard: VERDE (77.7%). Bonfiglioli BRE120, Proveedor Premium Quito, Quito.",
+        "semaphore_color": "verde",
+        "priceguard_score": 77.7,
+        "market_band": {
+          "min": 48.0,
+          "p25": 48.0,
+          "median": 118.0,
+          "p75": 142.0,
+          "max": 142.0,
+          "sample_size": 3,
+          "spread_percent": 79.7
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Control/rectificador de freno: se compara precio unitario contra banda catálogo min 48.0 / mediana 118.0 / max 142.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "vfd",
+        "selected_offer": {
+          "component_id": "vfd",
+          "category": "Fuerza",
+          "description": "Variador 25HP 460V 3F",
+          "brand": "ABB",
+          "model": "ACS580-01-039A-4",
+          "supplier_id": "SUP-003",
+          "supplier_name": "Cuenca Control Supply",
+          "city": "Cuenca",
+          "price_usd": 1180.0,
+          "stock_status": "available",
+          "lead_time_days": 5,
+          "confidence": 0.8,
+          "source_type": "reference",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Confirmar brake chopper",
+          "score": 1.348
+        },
+        "offers": [
+          {
+            "component_id": "vfd",
+            "category": "Fuerza",
+            "description": "Variador 25HP 460V 3F",
+            "brand": "ABB",
+            "model": "ACS580-01-039A-4",
+            "supplier_id": "SUP-003",
+            "supplier_name": "Cuenca Control Supply",
+            "city": "Cuenca",
+            "price_usd": 1180.0,
+            "stock_status": "available",
+            "lead_time_days": 5,
+            "confidence": 0.8,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Confirmar brake chopper",
+            "score": 1.348
+          },
+          {
+            "component_id": "vfd",
+            "category": "Fuerza",
+            "description": "Variador 25HP 460V precio alto",
+            "brand": "Siemens",
+            "model": "G120C",
+            "supplier_id": "SUP-007",
+            "supplier_name": "Proveedor Premium Quito",
+            "city": "Quito",
+            "price_usd": 1860.0,
+            "stock_status": "available",
+            "lead_time_days": 6,
+            "confidence": 0.78,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium; outlier alto",
+            "score": 1.332
+          },
+          {
+            "component_id": "vfd",
+            "category": "Fuerza",
+            "description": "Variador 25HP 460V 3F heavy duty",
+            "brand": "Schneider",
+            "model": "ATV930D18N4",
+            "supplier_id": "SUP-002",
+            "supplier_name": "Automatización Andina",
+            "city": "Quito",
+            "price_usd": 1280.0,
+            "stock_status": "quote_needed",
+            "lead_time_days": 6,
+            "confidence": 0.78,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Validar aplicación de izaje",
+            "score": 1.025
+          },
+          {
+            "component_id": "vfd",
+            "category": "Fuerza",
+            "description": "Variador 25HP 460V 3F",
+            "brand": "INVT",
+            "model": "GD200A-022G/030P-4",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 690.0,
+            "stock_status": "available",
+            "lead_time_days": 3,
+            "confidence": 0.72,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Económico; validar torque/freno",
+            "score": 1.134
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 1180.0,
+        "extended_cost": 1180.0,
+        "price_type": "referencial fuerte",
+        "confidence_label": "media-alta",
+        "decision_note": "PriceGuard: VERDE (80.7%). ABB ACS580-01-039A-4, Cuenca Control Supply, Cuenca.",
+        "semaphore_color": "verde",
+        "priceguard_score": 80.7,
+        "market_band": {
+          "min": 690.0,
+          "p25": 1057.5,
+          "median": 1230.0,
+          "p75": 1425.0,
+          "max": 1860.0,
+          "sample_size": 4,
+          "spread_percent": 95.1
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Variador de frecuencia: se compara precio unitario contra banda catálogo min 690.0 / mediana 1230.0 / max 1860.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "line_reactor",
+        "selected_offer": {
+          "component_id": "line_reactor",
+          "category": "Fuerza",
+          "description": "Reactor línea 3% 460V",
+          "brand": "Genérico industrial",
+          "model": "LR-25HP-460",
+          "supplier_id": "SUP-004",
+          "supplier_name": "Suministros El Oro",
+          "city": "Machala",
+          "price_usd": 168.0,
+          "stock_status": "available",
+          "lead_time_days": 4,
+          "confidence": 0.68,
+          "source_type": "reference",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Verificar corriente",
+          "score": 1.278
+        },
+        "offers": [
+          {
+            "component_id": "line_reactor",
+            "category": "Fuerza",
+            "description": "Reactor línea 3% 460V",
+            "brand": "Genérico industrial",
+            "model": "LR-25HP-460",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 168.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.68,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Verificar corriente",
+            "score": 1.278
+          },
+          {
+            "component_id": "line_reactor",
+            "category": "Fuerza",
+            "description": "Reactor de línea 3% 460V 25HP",
+            "brand": "MTE",
+            "model": "RL-025HP-460",
+            "supplier_id": "SUP-002",
+            "supplier_name": "Automatización Andina",
+            "city": "Quito",
+            "price_usd": 245.0,
+            "stock_status": "quote_needed",
+            "lead_time_days": 6,
+            "confidence": 0.72,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Recomendado con VFD",
+            "score": 0.945
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 168.0,
+        "extended_cost": 168.0,
+        "price_type": "referencial",
+        "confidence_label": "media",
+        "decision_note": "PriceGuard: AMARILLO (75.0%). Genérico industrial LR-25HP-460, Suministros El Oro, Machala.",
+        "semaphore_color": "amarillo",
+        "priceguard_score": 75.0,
+        "market_band": {
+          "min": 168.0,
+          "p25": 168.0,
+          "median": 206.5,
+          "p75": 245.0,
+          "max": 245.0,
+          "sample_size": 2,
+          "spread_percent": 37.3
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar como referencia; enviar RFQ si el proyecto es sensible a precio o plazo.",
+        "auto_corrected": false,
+        "rfq_priority": "media",
+        "price_explanation": "Reactor de línea: se compara precio unitario contra banda catálogo min 168.0 / mediana 206.5 / max 245.0 USD. Semáforo amarillo. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "braking_resistor",
+        "selected_offer": {
+          "component_id": "braking_resistor",
+          "category": "Fuerza",
+          "description": "Resistencia de frenado para VFD 25HP",
+          "brand": "Danfoss",
+          "model": "BR-25HP",
+          "supplier_id": "SUP-002",
+          "supplier_name": "Automatización Andina",
+          "city": "Quito",
+          "price_usd": 310.0,
+          "stock_status": "quote_needed",
+          "lead_time_days": 6,
+          "confidence": 0.7,
+          "source_type": "reference",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Dimensionar por ciclo de carga",
+          "score": 0.925
+        },
+        "offers": [
+          {
+            "component_id": "braking_resistor",
+            "category": "Fuerza",
+            "description": "Resistencia de frenado para VFD 25HP",
+            "brand": "Danfoss",
+            "model": "BR-25HP",
+            "supplier_id": "SUP-002",
+            "supplier_name": "Automatización Andina",
+            "city": "Quito",
+            "price_usd": 310.0,
+            "stock_status": "quote_needed",
+            "lead_time_days": 6,
+            "confidence": 0.7,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Dimensionar por ciclo de carga",
+            "score": 0.925
+          },
+          {
+            "component_id": "braking_resistor",
+            "category": "Fuerza",
+            "description": "Resistencia frenado 25HP",
+            "brand": "Genérico industrial",
+            "model": "DBR-25HP",
+            "supplier_id": "SUP-008",
+            "supplier_name": "Marketplace Referencial",
+            "city": "Ecuador",
+            "price_usd": 185.0,
+            "stock_status": "unknown",
+            "lead_time_days": 9,
+            "confidence": 0.55,
+            "source_type": "marketplace",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Validar watts/ohmios",
+            "score": 0.57
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 247.5,
+        "extended_cost": 247.5,
+        "price_type": "estimado corregido",
+        "confidence_label": "baja",
+        "decision_note": "PriceGuard: ROJO (50.8%). Danfoss BR-25HP, Automatización Andina, Quito. Alertas: stock no confirmado. Se aplicó autocorrección por banda de mercado.",
+        "semaphore_color": "rojo",
+        "priceguard_score": 50.8,
+        "market_band": {
+          "min": 185.0,
+          "p25": 185.0,
+          "median": 247.5,
+          "p75": 310.0,
+          "max": 310.0,
+          "sample_size": 2,
+          "spread_percent": 50.5
+        },
+        "anomaly_flags": [
+          "stock no confirmado"
+        ],
+        "action_required": "Precio fuera de confianza. Usar mediana temporal y enviar RFQ a varios proveedores.",
+        "auto_corrected": true,
+        "rfq_priority": "alta",
+        "price_explanation": "Resistencia de frenado: se compara precio unitario contra banda catálogo min 185.0 / mediana 247.5 / max 310.0 USD. Semáforo rojo. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "label_package",
+        "selected_offer": {
+          "component_id": "label_package",
+          "category": "Taller",
+          "description": "Etiquetado tablero básico",
+          "brand": "Genérico",
+          "model": "LABEL-KIT",
+          "supplier_id": "SUP-004",
+          "supplier_name": "Suministros El Oro",
+          "city": "Machala",
+          "price_usd": 32.0,
+          "stock_status": "available",
+          "lead_time_days": 1,
+          "confidence": 0.76,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Precio piloto",
+          "score": 1.539
+        },
+        "offers": [
+          {
+            "component_id": "label_package",
+            "category": "Taller",
+            "description": "Etiquetado tablero básico",
+            "brand": "Genérico",
+            "model": "LABEL-KIT",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 32.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.76,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Precio piloto",
+            "score": 1.539
+          },
+          {
+            "component_id": "label_package",
+            "category": "Taller",
+            "description": "Etiquetas, ferrules y marcadores profesionales",
+            "brand": "Brady",
+            "model": "BMP Kit",
+            "supplier_id": "SUP-007",
+            "supplier_name": "Proveedor Premium Quito",
+            "city": "Quito",
+            "price_usd": 96.0,
+            "stock_status": "available",
+            "lead_time_days": 5,
+            "confidence": 0.76,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Para entrega premium",
+            "score": 1.272
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 32.0,
+        "extended_cost": 32.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (81.1%). Genérico LABEL-KIT, Suministros El Oro, Machala.",
+        "semaphore_color": "verde",
+        "priceguard_score": 81.1,
+        "market_band": {
+          "min": 32.0,
+          "p25": 32.0,
+          "median": 64.0,
+          "p75": 96.0,
+          "max": 96.0,
+          "sample_size": 2,
+          "spread_percent": 100.0
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Etiquetado premium: se compara precio unitario contra banda catálogo min 32.0 / mediana 64.0 / max 96.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "terminal_blocks",
+        "selected_offer": {
+          "component_id": "terminal_blocks",
+          "category": "Cableado",
+          "description": "Borneras y marcadores industriales",
+          "brand": "Genérico",
+          "model": "TB-KIT-30",
+          "supplier_id": "SUP-004",
+          "supplier_name": "Suministros El Oro",
+          "city": "Machala",
+          "price_usd": 38.0,
+          "stock_status": "available",
+          "lead_time_days": 1,
+          "confidence": 0.78,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Precio piloto confirmado",
+          "score": 1.599
+        },
+        "offers": [
+          {
+            "component_id": "terminal_blocks",
+            "category": "Cableado",
+            "description": "Borneras y marcadores industriales",
+            "brand": "Genérico",
+            "model": "TB-KIT-30",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 38.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.78,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Precio piloto confirmado",
+            "score": 1.599
+          },
+          {
+            "component_id": "terminal_blocks",
+            "category": "Cableado",
+            "description": "Paquete borneras/puentes/marcadores 30 puntos",
+            "brand": "Phoenix Contact",
+            "model": "UK Kit 30",
+            "supplier_id": "SUP-002",
+            "supplier_name": "Automatización Andina",
+            "city": "Quito",
+            "price_usd": 82.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.8,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium",
+            "score": 1.354
+          },
+          {
+            "component_id": "terminal_blocks",
+            "category": "Cableado",
+            "description": "Paquete borneras y marcadores",
+            "brand": "Wago",
+            "model": "TOPJOB Kit",
+            "supplier_id": "SUP-003",
+            "supplier_name": "Cuenca Control Supply",
+            "city": "Cuenca",
+            "price_usd": 76.0,
+            "stock_status": "available",
+            "lead_time_days": 4,
+            "confidence": 0.78,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium",
+            "score": 1.332
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 38.0,
+        "extended_cost": 38.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (86.5%). Genérico TB-KIT-30, Suministros El Oro, Machala.",
+        "semaphore_color": "verde",
+        "priceguard_score": 86.5,
+        "market_band": {
+          "min": 38.0,
+          "p25": 38.0,
+          "median": 76.0,
+          "p75": 82.0,
+          "max": 82.0,
+          "sample_size": 3,
+          "spread_percent": 57.9
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Borneras, puentes y marcadores: se compara precio unitario contra banda catálogo min 38.0 / mediana 76.0 / max 82.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "wiring_pack",
+        "selected_offer": {
+          "component_id": "wiring_pack",
+          "category": "Cableado",
+          "description": "Consumibles cableado tablero",
+          "brand": "Genérico",
+          "model": "WP-LOCAL",
+          "supplier_id": "SUP-004",
+          "supplier_name": "Suministros El Oro",
+          "city": "Machala",
+          "price_usd": 98.0,
+          "stock_status": "available",
+          "lead_time_days": 1,
+          "confidence": 0.78,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Precio piloto confirmado",
+          "score": 1.593
+        },
+        "offers": [
+          {
+            "component_id": "wiring_pack",
+            "category": "Cableado",
+            "description": "Consumibles cableado tablero",
+            "brand": "Genérico",
+            "model": "WP-LOCAL",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 98.0,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.78,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Precio piloto confirmado",
+            "score": 1.593
+          },
+          {
+            "component_id": "wiring_pack",
+            "category": "Cableado",
+            "description": "Canaleta, punteras, etiquetas, cable control",
+            "brand": "ControlPro Kit",
+            "model": "WP-CTRL-01",
+            "supplier_id": "SUP-005",
+            "supplier_name": "Base Interna ControlPro",
+            "city": "Base interna",
+            "price_usd": 120.0,
+            "stock_status": "available",
+            "lead_time_days": 0,
+            "confidence": 0.86,
+            "source_type": "internal",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Kit histórico interno",
+            "score": 1.497
+          },
+          {
+            "component_id": "wiring_pack",
+            "category": "Cableado",
+            "description": "Consumibles premium tablero",
+            "brand": "Phoenix/Brady",
+            "model": "WP-PREMIUM",
+            "supplier_id": "SUP-007",
+            "supplier_name": "Proveedor Premium Quito",
+            "city": "Quito",
+            "price_usd": 185.0,
+            "stock_status": "available",
+            "lead_time_days": 5,
+            "confidence": 0.78,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Premium",
+            "score": 1.326
+          }
+        ],
+        "qty": 1.0,
+        "unit_cost": 98.0,
+        "extended_cost": 98.0,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (85.8%). Genérico WP-LOCAL, Suministros El Oro, Machala.",
+        "semaphore_color": "verde",
+        "priceguard_score": 85.8,
+        "market_band": {
+          "min": 98.0,
+          "p25": 98.0,
+          "median": 120.0,
+          "p75": 185.0,
+          "max": 185.0,
+          "sample_size": 3,
+          "spread_percent": 72.5
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Consumibles de cableado de tablero: se compara precio unitario contra banda catálogo min 98.0 / mediana 120.0 / max 185.0 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      },
+      {
+        "component_id": "power_cable",
+        "selected_offer": {
+          "component_id": "power_cable",
+          "category": "Cableado",
+          "description": "Cable cobre THHN #8 AWG metro",
+          "brand": "Electrocables",
+          "model": "THHN-8AWG-CU",
+          "supplier_id": "SUP-004",
+          "supplier_name": "Suministros El Oro",
+          "city": "Machala",
+          "price_usd": 2.45,
+          "stock_status": "available",
+          "lead_time_days": 1,
+          "confidence": 0.84,
+          "source_type": "confirmed",
+          "valid_until": "2026-08-31",
+          "url": "",
+          "notes": "Precio por metro",
+          "score": 1.651
+        },
+        "offers": [
+          {
+            "component_id": "power_cable",
+            "category": "Cableado",
+            "description": "Cable cobre THHN #8 AWG metro",
+            "brand": "Electrocables",
+            "model": "THHN-8AWG-CU",
+            "supplier_id": "SUP-004",
+            "supplier_name": "Suministros El Oro",
+            "city": "Machala",
+            "price_usd": 2.45,
+            "stock_status": "available",
+            "lead_time_days": 1,
+            "confidence": 0.84,
+            "source_type": "confirmed",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Precio por metro",
+            "score": 1.651
+          },
+          {
+            "component_id": "power_cable",
+            "category": "Cableado",
+            "description": "Cable cobre THHN #8 AWG metro",
+            "brand": "Cablec",
+            "model": "THHN-8AWG",
+            "supplier_id": "SUP-001",
+            "supplier_name": "ElectroIndustrial Guayaquil",
+            "city": "Guayaquil",
+            "price_usd": 2.82,
+            "stock_status": "available",
+            "lead_time_days": 2,
+            "confidence": 0.82,
+            "source_type": "reference",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Precio por metro",
+            "score": 1.399
+          },
+          {
+            "component_id": "power_cable",
+            "category": "Cableado",
+            "description": "Cable cobre THHN #8 AWG metro",
+            "brand": "Genérico",
+            "model": "THHN-8",
+            "supplier_id": "SUP-008",
+            "supplier_name": "Marketplace Referencial",
+            "city": "Ecuador",
+            "price_usd": 1.65,
+            "stock_status": "unknown",
+            "lead_time_days": 7,
+            "confidence": 0.52,
+            "source_type": "marketplace",
+            "valid_until": "2026-08-31",
+            "url": "",
+            "notes": "Verificar cobre real y norma",
+            "score": 0.601
+          }
+        ],
+        "qty": 53.1,
+        "unit_cost": 2.45,
+        "extended_cost": 130.09,
+        "price_type": "confirmado",
+        "confidence_label": "alta",
+        "decision_note": "PriceGuard: VERDE (88.7%). Electrocables THHN-8AWG-CU, Suministros El Oro, Machala.",
+        "semaphore_color": "verde",
+        "priceguard_score": 88.7,
+        "market_band": {
+          "min": 1.65,
+          "p25": 1.65,
+          "median": 2.45,
+          "p75": 2.82,
+          "max": 2.82,
+          "sample_size": 3,
+          "spread_percent": 47.8
+        },
+        "anomaly_flags": [],
+        "action_required": "Usar en cotización revisable; confirmar vigencia si la oferta supera 72 horas.",
+        "auto_corrected": false,
+        "rfq_priority": "baja",
+        "price_explanation": "Conductor de fuerza: se compara precio unitario contra banda catálogo min 1.65 / mediana 2.45 / max 2.82 USD. Semáforo verde. Importa porque un precio bajo puede significar componente incompatible o sin garantía, y uno alto puede destruir margen en cotizaciones que quizá no se ganen."
+      }
+    ],
+    "supplier_count": 5,
+    "method": "PriceGuard 9: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
+    "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
+    "priceguard_methodology": {
+      "name": "PriceGuard 9",
+      "goal": "Evitar cotizaciones débiles, precios exagerados, precios demasiado bajos/incompatibles y falsas certezas antes de presupuestar trabajos de miles de dólares.",
+      "inputs": [
+        "catálogo interno",
+        "fuente de precio",
+        "stock",
+        "vigencia",
+        "proveedor",
+        "banda de mercado",
+        "ubicación",
+        "historial/RFQ",
+        "auditoría de outliers",
+        "estado de credenciales API"
+      ],
+      "semaforos": {
+        "verde": "usable en cotización revisable; aun así debe verificarse si el precio es sensible o la oferta vence pronto",
+        "amarillo": "referencial; se recomienda RFQ o confirmación antes de enviar propuesta firme",
+        "rojo": "no cerrar precio; se autocorrige con mediana temporal o se exige RFQ"
+      },
+      "anti_garbage_rules": [
+        "No escoger automáticamente el precio más barato.",
+        "No usar precio sospechosamente bajo como definitivo.",
+        "No fingir mercado real si las APIs están sin credenciales.",
+        "Mostrar catálogo piloto separado de mercado vivo.",
+        "Auditar todas las ofertas candidatas, no solo la seleccionada.",
+        "Separar precio estimado, referencial, referencial fuerte y confirmado.",
+        "Bloquear salida fuerte cuando hay demasiados rojos o stock sin confirmar."
+      ]
+    }
+  },
+  "budget": {
+    "materials": 2963.59,
+    "panel_labor": 270.0,
+    "field_labor": 330.0,
+    "engineering": 570.0,
+    "transport_logistics": 120.0,
+    "contingency": 340.29,
+    "margin": 1148.47,
+    "floor_price": 5145.14,
+    "recommended_sell_price": 5742.35,
+    "premium_price": 7005.66,
+    "price_confidence": "media-alta",
+    "priceguard_status": "PriceGuard 83.8% · verde 17 · amarillo 1 · rojo 1",
+    "commercial_note": "Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia."
+  },
+  "risks": [
+    {
+      "risk": "Cotización con precio no confirmado",
+      "severity": "Alta",
+      "mitigation": "Separar precio estimado, referencial y confirmado; enviar RFQ cuando confianza sea baja."
+    },
+    {
+      "risk": "Movimiento simultáneo subir/bajar",
+      "severity": "Alta",
+      "mitigation": "Enclavamiento eléctrico y mecánico; prueba funcional obligatoria."
+    },
+    {
+      "risk": "Sobre-recorrido de carga",
+      "severity": "Alta",
+      "mitigation": "Finales de carrera superior/inferior y prueba sin carga antes de carga real."
+    },
+    {
+      "risk": "Freno mal seleccionado o mal secuenciado",
+      "severity": "Alta",
+      "mitigation": "Confirmar placa del freno; validar tensión, corriente y lógica de liberación."
+    },
+    {
+      "risk": "SCCR no coordinado",
+      "severity": "Media",
+      "mitigation": "Verificar corriente de cortocircuito disponible y ratings de todos los componentes."
+    },
+    {
+      "risk": "Ambiente severo",
+      "severity": "Media",
+      "mitigation": "Seleccionar gabinete y componentes según ambiente declarado: Interior industrial con polvo."
+    }
+  ],
+  "checklists": {
+    "datos_minimos": [
+      "Foto de placa",
+      "Tensión/fases medidas",
+      "Distancia real",
+      "Ambiente",
+      "Freno",
+      "Finales de carrera",
+      "Ubicación de entrega",
+      "kAIC/SCCR si se libera construcción"
+    ],
+    "cotizacion": [
+      "Confirmar ítems de baja confianza",
+      "Enviar RFQ",
+      "Revisar stock",
+      "Definir vigencia",
+      "Aplicar margen",
+      "Adjuntar exclusiones",
+      "Marcar supuestos"
+    ],
+    "taller": [
+      "Continuidad",
+      "Torque/ajuste",
+      "Enclavamientos",
+      "Paro de emergencia",
+      "Finales",
+      "Freno",
+      "Prueba sin carga",
+      "Rotulado"
+    ],
+    "campo": [
+      "Bloqueo/etiquetado",
+      "Verificación tensión",
+      "Giro",
+      "Freno",
+      "Prueba con carga supervisada",
+      "Firma de entrega"
+    ],
+    "fallas_comunes": [
+      "No arranca: revisar control, E-Stop, térmico y bobina",
+      "Dispara térmico: medir corriente, carga mecánica y ajuste",
+      "Gira al revés: invertir dos fases con procedimiento seguro",
+      "Freno no libera: verificar tensión/rectificador/secuencia",
+      "Final no actúa: probar continuidad y posición mecánica"
+    ]
+  },
+  "diagrams": {
+    "single_line_svg": "<svg viewBox='0 0 1200 800' xmlns='http://www.w3.org/2000/svg' role='img' aria-label='Diagrama unifilar CAD-like'>\n  \n    <defs>\n      <pattern id='gridMinor' width='20' height='20' patternUnits='userSpaceOnUse'>\n        <path d='M 20 0 L 0 0 0 20' fill='none' stroke='#133146' stroke-width='0.55'/>\n      </pattern>\n      <pattern id='gridMajor' width='100' height='100' patternUnits='userSpaceOnUse'>\n        <rect width='100' height='100' fill='url(#gridMinor)'/>\n        <path d='M 100 0 L 0 0 0 100' fill='none' stroke='#1c4c66' stroke-width='1'/>\n      </pattern>\n      <style>\n        .wire{stroke:#d9f2ff;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}\n        .bus{stroke:#ffffff;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}\n        .device{fill:#091421;stroke:#9edcff;stroke-width:2}\n        .device2{fill:#0e2232;stroke:#55c8ff;stroke-width:2}\n        .tag{fill:#071019;stroke:#55c8ff;stroke-width:1.3;rx:8}\n        .txt{fill:#e6f7ff;font-family:Inter,Arial;font-size:15px}\n        .small{fill:#a8c7da;font-family:Inter,Arial;font-size:12px}\n        .blue{fill:#55c8ff;font-family:Inter,Arial;font-size:16px;font-weight:800}\n        .warn{fill:#ffcf8a;font-family:Inter,Arial;font-size:12px}\n      </style>\n    </defs>\n    <rect width='1200' height='800' fill='#061019'/>\n    <rect width='1200' height='800' fill='url(#gridMajor)' opacity='0.64'/>\n    \n  <text x='42' y='44' class='blue' font-size='24'>E-001 · DIAGRAMA UNIFILAR PRELIMINAR</text>\n  <text x='42' y='70' class='small'>Proyecto: Guinche de izaje — Cotización técnica premium · Aplicación: Guinche / winche de izaje · Ubicación: Zaruma, El Oro</text>\n\n  <g id='feeder'>\n    <line x1='600' y1='95' x2='600' y2='145' class='bus'/>\n    <rect x='500' y='145' width='200' height='56' class='device2'/>\n    <text x='525' y='168' class='txt'>QF-01 · MCCB 3P</text>\n    <text x='525' y='188' class='small'>60 A · 460 V · kAIC: PENDIENTE</text>\n    <line x1='600' y1='201' x2='600' y2='250' class='bus'/>\n\n    <rect x='500' y='250' width='200' height='56' class='device'/>\n    <text x='525' y='273' class='txt'>FM-01 · Monitor fase</text>\n    <text x='525' y='293' class='small'>Pérdida / secuencia / subtensión</text>\n    <line x1='600' y1='306' x2='600' y2='358' class='bus'/>\n\n    <rect x='472' y='358' width='256' height='70' class='device2'/>\n    <text x='495' y='382' class='txt'>KM1/KM2 · Inversión enclavada</text>\n    <text x='495' y='404' class='small'>AC-3 · bobina 120 V · enclavamiento mecánico</text>\n    <line x1='600' y1='428' x2='600' y2='478' class='bus'/>\n\n    <rect x='500' y='478' width='200' height='56' class='device'/>\n    <text x='525' y='501' class='txt'>OL-01 · Sobrecarga</text>\n    <text x='525' y='521' class='small'>Ajuste preliminar: 38.0 A</text>\n    <line x1='600' y1='534' x2='600' y2='606' class='bus'/>\n\n    <circle cx='600' cy='640' r='36' fill='#0e2232' stroke='#9edcff' stroke-width='2.4'/>\n    <text x='586' y='649' fill='#e6f7ff' font-family='Inter,Arial' font-size='28' font-weight='800'>M</text>\n    <text x='653' y='628' class='txt'>MTR-01 · 25.0 HP</text>\n    <text x='653' y='649' class='small'>FLA 30.4 A · 460 V · 3F · 60 Hz</text>\n    <text x='653' y='670' class='small'>Cable preliminar: #8 AWG Cu · recorrido 45 m</text>\n  </g>\n\n  <g id='control-power'>\n    <line x1='600' y1='332' x2='880' y2='332' class='wire'/>\n    <rect x='880' y='292' width='198' height='80' class='device'/>\n    <text x='902' y='320' class='txt'>T1 · Transformador control</text>\n    <text x='902' y='342' class='small'>460 V → 120 V · fusible prim/sec</text>\n    <line x1='979' y1='372' x2='979' y2='420' class='wire'/>\n    <rect x='900' y='420' width='158' height='52' class='device2'/>\n    <text x='923' y='452' class='txt'>TB-CONTROL</text>\n  </g>\n\n  <g id='terminales'>\n    <rect x='72' y='126' width='292' height='176' class='device'/>\n    <text x='96' y='154' class='blue'>Leyenda / tags</text>\n    <text x='96' y='184' class='txt'>QF-01: Interruptor principal</text>\n    <text x='96' y='210' class='txt'>KM1: Subir / KM2: Bajar</text>\n    <text x='96' y='236' class='txt'>OL-01: Sobrecarga motor</text>\n    <text x='96' y='262' class='txt'>TB: Borneras cableadas</text>\n    <text x='96' y='288' class='warn'>Pendiente crítico: SCCR/kAIC real</text>\n  </g>\n\n  \n    <g class='title-block' font-family='Inter, Arial'>\n      <rect x='686' y='650' width='466' height='126' fill='#0a1622' stroke='#9edcff' stroke-width='1.3'/>\n      <line x1='686' y1='682' x2='1152' y2='682' stroke='#9edcff' stroke-width='1'/>\n      <line x1='686' y1='714' x2='1152' y2='714' stroke='#9edcff' stroke-width='1'/>\n      <line x1='894' y1='650' x2='894' y2='776' stroke='#9edcff' stroke-width='1'/>\n      <line x1='1016' y1='714' x2='1016' y2='776' stroke='#9edcff' stroke-width='1'/>\n      <text x='700' y='672' fill='#55c8ff' font-size='17' font-weight='800'>CONTROLPRO ADVISOR OS V7</text>\n      <text x='700' y='704' fill='#e6f7ff' font-size='14'>PLANO: E-001 Unifilar</text>\n      <text x='700' y='736' fill='#e6f7ff' font-size='13'>PROYECTO: Guinche de izaje — Cotización técnica premium</text>\n      <text x='700' y='760' fill='#b8d6e8' font-size='12'>USO: COTIZACIÓN / REVISIÓN · NO LIBERA CONSTRUCCIÓN SIN APROBACIÓN</text>\n      <text x='907' y='736' fill='#e6f7ff' font-size='12'>REV: A</text>\n      <text x='907' y='760' fill='#e6f7ff' font-size='12'>FECHA: 2026-06-02</text>\n      <text x='1028' y='736' fill='#e6f7ff' font-size='12'>ESCALA: NTS</text>\n      <text x='1028' y='760' fill='#e6f7ff' font-size='12'>FORMATO: SVG/CAD-LIKE</text>\n    </g>\n    \n</svg>",
+    "control_ladder_svg": "<svg viewBox='0 0 1200 800' xmlns='http://www.w3.org/2000/svg' role='img' aria-label='Diagrama ladder CAD-like'>\n  \n    <defs>\n      <pattern id='gridMinor' width='20' height='20' patternUnits='userSpaceOnUse'>\n        <path d='M 20 0 L 0 0 0 20' fill='none' stroke='#133146' stroke-width='0.55'/>\n      </pattern>\n      <pattern id='gridMajor' width='100' height='100' patternUnits='userSpaceOnUse'>\n        <rect width='100' height='100' fill='url(#gridMinor)'/>\n        <path d='M 100 0 L 0 0 0 100' fill='none' stroke='#1c4c66' stroke-width='1'/>\n      </pattern>\n      <style>\n        .wire{stroke:#d9f2ff;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}\n        .bus{stroke:#ffffff;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}\n        .device{fill:#091421;stroke:#9edcff;stroke-width:2}\n        .device2{fill:#0e2232;stroke:#55c8ff;stroke-width:2}\n        .tag{fill:#071019;stroke:#55c8ff;stroke-width:1.3;rx:8}\n        .txt{fill:#e6f7ff;font-family:Inter,Arial;font-size:15px}\n        .small{fill:#a8c7da;font-family:Inter,Arial;font-size:12px}\n        .blue{fill:#55c8ff;font-family:Inter,Arial;font-size:16px;font-weight:800}\n        .warn{fill:#ffcf8a;font-family:Inter,Arial;font-size:12px}\n      </style>\n    </defs>\n    <rect width='1200' height='800' fill='#061019'/>\n    <rect width='1200' height='800' fill='url(#gridMajor)' opacity='0.64'/>\n    \n  <text x='42' y='44' class='blue' font-size='24'>E-002 · DIAGRAMA DE CONTROL / LADDER PRELIMINAR</text>\n  <text x='42' y='70' class='small'>Control: 120 V · lógica con paro, enclavamientos, finales y freno. Revisar numeración final antes de fabricación.</text>\n\n  <g id='rails'>\n    <line x1='90' y1='116' x2='90' y2='600' class='bus'/>\n    <line x1='1110' y1='116' x2='1110' y2='600' class='bus'/>\n    <text x='74' y='104' class='txt'>L+</text><text x='1094' y='104' class='txt'>L-</text>\n  </g>\n\n  <g id='rungs' class='wire'>\n    <line x1='90' y1='150' x2='1110' y2='150'/>\n    <line x1='90' y1='235' x2='1110' y2='235'/>\n    <line x1='90' y1='320' x2='1110' y2='320'/>\n    <line x1='90' y1='405' x2='1110' y2='405'/>\n    <line x1='90' y1='490' x2='1110' y2='490'/>\n    <line x1='90' y1='575' x2='1110' y2='575'/>\n  </g>\n\n  <g id='contacts' stroke='#e6f7ff' stroke-width='2.5' fill='none' font-family='Inter,Arial'>\n    <path d='M170 126 v48 M196 126 v48 M278 126 v48 M304 126 v48 M402 126 v48 M428 126 v48'/>\n    <circle cx='1000' cy='150' r='30'/>\n    <path d='M170 211 v48 M196 211 v48 M310 211 v48 M336 211 v48 M492 211 v48 M518 211 v48 M650 211 v48 M676 211 v48'/>\n    <circle cx='1000' cy='235' r='30'/>\n    <path d='M170 296 v48 M196 296 v48 M310 296 v48 M336 296 v48 M492 296 v48 M518 296 v48 M650 296 v48 M676 296 v48'/>\n    <circle cx='1000' cy='320' r='30'/>\n    <path d='M170 381 v48 M196 381 v48 M350 381 v48 M376 381 v48 M528 381 v48 M554 381 v48'/>\n    <circle cx='1000' cy='405' r='30'/>\n    <path d='M170 466 v48 M196 466 v48 M350 466 v48 M376 466 v48'/>\n    <circle cx='1000' cy='490' r='30'/>\n    <path d='M170 551 v48 M196 551 v48 M350 551 v48 M376 551 v48 M528 551 v48 M554 551 v48'/>\n    <circle cx='1000' cy='575' r='30'/>\n  </g>\n\n  <g font-family='Inter,Arial'>\n    <text x='105' y='142' class='small'>R1</text><text x='160' y='116' class='txt'>S0 STOP NC</text><text x='260' y='116' class='txt'>S-ESTOP NC</text><text x='390' y='116' class='txt'>RESET</text><text x='980' y='156' class='txt'>CR</text>\n    <text x='105' y='227' class='small'>R2</text><text x='160' y='201' class='txt'>CR NO</text><text x='294' y='201' class='txt'>S1 SUBIR</text><text x='472' y='201' class='txt'>LS-UP NC</text><text x='626' y='201' class='txt'>KM2 NC</text><text x='976' y='241' class='txt'>KM1</text>\n    <text x='105' y='312' class='small'>R3</text><text x='160' y='286' class='txt'>CR NO</text><text x='294' y='286' class='txt'>S2 BAJAR</text><text x='472' y='286' class='txt'>LS-DN NC</text><text x='626' y='286' class='txt'>KM1 NC</text><text x='976' y='326' class='txt'>KM2</text>\n    <text x='105' y='397' class='small'>R4</text><text x='160' y='371' class='txt'>KM1/KM2 NO</text><text x='330' y='371' class='txt'>OL NC</text><text x='504' y='371' class='txt'>FM OK</text><text x='976' y='411' class='txt'>BRK</text>\n    <text x='105' y='482' class='small'>R5</text><text x='160' y='456' class='txt'>OL TRIP</text><text x='330' y='456' class='txt'>FM FAIL</text><text x='968' y='496' class='txt'>ALM</text>\n    <text x='105' y='567' class='small'>R6</text><text x='160' y='541' class='txt'>CR NO</text><text x='330' y='541' class='txt'>KM1 NO</text><text x='504' y='541' class='txt'>KM2 NO</text><text x='970' y='581' class='txt'>PIL</text>\n  </g>\n\n  <g id='terminal-tags' font-family='Inter,Arial'>\n    <rect x='74' y='625' width='542' height='96' class='device'/>\n    <text x='96' y='654' class='blue'>Numeración preliminar de cables</text>\n    <text x='96' y='681' class='small'>W101 L+ → S0; W102 S0 → E-STOP; W103 E-STOP → CR; W201 CR → KM1; W301 CR → KM2; W401 KM1/KM2 → BRK.</text>\n    <text x='96' y='704' class='warn'>Revisión de taller: confirmar borneras, colores, calibre de control y tensión real de bobinas/freno.</text>\n  </g>\n  \n    <g class='title-block' font-family='Inter, Arial'>\n      <rect x='686' y='650' width='466' height='126' fill='#0a1622' stroke='#9edcff' stroke-width='1.3'/>\n      <line x1='686' y1='682' x2='1152' y2='682' stroke='#9edcff' stroke-width='1'/>\n      <line x1='686' y1='714' x2='1152' y2='714' stroke='#9edcff' stroke-width='1'/>\n      <line x1='894' y1='650' x2='894' y2='776' stroke='#9edcff' stroke-width='1'/>\n      <line x1='1016' y1='714' x2='1016' y2='776' stroke='#9edcff' stroke-width='1'/>\n      <text x='700' y='672' fill='#55c8ff' font-size='17' font-weight='800'>CONTROLPRO ADVISOR OS V7</text>\n      <text x='700' y='704' fill='#e6f7ff' font-size='14'>PLANO: E-002 Control ladder</text>\n      <text x='700' y='736' fill='#e6f7ff' font-size='13'>PROYECTO: Guinche de izaje — Cotización técnica premium</text>\n      <text x='700' y='760' fill='#b8d6e8' font-size='12'>USO: COTIZACIÓN / REVISIÓN · NO LIBERA CONSTRUCCIÓN SIN APROBACIÓN</text>\n      <text x='907' y='736' fill='#e6f7ff' font-size='12'>REV: A</text>\n      <text x='907' y='760' fill='#e6f7ff' font-size='12'>FECHA: 2026-06-02</text>\n      <text x='1028' y='736' fill='#e6f7ff' font-size='12'>ESCALA: NTS</text>\n      <text x='1028' y='760' fill='#e6f7ff' font-size='12'>FORMATO: SVG/CAD-LIKE</text>\n    </g>\n    \n</svg>",
+    "panel_preview_svg": "<svg viewBox='0 0 1200 800' xmlns='http://www.w3.org/2000/svg' role='img' aria-label='Layout tablero CAD-like'>\n  \n    <defs>\n      <pattern id='gridMinor' width='20' height='20' patternUnits='userSpaceOnUse'>\n        <path d='M 20 0 L 0 0 0 20' fill='none' stroke='#133146' stroke-width='0.55'/>\n      </pattern>\n      <pattern id='gridMajor' width='100' height='100' patternUnits='userSpaceOnUse'>\n        <rect width='100' height='100' fill='url(#gridMinor)'/>\n        <path d='M 100 0 L 0 0 0 100' fill='none' stroke='#1c4c66' stroke-width='1'/>\n      </pattern>\n      <style>\n        .wire{stroke:#d9f2ff;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}\n        .bus{stroke:#ffffff;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}\n        .device{fill:#091421;stroke:#9edcff;stroke-width:2}\n        .device2{fill:#0e2232;stroke:#55c8ff;stroke-width:2}\n        .tag{fill:#071019;stroke:#55c8ff;stroke-width:1.3;rx:8}\n        .txt{fill:#e6f7ff;font-family:Inter,Arial;font-size:15px}\n        .small{fill:#a8c7da;font-family:Inter,Arial;font-size:12px}\n        .blue{fill:#55c8ff;font-family:Inter,Arial;font-size:16px;font-weight:800}\n        .warn{fill:#ffcf8a;font-family:Inter,Arial;font-size:12px}\n      </style>\n    </defs>\n    <rect width='1200' height='800' fill='#061019'/>\n    <rect width='1200' height='800' fill='url(#gridMajor)' opacity='0.64'/>\n    \n  <text x='42' y='44' class='blue' font-size='24'>E-003 · LAYOUT PRELIMINAR DE TABLERO / BACKPLATE</text>\n  <text x='42' y='70' class='small'>Distribución orientativa para cotización. Dimensiones finales dependen de marcas/modelos reales y disipación térmica.</text>\n  <g transform='translate(170 110)'>\n    <rect x='0' y='0' width='560' height='500' rx='14' fill='#0b1722' stroke='#9edcff' stroke-width='3'/>\n    <rect x='24' y='22' width='512' height='38' fill='#123044' stroke='#55c8ff'/><text x='38' y='48' class='txt'>RIEL DIN SUPERIOR · CONTROL / PROTECCIONES</text>\n    <rect x='52' y='86' width='112' height='76' class='device2'/><text x='70' y='128' class='small'>QF-01</text>\n    <rect x='194' y='86' width='112' height='76' class='device'/><text x='213' y='128' class='small'>FM-01</text>\n    <rect x='336' y='86' width='142' height='76' class='device'/><text x='352' y='128' class='small'>T1/FUS</text>\n\n    <rect x='24' y='206' width='512' height='38' fill='#123044' stroke='#55c8ff'/><text x='38' y='232' class='txt'>RIEL DIN MEDIO · CONTACTORES / SOBRECARGA</text>\n    <rect x='72' y='270' width='126' height='90' class='device2'/><text x='105' y='319' class='small'>KM1</text>\n    <rect x='218' y='270' width='70' height='90' class='device'/><text x='235' y='319' class='small'>INT</text>\n    <rect x='306' y='270' width='126' height='90' class='device2'/><text x='339' y='319' class='small'>KM2</text>\n    <rect x='452' y='270' width='64' height='90' class='device'/><text x='466' y='319' class='small'>OL</text>\n\n    <rect x='24' y='404' width='512' height='38' fill='#123044' stroke='#55c8ff'/><text x='38' y='430' class='txt'>BORNERAS / CANALETA / RESERVA</text>\n    <rect x='52' y='462' width='430' height='20' fill='#ffb33a'/><text x='494' y='478' class='small'>TB1</text>\n    <path d='M24 74 h512 M24 190 h512 M24 388 h512' stroke='#1d4c68' stroke-width='10' stroke-linecap='round'/>\n  </g>\n  <g transform='translate(795 130)' font-family='Inter,Arial'>\n    <rect x='0' y='0' width='300' height='420' rx='16' class='device'/>\n    <text x='24' y='34' class='blue'>Puerta / operador</text>\n    <circle cx='72' cy='98' r='22' fill='#d73737'/><text x='114' y='105' class='txt'>S-ESTOP</text>\n    <circle cx='72' cy='158' r='18' fill='#3bf28b'/><text x='114' y='165' class='txt'>SUBIR</text>\n    <circle cx='72' cy='214' r='18' fill='#55c8ff'/><text x='114' y='221' class='txt'>BAJAR</text>\n    <circle cx='72' cy='270' r='18' fill='#ffb33a'/><text x='114' y='277' class='txt'>FALLA</text>\n    <rect x='44' y='326' width='210' height='48' rx='8' class='device2'/><text x='70' y='356' class='txt'>PLACA / ROTULADO</text>\n  </g>\n  <text x='170' y='642' class='warn'>Regla: no congelar layout hasta confirmar marca/modelo, dimensiones, disipación, radios de curva y acceso de mantenimiento.</text>\n  \n    <g class='title-block' font-family='Inter, Arial'>\n      <rect x='686' y='650' width='466' height='126' fill='#0a1622' stroke='#9edcff' stroke-width='1.3'/>\n      <line x1='686' y1='682' x2='1152' y2='682' stroke='#9edcff' stroke-width='1'/>\n      <line x1='686' y1='714' x2='1152' y2='714' stroke='#9edcff' stroke-width='1'/>\n      <line x1='894' y1='650' x2='894' y2='776' stroke='#9edcff' stroke-width='1'/>\n      <line x1='1016' y1='714' x2='1016' y2='776' stroke='#9edcff' stroke-width='1'/>\n      <text x='700' y='672' fill='#55c8ff' font-size='17' font-weight='800'>CONTROLPRO ADVISOR OS V7</text>\n      <text x='700' y='704' fill='#e6f7ff' font-size='14'>PLANO: E-003 Layout tablero</text>\n      <text x='700' y='736' fill='#e6f7ff' font-size='13'>PROYECTO: Guinche de izaje — Cotización técnica premium</text>\n      <text x='700' y='760' fill='#b8d6e8' font-size='12'>USO: COTIZACIÓN / REVISIÓN · NO LIBERA CONSTRUCCIÓN SIN APROBACIÓN</text>\n      <text x='907' y='736' fill='#e6f7ff' font-size='12'>REV: A</text>\n      <text x='907' y='760' fill='#e6f7ff' font-size='12'>FECHA: 2026-06-02</text>\n      <text x='1028' y='736' fill='#e6f7ff' font-size='12'>ESCALA: NTS</text>\n      <text x='1028' y='760' fill='#e6f7ff' font-size='12'>FORMATO: SVG/CAD-LIKE</text>\n    </g>\n    \n</svg>",
+    "single_line_legacy_svg": "<svg viewBox='0 0 1000 520' xmlns='http://www.w3.org/2000/svg' role='img'>\n      <rect width='1000' height='520' fill='#071019'/>\n      <defs><filter id='g'><feGaussianBlur stdDeviation='2.2' result='b'/><feMerge><feMergeNode in='b'/><feMergeNode in='SourceGraphic'/></feMerge></filter></defs>\n      <text x='28' y='42' fill='#55c8ff' font-size='26' font-family='Inter, Arial' font-weight='700'>DIAGRAMA UNIFILAR · 460 V · 3F · CONCEPTUAL</text>\n      <g stroke='#bfe6ff' stroke-width='3' fill='none' filter='url(#g)'>\n        <line x1='500' y1='60' x2='500' y2='110'/><circle cx='500' cy='125' r='15'/><line x1='500' y1='140' x2='500' y2='185'/>\n        <rect x='438' y='185' width='124' height='52' rx='8'/><line x1='500' y1='237' x2='500' y2='288'/>\n        <rect x='442' y='288' width='116' height='52' rx='8'/><line x1='500' y1='340' x2='500' y2='385'/>\n        <line x1='280' y1='385' x2='720' y2='385'/>\n        <line x1='340' y1='385' x2='340' y2='440'/><circle cx='340' cy='468' r='30'/>\n        <line x1='650' y1='385' x2='650' y2='430'/><path d='M625 430 h50 M625 450 h50 M625 470 h50'/>\n      </g>\n      <g fill='#dff5ff' font-family='Inter, Arial' font-size='18'>\n        <text x='560' y='130'>Seccionador / MCCB</text><text x='560' y='154'>60 A preliminar · kAIC/SCCR por verificar</text>\n        <text x='575' y='220'>Protección motor / sobrecarga</text><text x='575' y='244'>Ajuste preliminar: 38.0 A</text>\n        <text x='575' y='323'>Control: 120 V</text>\n        <text x='205' y='472'>M</text><text x='375' y='458'>25 HP · 30.4 A</text><text x='375' y='484'>Guinche / winche de izaje</text>\n        <text x='700' y='452'>Transformador control</text><text x='700' y='480'>460V → 120V</text>\n      </g>\n    </svg>",
+    "control_ladder_legacy_svg": "<svg viewBox='0 0 1000 520' xmlns='http://www.w3.org/2000/svg' role='img'>\n      <rect width='1000' height='520' fill='#071019'/>\n      <text x='28' y='42' fill='#55c8ff' font-size='26' font-family='Inter, Arial' font-weight='700'>DIAGRAMA DE CONTROL · LADDER CONCEPTUAL</text>\n      <g stroke='#d7efff' stroke-width='3' fill='none'>\n        <line x1='80' y1='85' x2='80' y2='470'/><line x1='920' y1='85' x2='920' y2='470'/>\n        <line x1='80' y1='130' x2='920' y2='130'/><line x1='80' y1='215' x2='920' y2='215'/><line x1='80' y1='300' x2='920' y2='300'/><line x1='80' y1='385' x2='920' y2='385'/>\n        <path d='M170 108 v44 M195 108 v44 M280 108 v44 M305 108 v44 M410 108 v44 M435 108 v44'/><circle cx='825' cy='130' r='34'/>\n        <path d='M170 193 v44 M195 193 v44 M320 193 v44 M345 193 v44 M505 193 v44 M530 193 v44'/><circle cx='825' cy='215' r='34'/>\n        <path d='M170 278 v44 M195 278 v44 M320 278 v44 M345 278 v44 M505 278 v44 M530 278 v44'/><circle cx='825' cy='300' r='34'/>\n        <path d='M170 363 v44 M195 363 v44 M390 363 v44 M415 363 v44'/><circle cx='825' cy='385' r='34'/>\n      </g>\n      <g fill='#dff5ff' font-family='Inter, Arial' font-size='17'>\n        <text x='62' y='75'>L1</text><text x='905' y='75'>L2</text>\n        <text x='160' y='100'>STOP</text><text x='260' y='100'>E-STOP</text><text x='390' y='100'>SUBIR</text><text x='807' y='136'>CR1</text>\n        <text x='160' y='185'>CR1</text><text x='300' y='185'>LÍMITE SUP.</text><text x='485' y='185'>ENCL. BAJAR</text><text x='801' y='221'>KM1</text>\n        <text x='160' y='270'>CR2</text><text x='300' y='270'>LÍMITE INF.</text><text x='485' y='270'>ENCL. SUBIR</text><text x='801' y='306'>BAJAR</text>\n        <text x='160' y='355'>KM1/KM2</text><text x='375' y='355'>FRENO OK</text><text x='805' y='391'>BRK</text>\n      </g>\n    </svg>",
+    "panel_preview_legacy_svg": "<svg viewBox='0 0 1000 520' xmlns='http://www.w3.org/2000/svg' role='img'>\n      <rect width='1000' height='520' fill='#071019'/>\n      <text x='28' y='42' fill='#55c8ff' font-size='26' font-family='Inter, Arial' font-weight='700'>VISTA 3D CONCEPTUAL · TABLERO + MOTOR</text>\n      <g transform='translate(185 82) skewY(-4)'>\n        <rect x='0' y='0' width='300' height='365' rx='20' fill='#17212d' stroke='#77ccff' stroke-width='3'/>\n        <rect x='32' y='42' width='94' height='74' rx='10' fill='#e8eef5'/><rect x='160' y='42' width='94' height='74' rx='10' fill='#e8eef5'/>\n        <rect x='32' y='148' width='222' height='86' rx='10' fill='#0e1821' stroke='#426b86'/>\n        <rect x='50' y='166' width='38' height='52' rx='4' fill='#f4f8fb'/><rect x='105' y='166' width='38' height='52' rx='4' fill='#f4f8fb'/><rect x='160' y='166' width='38' height='52' rx='4' fill='#f4f8fb'/>\n        <rect x='32' y='270' width='222' height='55' rx='8' fill='#0c131b' stroke='#426b86'/><line x1='48' y1='336' x2='245' y2='336' stroke='#ffa533' stroke-width='5'/>\n      </g>\n      <g transform='translate(565 132)'>\n        <ellipse cx='120' cy='120' rx='150' ry='58' fill='#071019' stroke='#16354a'/>\n        <rect x='35' y='55' width='245' height='112' rx='38' fill='#155174' stroke='#8ecaff' stroke-width='3'/>\n        <rect x='278' y='96' width='112' height='30' fill='#aeb8c2'/><circle cx='398' cy='111' r='22' fill='#d5dce3'/>\n        <path d='M60 55 v112 M82 55 v112 M104 55 v112 M126 55 v112 M148 55 v112 M170 55 v112 M192 55 v112 M214 55 v112 M236 55 v112' stroke='#071019' stroke-width='3'/>\n        <text x='45' y='235' fill='#dff5ff' font-family='Inter, Arial' font-size='22'>Motor TEFC · modelo conceptual</text>\n      </g>\n    </svg>"
+  },
+  "statistics": {
+    "engineering_completeness_percent": 97.8,
+    "market_coverage_percent": 100.0,
+    "quote_confidence": "media-alta",
+    "reviewer_correction_load": "Mínima",
+    "time_saved_estimate": "2–6 horas por cotización compleja",
+    "estimated_manual_quote_hours": "4–8 h",
+    "estimated_controlpro_quote_hours": "35–75 min",
+    "commercial_savings_message": "Ahorra horas de búsqueda, normalización de BOM, armado de RFQ, presupuesto y documento para cliente.",
+    "deliverables_ready": 15,
+    "rfq_required_items": 1,
+    "priceguard_score_percent": 83.8,
+    "priceguard_green": 17,
+    "priceguard_yellow": 1,
+    "priceguard_red": 1,
+    "priceguard_verdict": "Revisable con RFQ",
+    "locked_price_count": 16,
+    "referential_price_count": 1,
+    "blocked_price_count": 1,
+    "candidate_offer_audit": {
+      "total_candidate_offers": 58,
+      "suspicious_low_rejected": 4,
+      "suspicious_high_flagged": 0,
+      "expired_rejected": 0,
+      "weak_source_flagged": 5,
+      "blocked_examples": [
+        {
+          "component_id": "mccb_main",
+          "supplier": "Marketplace Referencial",
+          "brand_model": "Genérico No verificado",
+          "price_usd": 28.0,
+          "market_median": 108.5,
+          "flags": [
+            "precio sospechosamente bajo",
+            "stock no confirmado",
+            "fuente débil"
+          ]
+        },
+        {
+          "component_id": "contactor_fwd",
+          "supplier": "Suministros El Oro",
+          "brand_model": "Chint NC1-3210 120V",
+          "price_usd": 43.0,
+          "market_median": 85.0,
+          "flags": [
+            "precio sospechosamente bajo"
+          ]
+        },
+        {
+          "component_id": "contactor_rev",
+          "supplier": "Suministros El Oro",
+          "brand_model": "Chint NC1-3210 120V",
+          "price_usd": 43.0,
+          "market_median": 85.0,
+          "flags": [
+            "precio sospechosamente bajo"
+          ]
+        },
+        {
+          "component_id": "cabinet",
+          "supplier": "Marketplace Referencial",
+          "brand_model": "Genérico GAB-604025",
+          "price_usd": 79.0,
+          "market_median": 135.0,
+          "flags": [
+            "stock no confirmado",
+            "fuente débil"
+          ]
+        },
+        {
+          "component_id": "brake_rectifier",
+          "supplier": "Automatización Andina",
+          "brand_model": "Kendrion BR120-2A",
+          "price_usd": 118.0,
+          "market_median": 118.0,
+          "flags": [
+            "stock no confirmado"
+          ]
+        },
+        {
+          "component_id": "brake_rectifier",
+          "supplier": "Marketplace Referencial",
+          "brand_model": "Genérico BR-120",
+          "price_usd": 48.0,
+          "market_median": 118.0,
+          "flags": [
+            "stock no confirmado",
+            "fuente débil"
+          ]
+        },
+        {
+          "component_id": "vfd",
+          "supplier": "Automatización Andina",
+          "brand_model": "Schneider ATV930D18N4",
+          "price_usd": 1280.0,
+          "market_median": 1230.0,
+          "flags": [
+            "stock no confirmado"
+          ]
+        },
+        {
+          "component_id": "vfd",
+          "supplier": "Suministros El Oro",
+          "brand_model": "INVT GD200A-022G/030P-4",
+          "price_usd": 690.0,
+          "market_median": 1230.0,
+          "flags": [
+            "precio sospechosamente bajo"
+          ]
+        }
+      ],
+      "policy": "El motor audita también ofertas no seleccionadas para no caer en precio barato falso ni precio inflado fuera de banda."
+    },
+    "price_outliers": 1,
+    "auto_corrected_prices": 1,
+    "execution_days_estimate": "2–4 días con materiales disponibles",
+    "quote_readiness_score": 95.4
+  },
+  "deliverables": [
+    {
+      "name": "Propuesta para cliente",
+      "description": "Resumen comercial con precio piso/recomendado/premium, alcance, vigencia y exclusiones."
+    },
+    {
+      "name": "BOM cotizable",
+      "description": "Materiales normalizados con proveedor, precio, confianza, stock, semáforo PriceGuard y decisión."
+    },
+    {
+      "name": "Reporte PriceGuard",
+      "description": "Semáforos verde/amarillo/rojo, bandas de mercado, outliers, autocorrecciones y acciones RFQ."
+    },
+    {
+      "name": "Mensaje RFQ",
+      "description": "Texto listo para WhatsApp/correo a proveedores."
+    },
+    {
+      "name": "Diagrama unifilar",
+      "description": "SVG conceptual para revisión técnica."
+    },
+    {
+      "name": "Diagrama de control",
+      "description": "Ladder conceptual con enclavamientos y seguridad."
+    },
+    {
+      "name": "Vista 3D conceptual",
+      "description": "Explicación visual del tablero y motor."
+    },
+    {
+      "name": "Semáforo de precisión",
+      "description": "Calidad de datos, coherencia, mercado y compuertas."
+    },
+    {
+      "name": "Libro de supuestos",
+      "description": "Qué se asumió, confianza y cómo verificar."
+    },
+    {
+      "name": "Checklist de cotización",
+      "description": "Pasos para no enviar precio flojo."
+    },
+    {
+      "name": "Checklist de pruebas",
+      "description": "Taller, campo, seguridad y firma."
+    },
+    {
+      "name": "Registro de riesgos",
+      "description": "Riesgos técnicos/comerciales con mitigación."
+    },
+    {
+      "name": "Expediente Markdown",
+      "description": "Archivo exportable para editar o convertir a PDF."
+    },
+    {
+      "name": "Reporte PDF",
+      "description": "Resumen formal para revisión y presentación."
+    },
+    {
+      "name": "BOM CSV/XLSX",
+      "description": "Lista de materiales editable para compras y seguimiento."
+    }
+  ],
+  "rfq": {
+    "message": "Buenos días, necesito cotizar materiales para un proyecto de control industrial.\n\nProyecto: Guinche de izaje — Cotización técnica premium\nUbicación de entrega/referencia: Zaruma, El Oro, Ecuador\n\nFavor confirmar precio unitario, marca disponible, modelo exacto, stock, tiempo de entrega, garantía, forma de pago y vigencia de oferta:\n\n1. [MEDIA] Reactor de línea — Cantidad: 1 u — Especificación: 3%, 460 V, corriente compatible con 30.4 A — Motivo: confirmación de mercado\n2. [ALTA] Resistencia de frenado — Cantidad: 1 u — Especificación: Dimensionar por ciclo de carga, energía de frenado y especificación del VFD — Motivo: stock no confirmado\n\nTambién indicar alternativas equivalentes de calidad industrial y si pueden emitir proforma.\nGracias.",
+    "channels_ready": [
+      "WhatsApp manual",
+      "Correo",
+      "WhatsApp Cloud API con credenciales",
+      "SMTP con credenciales"
+    ],
+    "note": "La versión piloto genera RFQ listo. El envío automático requiere credenciales reales y aprobación del usuario."
+  },
+  "crm": {
+    "quote_status": "Listo para propuesta piloto revisable",
+    "next_action": "Confirmar ítems RFQ y enviar propuesta",
+    "win_loss_learning": [
+      "Registrar si se gana o pierde",
+      "Guardar precio competidor si existe",
+      "Actualizar base interna"
+    ]
+  },
+  "validation": {
+    "status": "Apto para prueba piloto comercial revisable",
+    "human_approval_required": true,
+    "construction_release": false,
+    "gates": [
+      "OK · Datos críticos: Completar placa, tensión/fases, aplicación y seguridad.",
+      "OK · Coherencia técnica: Resolver auditoría de coherencia.",
+      "OK · Mercado/precio: Confirmar proveedores/stock y corregir outliers de precio.",
+      "PENDIENTE · SCCR/kAIC: Solicitar corto disponible o criterio de protección.",
+      "OK · Seguridad de izaje: Añadir freno, finales, E-Stop y pruebas."
+    ]
+  },
+  "assumption_ledger": [
+    {
+      "topic": "SCCR/kAIC",
+      "assumption": "No se conoce corriente de cortocircuito; el breaker se trata como preliminar.",
+      "confidence": "baja",
+      "verification": "Solicitar dato de transformador/red o medir/calcular antes de construir."
+    },
+    {
+      "topic": "Precio de materiales",
+      "assumption": "Cobertura catálogo 100.0%; PriceGuard 83.8%; verdes 17, amarillos 1, rojos 1; RFQ requerido en 1 ítems.",
+      "confidence": "según fuente",
+      "verification": "Confirmar stock/vigencia; el precio 100% cerrado solo existe con proveedor confirmado."
+    },
+    {
+      "topic": "Mano de obra",
+      "assumption": "Se asumen 1.5 días tablero y 1.5 días campo.",
+      "confidence": "media",
+      "verification": "Ajustar con visita técnica y alcance final."
+    },
+    {
+      "topic": "Alcance",
+      "assumption": "Tablero + instalación en campo",
+      "confidence": "media",
+      "verification": "Definir exclusiones: obra civil, canalización extra, parada de producción, permisos."
+    },
+    {
+      "topic": "Izaje",
+      "assumption": "Se trata como equipo crítico por carga suspendida; se exige revisión superior.",
+      "confidence": "alta",
+      "verification": "Probar sin carga, con carga supervisada y firmar checklist."
+    }
+  ],
+  "consistency_audit": {
+    "score_percent": 100,
+    "checks": [
+      {
+        "name": "Coherencia FLA vs potencia",
+        "status": "ok",
+        "severity": "media",
+        "detail": "FLA placa 30.4 A vs estimado 29.1 A; desviación 4.5%.",
+        "action": "Si supera 35%, revisar placa, conexión, tensión y unidades HP/kW."
+      },
+      {
+        "name": "Arquitectura de izaje",
+        "status": "ok",
+        "severity": "crítica",
+        "detail": "Aplicación de carga suspendida detectada.",
+        "action": "No liberar construcción sin freno, finales de carrera, paro de emergencia y enclavamientos."
+      },
+      {
+        "name": "Caída de tensión",
+        "status": "ok",
+        "severity": "baja",
+        "detail": "Caída estimada 0.42%.",
+        "action": "Mantener verificación con tabla/código local."
+      },
+      {
+        "name": "SCCR/kAIC",
+        "status": "pendiente",
+        "severity": "alta",
+        "detail": "No se declaró corriente de cortocircuito disponible.",
+        "action": "Cotizar con advertencia; no liberar fabricación hasta verificar kAIC/SCCR."
+      }
+    ],
+    "blockers": []
+  },
+  "release_gates": {
+    "quote_ready": true,
+    "construction_ready": false,
+    "gates": [
+      {
+        "name": "Datos críticos",
+        "passed": true,
+        "consequence": "Sin datos críticos no se puede construir ni cerrar precio técnico.",
+        "required_action": "Completar placa, tensión/fases, aplicación y seguridad."
+      },
+      {
+        "name": "Coherencia técnica",
+        "passed": true,
+        "consequence": "Bloqueadores elevan revisión humana y bajan confianza.",
+        "required_action": "Resolver auditoría de coherencia."
+      },
+      {
+        "name": "Mercado/precio",
+        "passed": true,
+        "consequence": "Ítems en rojo o PriceGuard bajo obligan a RFQ antes de precio cerrado.",
+        "required_action": "Confirmar proveedores/stock y corregir outliers de precio."
+      },
+      {
+        "name": "SCCR/kAIC",
+        "passed": false,
+        "consequence": "No liberar fabricación sin capacidad interruptiva verificada.",
+        "required_action": "Solicitar corto disponible o criterio de protección."
+      },
+      {
+        "name": "Seguridad de izaje",
+        "passed": true,
+        "consequence": "Carga suspendida sin seguridad completa es bloqueo crítico.",
+        "required_action": "Añadir freno, finales, E-Stop y pruebas."
+      }
+    ],
+    "verdict": "Lista para cotización piloto",
+    "construction_verdict": "No liberada para construcción automática"
+  },
+  "quote_readiness": {
+    "score_percent": 95.4,
+    "status": "Alta: lista para propuesta piloto revisable",
+    "seller_message": "Ahorra tiempo porque arma el 80–90% del expediente; el humano valida, no reconstruye.",
+    "do_not_send_if": []
+  },
+  "field_verification_plan": [
+    {
+      "step": "Placa y alimentación",
+      "what": "Foto de placa, tensión entre fases, tierra, frecuencia y FLA.",
+      "why": "Evita comprar bobina/protección equivocada."
+    },
+    {
+      "step": "Ruta física",
+      "what": "Medir distancia real, canalización, temperatura y polvo/humedad.",
+      "why": "Ajusta conductor, gabinete y reserva."
+    },
+    {
+      "step": "Tablero existente",
+      "what": "Fotos internas, espacio, entradas inferiores/superiores, borneras y cableado.",
+      "why": "Reduce sorpresas y horas de montaje."
+    },
+    {
+      "step": "Proveedor",
+      "what": "Confirmar precio, stock, marca, garantía y entrega.",
+      "why": "Convierte precio referencial en precio confirmado."
+    },
+    {
+      "step": "Freno",
+      "what": "Placa/tensión/corriente del freno y lógica de liberación.",
+      "why": "El guinche no se trata como motor común."
+    },
+    {
+      "step": "Finales de carrera",
+      "what": "Ubicación mecánica, accionamiento y redundancia si aplica.",
+      "why": "Evita sobre-recorrido y riesgo de carga."
+    }
+  ],
+  "qa_scorecard": {
+    "data_score": 96.0,
+    "consistency_score": 100,
+    "quote_score": 95.4,
+    "release_gate_passed": true,
+    "construction_gate_passed": false,
+    "principle": "Métricas altas no eliminan aprobación humana; reducen corrección y tiempo perdido."
+  },
+  "review_board": {
+    "veredicto": "La V9 está lista para prueba piloto cerrada con ingenieros: el humano revisa, no reconstruye.",
+    "quote_score": 95.4,
+    "personas": [
+      {
+        "perfil": "Ingeniero junior",
+        "lo_que_exigia": "Guía paso a paso, ejemplos y bloqueo si faltan datos.",
+        "respuesta_v9": "Flujo guiado, modo rápido, semáforo de precisión y compuertas de salida.",
+        "estado": "feliz para piloto"
+      },
+      {
+        "perfil": "Técnico tablerista",
+        "lo_que_exigia": "BOM aterrizado, categorías, chequeos críticos y materiales editables.",
+        "respuesta_v9": "BOM normalizado por categoría, tabla cotizable, CSV/XLSX y notas de riesgo por componente.",
+        "estado": "feliz para piloto"
+      },
+      {
+        "perfil": "Mantenimiento industrial",
+        "lo_que_exigia": "Plan de pruebas, fallas comunes y entrega sin improvisación.",
+        "respuesta_v9": "Checklist de taller/campo, plan de verificación y diagnóstico de fallas típicas.",
+        "estado": "feliz para piloto"
+      },
+      {
+        "perfil": "Diseñador eléctrico",
+        "lo_que_exigia": "Trazabilidad, supuestos, auditoría, compuertas y documentos formales.",
+        "respuesta_v9": "Libro de supuestos, auditoría de coherencia, export PDF, Markdown y bloqueo SCCR/kAIC.",
+        "estado": "Satisfecho para piloto"
+      },
+      {
+        "perfil": "Cotizador/compras",
+        "lo_que_exigia": "Precios por confianza, proveedores, RFQ y exportación a Excel.",
+        "respuesta_v9": "Market engine, price confidence, RFQ, CSV/XLSX BOM y fuente/vigencia por línea.",
+        "estado": "feliz para piloto"
+      },
+      {
+        "perfil": "Seguridad/supervisor",
+        "lo_que_exigia": "No liberar construcción si hay riesgo crítico.",
+        "respuesta_v9": "Construction gate separado de quote gate; aprobación humana obligatoria.",
+        "estado": "feliz: no promete construcción automática"
+      }
+    ],
+    "regla_de_venta": "Vender ahorro de tiempo y expediente técnico-comercial trazable, no certificación automática.",
+    "pendiente_realista": "Conectar credenciales reales de proveedores/marketplaces para pasar de precio referencial a precio confirmado masivo."
+  },
+  "guided_flow": {
+    "modo_rapido": [
+      "1. Elige tipo de máquina y potencia.",
+      "2. Confirma tensión/fases/FLA o sube placa.",
+      "3. Define seguridad: paro, finales, freno, monitor de fase.",
+      "4. Genera solución y revisa semáforo.",
+      "5. Confirma precios de baja confianza con RFQ.",
+      "6. Exporta propuesta y BOM."
+    ],
+    "modo_expediente": [
+      "Completa fotos, ambiente, distancia, SCCR/kAIC, alcance y logística.",
+      "Revisa auditoría de coherencia y libro de supuestos.",
+      "Cierra precios confirmados y bloqueadores antes de ofertar fuerte."
+    ],
+    "next_best_actions": [
+      "Si no se conoce, marcar SCCR/kAIC como pendiente y no liberar construcción."
+    ],
+    "market_status": "19/19 materiales tienen precio; PriceGuard 83.8%; verdes 17, amarillos 1, rojos 1; 1 requieren RFQ."
+  },
+  "output_quality_contract": {
+    "promesa": "Con pocos datos produce el 80-90% del expediente para revisión, cotización y negociación.",
+    "no_promete": "No certifica construcción ni energización sin responsable humano, campo y normativa local.",
+    "reglas_no_basura": [
+      "Separar dato confirmado, supuesto y pendiente.",
+      "No ocultar baja confianza de precio.",
+      "Bloquear construcción si faltan seguridad, SCCR/kAIC o coherencia crítica.",
+      "Mostrar acciones concretas para cerrar cada pendiente.",
+      "Entregar archivos exportables y trazables."
+    ],
+    "quote_gate": "Alta: lista para propuesta piloto revisable",
+    "construction_gate": "No liberada para construcción automática"
+  },
+  "cad_outputs": {
+    "level": "CAD-like piloto / Draw.io editable",
+    "single_line_sheet": "E-001",
+    "control_ladder_sheet": "E-002",
+    "panel_layout_sheet": "E-003",
+    "terminal_schedule": [
+      {
+        "terminal": "TB1-01",
+        "wire": "W101",
+        "from": "T1 secondary L+",
+        "to": "S0 STOP NC",
+        "function": "Alimentación control",
+        "gauge": "#16 AWG Cu",
+        "color": "Rojo"
+      },
+      {
+        "terminal": "TB1-02",
+        "wire": "W102",
+        "from": "S0 STOP NC",
+        "to": "S-ESTOP NC",
+        "function": "Cadena de paro",
+        "gauge": "#16 AWG Cu",
+        "color": "Rojo"
+      },
+      {
+        "terminal": "TB1-03",
+        "wire": "W103",
+        "from": "S-ESTOP NC",
+        "to": "CR coil",
+        "function": "Permisivo maestro",
+        "gauge": "#16 AWG Cu",
+        "color": "Rojo"
+      },
+      {
+        "terminal": "TB1-04",
+        "wire": "W201",
+        "from": "S1 SUBIR",
+        "to": "KM1 coil",
+        "function": "Orden subir",
+        "gauge": "#16 AWG Cu",
+        "color": "Azul"
+      },
+      {
+        "terminal": "TB1-05",
+        "wire": "W301",
+        "from": "S2 BAJAR",
+        "to": "KM2 coil",
+        "function": "Orden bajar",
+        "gauge": "#16 AWG Cu",
+        "color": "Azul"
+      },
+      {
+        "terminal": "TB1-06",
+        "wire": "W401",
+        "from": "KM1/KM2 aux",
+        "to": "BRK",
+        "function": "Liberación freno",
+        "gauge": "#16 AWG Cu",
+        "color": "Naranja"
+      },
+      {
+        "terminal": "TB1-07",
+        "wire": "W501",
+        "from": "OL/FM",
+        "to": "ALM",
+        "function": "Alarma/falla",
+        "gauge": "#16 AWG Cu",
+        "color": "Amarillo"
+      },
+      {
+        "terminal": "TB1-08",
+        "wire": "W000",
+        "from": "Control common",
+        "to": "L-",
+        "function": "Retorno control",
+        "gauge": "#16 AWG Cu",
+        "color": "Blanco"
+      }
+    ],
+    "wire_schedule": [
+      {
+        "cable": "C-PWR-01",
+        "from": "QF-01",
+        "to": "KM1/KM2",
+        "conductors": "3F+PE",
+        "size": "#8 AWG Cu",
+        "length_m": 5.6,
+        "service": "Dentro tablero",
+        "verify": "calibre/radio"
+      },
+      {
+        "cable": "C-MTR-01",
+        "from": "OL-01",
+        "to": "MTR-01",
+        "conductors": "3F+PE",
+        "size": "#8 AWG Cu",
+        "length_m": 53.1,
+        "service": "Fuerza motor",
+        "verify": "canalización/caída"
+      },
+      {
+        "cable": "C-CNT-01",
+        "from": "TB1",
+        "to": "Botonera",
+        "conductors": "8C",
+        "size": "#16 AWG Cu",
+        "length_m": 8.0,
+        "service": "Mando",
+        "verify": "IP/ambiente"
+      },
+      {
+        "cable": "C-LS-01",
+        "from": "TB1",
+        "to": "Final carrera sup/inf",
+        "conductors": "4C",
+        "size": "#16 AWG Cu",
+        "length_m": 12.0,
+        "service": "Seguridad de recorrido",
+        "verify": "posición mecánica"
+      }
+    ],
+    "drawio_available": true,
+    "upgrade_rule": "Antes de fabricar, convertir a CAD final con marcas/modelos reales, numeración congelada, revisión de SCCR/kAIC y firma responsable."
+  },
+  "api_activation": {
+    "release": "V9 PriceTrust Closing",
+    "configured_count": 0,
+    "enabled_count": 0,
+    "services": [
+      {
+        "key": "mercadolibre",
+        "name": "Mercado Libre Search",
+        "enabled": false,
+        "configured": false,
+        "missing": [
+          "MELI_SITE_ID"
+        ],
+        "required_env": [
+          "MELI_SITE_ID"
+        ],
+        "optional_env": [
+          "MELI_ACCESS_TOKEN"
+        ],
+        "status": "desactivado",
+        "note": "Busca precios referenciales. La selección final exige verificar especificación, stock y vigencia."
+      },
+      {
+        "key": "google_places",
+        "name": "Google Places Suppliers",
+        "enabled": false,
+        "configured": false,
+        "missing": [
+          "GOOGLE_PLACES_API_KEY"
+        ],
+        "required_env": [
+          "GOOGLE_PLACES_API_KEY"
+        ],
+        "optional_env": [
+          "GOOGLE_PLACES_DEFAULT_COUNTRY"
+        ],
+        "status": "desactivado",
+        "note": "Encuentra proveedores cercanos; no confirma precios."
+      },
+      {
+        "key": "whatsapp_cloud",
+        "name": "WhatsApp Cloud API RFQ",
+        "enabled": false,
+        "configured": false,
+        "missing": [
+          "WHATSAPP_TOKEN",
+          "WHATSAPP_PHONE_NUMBER_ID"
+        ],
+        "required_env": [
+          "WHATSAPP_TOKEN",
+          "WHATSAPP_PHONE_NUMBER_ID"
+        ],
+        "optional_env": [
+          "WHATSAPP_API_VERSION",
+          "WHATSAPP_DEFAULT_COUNTRY_CODE"
+        ],
+        "status": "desactivado",
+        "note": "Envía RFQ solo con aprobación del usuario y consentimiento del destinatario."
+      },
+      {
+        "key": "smtp_email",
+        "name": "SMTP RFQ Email",
+        "enabled": false,
+        "configured": false,
+        "missing": [
+          "SMTP_HOST",
+          "SMTP_PORT",
+          "SMTP_USER",
+          "SMTP_PASSWORD",
+          "SMTP_FROM_EMAIL"
+        ],
+        "required_env": [
+          "SMTP_HOST",
+          "SMTP_PORT",
+          "SMTP_USER",
+          "SMTP_PASSWORD",
+          "SMTP_FROM_EMAIL"
+        ],
+        "optional_env": [
+          "SMTP_FROM_NAME"
+        ],
+        "status": "desactivado",
+        "note": "Envío de RFQ por correo cuando no se use WhatsApp."
+      }
+    ],
+    "safe_default": "Sin credenciales reales la app usa catálogo interno, precios por confianza y RFQ manual. No finge mercado en vivo."
+  },
+  "priceguard": {
+    "methodology": {
+      "name": "PriceGuard 9",
+      "goal": "Evitar cotizaciones débiles, precios exagerados, precios demasiado bajos/incompatibles y falsas certezas antes de presupuestar trabajos de miles de dólares.",
+      "inputs": [
+        "catálogo interno",
+        "fuente de precio",
+        "stock",
+        "vigencia",
+        "proveedor",
+        "banda de mercado",
+        "ubicación",
+        "historial/RFQ",
+        "auditoría de outliers",
+        "estado de credenciales API"
+      ],
+      "semaforos": {
+        "verde": "usable en cotización revisable; aun así debe verificarse si el precio es sensible o la oferta vence pronto",
+        "amarillo": "referencial; se recomienda RFQ o confirmación antes de enviar propuesta firme",
+        "rojo": "no cerrar precio; se autocorrige con mediana temporal o se exige RFQ"
+      },
+      "anti_garbage_rules": [
+        "No escoger automáticamente el precio más barato.",
+        "No usar precio sospechosamente bajo como definitivo.",
+        "No fingir mercado real si las APIs están sin credenciales.",
+        "Mostrar catálogo piloto separado de mercado vivo.",
+        "Auditar todas las ofertas candidatas, no solo la seleccionada.",
+        "Separar precio estimado, referencial, referencial fuerte y confirmado.",
+        "Bloquear salida fuerte cuando hay demasiados rojos o stock sin confirmar."
+      ]
+    },
+    "summary": {
+      "materials_cost": 2963.59,
+      "items_with_price": 19,
+      "total_items": 19,
+      "coverage_percent": 100.0,
+      "high_confidence_items": 16,
+      "needs_rfq_count": 1,
+      "suppliers_used": [
+        "Automatización Andina",
+        "Cuenca Control Supply",
+        "ElectroIndustrial Guayaquil",
+        "Proveedor Premium Quito",
+        "Suministros El Oro"
+      ],
+      "quote_needed_components": [
+        "braking_resistor"
+      ],
+      "priceguard_score_percent": 83.8,
+      "green_count": 17,
+      "yellow_count": 1,
+      "red_count": 1,
+      "outlier_count": 1,
+      "auto_corrected_count": 1,
+      "catalog_depth_score_percent": 94.7,
+      "candidate_offer_audit": {
+        "total_candidate_offers": 58,
+        "suspicious_low_rejected": 4,
+        "suspicious_high_flagged": 0,
+        "expired_rejected": 0,
+        "weak_source_flagged": 5,
+        "blocked_examples": [
+          {
+            "component_id": "mccb_main",
+            "supplier": "Marketplace Referencial",
+            "brand_model": "Genérico No verificado",
+            "price_usd": 28.0,
+            "market_median": 108.5,
+            "flags": [
+              "precio sospechosamente bajo",
+              "stock no confirmado",
+              "fuente débil"
+            ]
+          },
+          {
+            "component_id": "contactor_fwd",
+            "supplier": "Suministros El Oro",
+            "brand_model": "Chint NC1-3210 120V",
+            "price_usd": 43.0,
+            "market_median": 85.0,
+            "flags": [
+              "precio sospechosamente bajo"
+            ]
+          },
+          {
+            "component_id": "contactor_rev",
+            "supplier": "Suministros El Oro",
+            "brand_model": "Chint NC1-3210 120V",
+            "price_usd": 43.0,
+            "market_median": 85.0,
+            "flags": [
+              "precio sospechosamente bajo"
+            ]
+          },
+          {
+            "component_id": "cabinet",
+            "supplier": "Marketplace Referencial",
+            "brand_model": "Genérico GAB-604025",
+            "price_usd": 79.0,
+            "market_median": 135.0,
+            "flags": [
+              "stock no confirmado",
+              "fuente débil"
+            ]
+          },
+          {
+            "component_id": "brake_rectifier",
+            "supplier": "Automatización Andina",
+            "brand_model": "Kendrion BR120-2A",
+            "price_usd": 118.0,
+            "market_median": 118.0,
+            "flags": [
+              "stock no confirmado"
+            ]
+          },
+          {
+            "component_id": "brake_rectifier",
+            "supplier": "Marketplace Referencial",
+            "brand_model": "Genérico BR-120",
+            "price_usd": 48.0,
+            "market_median": 118.0,
+            "flags": [
+              "stock no confirmado",
+              "fuente débil"
+            ]
+          },
+          {
+            "component_id": "vfd",
+            "supplier": "Automatización Andina",
+            "brand_model": "Schneider ATV930D18N4",
+            "price_usd": 1280.0,
+            "market_median": 1230.0,
+            "flags": [
+              "stock no confirmado"
+            ]
+          },
+          {
+            "component_id": "vfd",
+            "supplier": "Suministros El Oro",
+            "brand_model": "INVT GD200A-022G/030P-4",
+            "price_usd": 690.0,
+            "market_median": 1230.0,
+            "flags": [
+              "precio sospechosamente bajo"
+            ]
+          }
+        ],
+        "policy": "El motor audita también ofertas no seleccionadas para no caer en precio barato falso ni precio inflado fuera de banda."
+      },
+      "locked_price_count": 16,
+      "referential_price_count": 1,
+      "blocked_price_count": 1,
+      "priceguard_verdict": "Revisable con RFQ",
+      "catalog_scope": "Catálogo piloto ampliado: fuerza, control, seguridad, VFD, soft starter, taller, cables y consumibles. No sustituye precios reales confirmados.",
+      "confidence_policy": {
+        "precio_confirmado": "Proveedor/stock/vigencia confirmados o fuente interna validada; se puede usar en propuesta revisable.",
+        "precio_referencial": "Sirve para armar presupuesto, pero se debe confirmar si afecta margen o plazo.",
+        "precio_bloqueado": "No usar para cerrar propuesta; enviar RFQ y esperar respuesta."
+      },
+      "semaphore_method": "Verde = precio usable en cotización revisable; amarillo = referencia con RFQ recomendado; rojo = no cerrar precio, autocorregir/consultar proveedor.",
+      "truth_status": "Precio 100% cerrado solo cuando proveedor confirma modelo, stock, vigencia y condiciones. Sin eso, se muestra como referencial o bloqueado."
+    },
+    "anti_garbage_rule": "Si un precio sale fuera de banda, sin stock, vencido o de fuente débil, se marca amarillo/rojo y no se permite precio cerrado sin RFQ.",
+    "catalog_scope": "Catálogo piloto ampliado: fuerza, control, seguridad, VFD, soft starter, taller, cables y consumibles. No sustituye precios reales confirmados.",
+    "confidence_policy": {
+      "precio_confirmado": "Proveedor/stock/vigencia confirmados o fuente interna validada; se puede usar en propuesta revisable.",
+      "precio_referencial": "Sirve para armar presupuesto, pero se debe confirmar si afecta margen o plazo.",
+      "precio_bloqueado": "No usar para cerrar propuesta; enviar RFQ y esperar respuesta."
+    },
+    "candidate_offer_audit": {
+      "total_candidate_offers": 58,
+      "suspicious_low_rejected": 4,
+      "suspicious_high_flagged": 0,
+      "expired_rejected": 0,
+      "weak_source_flagged": 5,
+      "blocked_examples": [
+        {
+          "component_id": "mccb_main",
+          "supplier": "Marketplace Referencial",
+          "brand_model": "Genérico No verificado",
+          "price_usd": 28.0,
+          "market_median": 108.5,
+          "flags": [
+            "precio sospechosamente bajo",
+            "stock no confirmado",
+            "fuente débil"
+          ]
+        },
+        {
+          "component_id": "contactor_fwd",
+          "supplier": "Suministros El Oro",
+          "brand_model": "Chint NC1-3210 120V",
+          "price_usd": 43.0,
+          "market_median": 85.0,
+          "flags": [
+            "precio sospechosamente bajo"
+          ]
+        },
+        {
+          "component_id": "contactor_rev",
+          "supplier": "Suministros El Oro",
+          "brand_model": "Chint NC1-3210 120V",
+          "price_usd": 43.0,
+          "market_median": 85.0,
+          "flags": [
+            "precio sospechosamente bajo"
+          ]
+        },
+        {
+          "component_id": "cabinet",
+          "supplier": "Marketplace Referencial",
+          "brand_model": "Genérico GAB-604025",
+          "price_usd": 79.0,
+          "market_median": 135.0,
+          "flags": [
+            "stock no confirmado",
+            "fuente débil"
+          ]
+        },
+        {
+          "component_id": "brake_rectifier",
+          "supplier": "Automatización Andina",
+          "brand_model": "Kendrion BR120-2A",
+          "price_usd": 118.0,
+          "market_median": 118.0,
+          "flags": [
+            "stock no confirmado"
+          ]
+        },
+        {
+          "component_id": "brake_rectifier",
+          "supplier": "Marketplace Referencial",
+          "brand_model": "Genérico BR-120",
+          "price_usd": 48.0,
+          "market_median": 118.0,
+          "flags": [
+            "stock no confirmado",
+            "fuente débil"
+          ]
+        },
+        {
+          "component_id": "vfd",
+          "supplier": "Automatización Andina",
+          "brand_model": "Schneider ATV930D18N4",
+          "price_usd": 1280.0,
+          "market_median": 1230.0,
+          "flags": [
+            "stock no confirmado"
+          ]
+        },
+        {
+          "component_id": "vfd",
+          "supplier": "Suministros El Oro",
+          "brand_model": "INVT GD200A-022G/030P-4",
+          "price_usd": 690.0,
+          "market_median": 1230.0,
+          "flags": [
+            "precio sospechosamente bajo"
+          ]
+        }
+      ],
+      "policy": "El motor audita también ofertas no seleccionadas para no caer en precio barato falso ni precio inflado fuera de banda."
+    }
+  },
+  "starter_intelligence": {
+    "profiles": [
+      {
+        "id": "dol_basic",
+        "name": "Arranque directo DOL",
+        "fit": "La opción más simple para motor sin inversión y con pocas maniobras.",
+        "how_it_works": "El contactor conecta el motor directamente a la red. El motor recibe tensión plena y desarrolla alto torque y alta corriente de arranque.",
+        "better_when": "Motor pequeño/mediano, red robusta, bajo número de arranques y cliente con presupuesto ajustado.",
+        "price_impact": "Menor costo inicial y menor ingeniería. Puede subir costos indirectos por golpe mecánico, picos de corriente y desgaste.",
+        "initial_cost": "Bajo",
+        "control_quality": 45,
+        "safety_depth": 58,
+        "complexity": 30,
+        "risk": "Alta corriente de arranque y poco control; no ideal para cargas críticas o red débil.",
+        "sell_when": "Cliente solo necesita encender/apagar con protección básica y presupuesto bajo."
+      },
+      {
+        "id": "dol_reversing",
+        "name": "DOL + contactores de inversión",
+        "fit": "Rápido y robusto para subir/bajar o adelante/atrás con costo controlado.",
+        "how_it_works": "Usa dos contactores enclavados para invertir fases. Debe llevar enclavamiento mecánico y eléctrico para evitar cierre simultáneo.",
+        "better_when": "Guinche simple, baja/mediana frecuencia de maniobra y cuando se acepta golpe mecánico.",
+        "price_impact": "Costo inicial bajo-medio. El precio sube por contactor doble, enclavamiento, finales de carrera, freno y seguridad.",
+        "initial_cost": "Bajo-medio",
+        "control_quality": 58,
+        "safety_depth": 72,
+        "complexity": 45,
+        "risk": "Si se arma mal, puede permitir inversión simultánea o errores de control.",
+        "sell_when": "Cliente quiere solución confiable sin pagar variador, pero con seguridad mínima seria."
+      },
+      {
+        "id": "star_delta",
+        "name": "Estrella-triángulo",
+        "fit": "Reduce corriente de arranque en motores aptos y cargas con bajo torque inicial.",
+        "how_it_works": "Arranca el motor en estrella para bajar tensión/corriente y luego conmuta a triángulo para operación normal.",
+        "better_when": "Motores con seis terminales accesibles, carga liviana al arranque y red sensible a picos.",
+        "price_impact": "Costo medio por tres contactores, temporizador y más cableado. No sirve si la carga necesita alto torque inicial.",
+        "initial_cost": "Medio",
+        "control_quality": 62,
+        "safety_depth": 64,
+        "complexity": 62,
+        "risk": "Puede fallar si el motor/carga no es apto; conmutación mal ajustada genera golpes eléctricos/mecánicos.",
+        "sell_when": "Cliente pide reducción de corriente sin llegar a soft starter/variador y el motor lo permite."
+      },
+      {
+        "id": "soft_starter",
+        "name": "Soft starter + bypass/protección",
+        "fit": "Intermedio para reducir corriente/golpe sin control de velocidad.",
+        "how_it_works": "Controla tensión durante arranque/parada. Puede usar bypass para operar con menores pérdidas luego del arranque.",
+        "better_when": "Arranques frecuentes moderados, red débil o se quiere menor estrés mecánico sin complejidad de VFD.",
+        "price_impact": "Costo medio-alto. Ahorra desgaste, pero requiere coordinación térmica, bypass y verificación de torque.",
+        "initial_cost": "Medio",
+        "control_quality": 73,
+        "safety_depth": 78,
+        "complexity": 60,
+        "risk": "No da velocidad variable ni diagnóstico profundo. Validar compatibilidad con freno/torque.",
+        "sell_when": "Cliente quiere mejora técnica clara sobre DOL y acepta pagar por menor estrés."
+      },
+      {
+        "id": "vfd_smart",
+        "name": "Variador + control inteligente",
+        "fit": "Premium para rampas, diagnóstico, control, crecimiento y diferenciación técnica.",
+        "how_it_works": "Controla frecuencia/tensión del motor, limita corriente, permite rampas, alarmas y lógica más avanzada. En izaje exige coordinación con freno y seguridad.",
+        "better_when": "Equipo crítico, muchas maniobras, necesidad de control suave o propuesta de alta confiabilidad.",
+        "price_impact": "Mayor costo inicial por VFD, reactor, resistencia, parametrización y pruebas. Puede reducir paradas, reclamos y desgaste.",
+        "initial_cost": "Alto",
+        "control_quality": 95,
+        "safety_depth": 90,
+        "complexity": 78,
+        "risk": "Requiere parametrización, revisión de freno, compatibilidad EMC y pruebas de seguridad.",
+        "sell_when": "Cliente valora confiabilidad, control, diagnóstico y menor riesgo operativo."
+      },
+      {
+        "id": "plc_hmi_control",
+        "name": "PLC/HMI + control avanzado",
+        "fit": "Capa superior cuando se requiere operación guiada, diagnóstico, históricos o crecimiento.",
+        "how_it_works": "El PLC gestiona lógica, enclavamientos, alarmas y señales; HMI muestra estados, fallas y operación. Se integra con contactores/VFD/sensores.",
+        "better_when": "Sistema crítico, varios sensores, operación por personal no técnico o necesidad de trazabilidad.",
+        "price_impact": "Sube ingeniería y componentes, pero aumenta valor percibido, diagnóstico y posibilidad de mantenimiento preventivo.",
+        "initial_cost": "Muy alto",
+        "control_quality": 98,
+        "safety_depth": 92,
+        "complexity": 86,
+        "risk": "Requiere programación, documentación y pruebas funcionales rigurosas.",
+        "sell_when": "Cliente quiere solución premium, escalable y con operación profesional."
+      }
+    ],
+    "recommended": {
+      "id": "star_delta",
+      "name": "Estrella-triángulo",
+      "fit": "Reduce corriente de arranque en motores aptos y cargas con bajo torque inicial.",
+      "how_it_works": "Arranca el motor en estrella para bajar tensión/corriente y luego conmuta a triángulo para operación normal.",
+      "better_when": "Motores con seis terminales accesibles, carga liviana al arranque y red sensible a picos.",
+      "price_impact": "Costo medio por tres contactores, temporizador y más cableado. No sirve si la carga necesita alto torque inicial.",
+      "initial_cost": "Medio",
+      "control_quality": 62,
+      "safety_depth": 64,
+      "complexity": 62,
+      "risk": "Puede fallar si el motor/carga no es apto; conmutación mal ajustada genera golpes eléctricos/mecánicos.",
+      "sell_when": "Cliente pide reducción de corriente sin llegar a soft starter/variador y el motor lo permite.",
+      "why": "Seleccionada por equilibrio entre seguridad, tiempo de cotización, control del riesgo y valor comercial defendible."
+    },
+    "didactic_rule": "Cada arranque explica cómo funciona, cuándo conviene y cómo impacta precio/riesgo."
+  },
+  "premium_document_contract": {
+    "pdf": "portada + resumen ejecutivo + semáforos + supuestos + presupuesto + BOM + anexos + firmas",
+    "spreadsheet": "BOM editable con semáforo y fuente",
+    "cad": "SVG/Draw.io CAD-like para revisión y formalización"
+  },
+  "human_review_notice": "ControlPro reduce tiempo, ordena el expediente y baja la carga de corrección; no reemplaza normativa local, verificación de campo, proveedor confirmado ni aprobación humana antes de fabricar o energizar."
+}

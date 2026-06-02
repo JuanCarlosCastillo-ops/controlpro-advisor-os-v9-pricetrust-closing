@@ -1,0 +1,745 @@
+from __future__ import annotations
+from datetime import datetime, timezone
+from math import sqrt
+from typing import Any, Dict, List
+
+from .models import ComponentRequirement, EngineeringPack, ProjectIntake
+from .pricing import decide_prices, generate_rfq_message, summarize_market, load_canonical_components, load_starter_profiles, priceguard_methodology
+from .cad import single_line_cad_svg, control_ladder_cad_svg, panel_layout_cad_svg, terminal_schedule, wire_schedule, drawio_xml
+from app.integrations.config import integration_status
+
+VERSION = "9.0-pricetrust-closing"
+PRODUCT = "ControlPro Advisor OS V9 PriceTrust Closing"
+
+
+def example_intake() -> Dict[str, Any]:
+    return ProjectIntake().model_dump()
+
+
+def _round(value: float, digits: int = 2) -> float:
+    return round(float(value), digits)
+
+
+def _estimate_flc(i: ProjectIntake) -> float:
+    if i.full_load_amps and i.full_load_amps > 0:
+        return float(i.full_load_amps)
+    watts = i.motor_power_hp * 746
+    if i.phases == 3:
+        return watts / (sqrt(3) * i.voltage * i.efficiency * i.power_factor)
+    return watts / (i.voltage * i.efficiency * i.power_factor)
+
+
+def _conductor_size_awg(current: float, distance_m: float) -> str:
+    thresholds = [
+        (15, "#14 AWG Cu"), (20, "#12 AWG Cu"), (30, "#10 AWG Cu"),
+        (45, "#8 AWG Cu"), (65, "#6 AWG Cu"), (85, "#4 AWG Cu"),
+        (115, "#2 AWG Cu"), (150, "1/0 AWG Cu"), (200, "3/0 AWG Cu"),
+    ]
+    adjusted = current * (1.08 if distance_m > 30 else 1.0) * (1.12 if distance_m > 75 else 1.0)
+    for limit, size in thresholds:
+        if adjusted <= limit:
+            return size
+    return "Requiere cálculo dedicado de conductor"
+
+
+def _breaker_size(current: float) -> int:
+    standard = [15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 125, 150, 175, 200, 225, 250, 300, 350, 400]
+    target = max(15, current * 1.75)
+    return next((s for s in standard if s >= target), standard[-1])
+
+
+def _overload_setting(current: float, service_factor: float) -> float:
+    multiplier = 1.25 if service_factor >= 1.15 else 1.15
+    return round(current * multiplier, 1)
+
+
+def _voltage_drop_percent(current: float, voltage: float, distance_m: float, phases: int) -> float:
+    route_factor = 1.732 if phases == 3 else 2.0
+    proxy_resistance_per_m = 0.00082
+    vd = route_factor * current * distance_m * proxy_resistance_per_m
+    return max(0.1, round((vd / voltage) * 100, 2))
+
+
+def _data_quality(i: ProjectIntake) -> Dict[str, Any]:
+    """Score de entrada: no premia llenar por llenar; premia datos verificables.
+
+    En trabajos de miles de dólares, el sistema debe decir cuándo puede cotizar,
+    cuándo solo puede producir borrador, y cuándo debe bloquear salida de construcción.
+    """
+    checks: List[Dict[str, Any]] = []
+
+    def add(name: str, ok: bool, impact: str, fix: str, weight: int):
+        checks.append({"check": name, "ok": ok, "impact": impact, "fix": fix, "weight": weight})
+
+    is_hoist = _is_hoist(i)
+    add("Corriente de placa / FLA", bool(i.full_load_amps and i.full_load_amps > 0), "Crítica", "Subir foto de placa o confirmar FLA medido antes de enviar precio cerrado.", 16)
+    add("Datos eléctricos base", i.voltage > 0 and i.phases in {1, 3} and i.frequency_hz in {50, 60}, "Crítica", "Confirmar tensión real, fases y frecuencia.", 12)
+    add("Potencia y aplicación", i.motor_power_hp > 0 and bool(i.application), "Crítica", "Indicar máquina, potencia y uso real.", 10)
+    add("Evidencia fotográfica", i.field_photos_count >= 3 or (i.nameplate_photo_confirmed and i.panel_photo_confirmed and i.site_photo_confirmed), "Alta", "Cargar placa, tablero actual/ruta y ambiente de instalación.", 12)
+    add("Seguridad de izaje", (not is_hoist) or (i.needs_brake and i.needs_limit_switches and i.needs_estop), "Crítica", "Para guinche/izaje exigir freno, finales de carrera y paro de emergencia.", 16)
+    add("Protección ante falla de fase", (i.phases != 3) or i.needs_phase_monitor, "Alta", "En motores trifásicos de trabajo crítico usar monitor de fase/secuencia.", 8)
+    add("Distancia y ambiente", i.cable_run_m >= 0 and bool(i.environment), "Alta", "Medir ruta real, temperatura, polvo/humedad y canalización.", 10)
+    add("Ubicación comercial", bool(i.location_city and i.location_province and i.country), "Media", "Indicar ciudad/provincia para proveedores, logística y vigencia.", 6)
+    add("Alcance y margen", bool(i.installation_scope) and i.margin_percent >= 12 and i.contingency_percent >= 3, "Media", "Definir si incluye tablero, instalación, pruebas, transporte y margen mínimo.", 6)
+    add("Cortocircuito disponible", bool(i.short_circuit_available_ka and i.short_circuit_available_ka > 0), "Alta", "Si no se conoce, marcar SCCR/kAIC como pendiente y no liberar construcción.", 4)
+
+    total_weight = sum(c["weight"] for c in checks)
+    earned = sum(c["weight"] for c in checks if c["ok"])
+    score = round((earned / max(1, total_weight)) * 100, 1)
+    critical_missing = [c for c in checks if not c["ok"] and c["impact"] == "Crítica"]
+    high_missing = [c for c in checks if not c["ok"] and c["impact"] == "Alta"]
+
+    if critical_missing:
+        status = "bloqueado para construcción; solo borrador de cotización"
+    elif high_missing:
+        status = "cotización revisable; exige RFQ/verificación antes de oferta cerrada"
+    else:
+        status = "apto para cotización piloto con revisión profesional"
+
+    return {
+        "score_percent": score,
+        "status": status,
+        "critical_missing": critical_missing,
+        "high_missing": high_missing,
+        "checks": checks,
+        "rule": "Todo dato no confirmado aparece como supuesto o compuerta. La app no convierte desconocidos en certeza.",
+    }
+
+
+def _build_requirements(i: ProjectIntake, calc: Dict[str, Any]) -> List[ComponentRequirement]:
+    req: List[ComponentRequirement] = []
+    req.append(ComponentRequirement(component_id="mccb_main", category="Fuerza", item="MCCB principal", qty=1, spec=f"3P, {calc['breaker_size_a']} A preliminar, tensión {int(i.voltage)} V, SCCR/kAIC por verificar", critical_checks=["corriente", "tensión", "SCCR", "curva"], risk_note="No seleccionar sin verificar cortocircuito disponible."))
+    req.append(ComponentRequirement(component_id="overload_relay", category="Fuerza", item="Relé de sobrecarga", qty=1, spec=f"Rango que cubra ajuste {calc['overload_setting_a']} A", critical_checks=["rango", "clase", "compatibilidad"], risk_note="Ajuste incorrecto puede disparar falso o no proteger."))
+    if i.needs_reversing:
+        req.append(ComponentRequirement(component_id="contactor_fwd", category="Fuerza", item="Contactor subir", qty=1, spec=f"AC-3, corriente mínima >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", critical_checks=["AC-3", "bobina", "corriente"], risk_note="Verificar compatibilidad con enclavamiento."))
+        req.append(ComponentRequirement(component_id="contactor_rev", category="Fuerza", item="Contactor bajar", qty=1, spec=f"AC-3, corriente mínima >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", critical_checks=["AC-3", "bobina", "corriente"], risk_note="Verificar compatibilidad con enclavamiento."))
+        req.append(ComponentRequirement(component_id="mechanical_interlock", category="Seguridad", item="Enclavamiento mecánico", qty=1, spec="Compatible con ambos contactores de inversión", critical_checks=["compatibilidad física", "bloqueo real"], risk_note="Obligatorio para evitar inversión simultánea."))
+    else:
+        req.append(ComponentRequirement(component_id="contactor_fwd", category="Fuerza", item="Contactor principal", qty=1, spec=f"AC-3, corriente mínima >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", critical_checks=["AC-3", "bobina", "corriente"]))
+    if i.needs_phase_monitor:
+        req.append(ComponentRequirement(component_id="phase_monitor", category="Seguridad", item="Relé monitor de fase", qty=1, spec=f"Para red {int(i.voltage)} V trifásica; falla y secuencia de fase", critical_checks=["tensión", "secuencia", "ajustes"], risk_note="Recomendado para proteger guinche/motor ante pérdida de fase."))
+    req.append(ComponentRequirement(component_id="control_transformer", category="Control", item="Transformador de control", qty=1, spec=f"{int(i.voltage)} V a {int(i.control_voltage)} V, {calc['control_transformer_va']} VA preliminar", critical_checks=["VA", "fusibles", "aislamiento"]))
+    req.append(ComponentRequirement(component_id="cabinet", category="Tablero", item="Gabinete industrial", qty=1, spec="NEMA/IP según polvo, humedad y temperatura; tamaño con 25% de reserva", critical_checks=["grado IP/NEMA", "espacio", "ventilación"]))
+    if i.needs_estop:
+        req.append(ComponentRequirement(component_id="estop", category="Seguridad", item="Paro de emergencia", qty=1, spec="Hongo 22mm, contacto NC, rotulado y accesible", critical_checks=["contacto NC", "acción positiva", "ubicación"]))
+    req.append(ComponentRequirement(component_id="pushbuttons", category="Control", item="Botonera de mando", qty=1, spec="Subir, bajar, stop, pilotos y rotulación", critical_checks=["IP", "contactos", "rotulado"]))
+    if i.needs_limit_switches:
+        req.append(ComponentRequirement(component_id="limit_switches", category="Seguridad", item="Finales de carrera", qty=2, spec="Superior e inferior, robustos, IP adecuado", critical_checks=["mecánica", "IP", "cableado"], risk_note="Clave para evitar sobre-recorrido."))
+    if i.needs_brake:
+        req.append(ComponentRequirement(component_id="brake_rectifier", category="Control", item="Control/rectificador de freno", qty=1, spec="Según placa del freno; validar tensión y corriente", critical_checks=["tensión freno", "corriente", "secuencia lógica"], risk_note="No comprar sin confirmar placa del freno."))
+    notes = (i.budget_profile + " " + i.user_notes + " " + i.application + " " + i.load_type).lower()
+    if "soft" in notes or "suave" in notes:
+        req.append(ComponentRequirement(component_id="soft_starter", category="Fuerza", item="Soft starter", qty=1, spec=f"Para {i.motor_power_hp:g} HP, {int(i.voltage)} V, corriente >= {calc['full_load_current_a']} A", must_have=False, critical_checks=["corriente", "bypass", "torque", "rampa"], risk_note="Opción intermedia; validar torque de arranque y compatibilidad con freno."))
+        req.append(ComponentRequirement(component_id="bypass_contactor", category="Fuerza", item="Contactor bypass", qty=1, spec=f"AC-3, corriente mínima >= {calc['full_load_current_a']} A, bobina {int(i.control_voltage)} V", must_have=False, critical_checks=["AC-3", "bobina", "coordinación"], risk_note="Puede requerirse para reducir pérdidas/temperatura en soft starter."))
+    if i.budget_profile.lower().startswith("premium") or "variador" in notes or "vfd" in notes or i.starts_per_hour >= 30:
+        req.append(ComponentRequirement(component_id="vfd", category="Fuerza", item="Variador de frecuencia", qty=1, spec=f"Para {i.motor_power_hp:g} HP, {int(i.voltage)} V, heavy duty, con criterio de frenado y seguridad", must_have=False, critical_checks=["corriente", "freno", "resistencia", "seguridad", "parametrización"], risk_note="Opción premium; no reemplaza seguridad de izaje por sí sola."))
+        req.append(ComponentRequirement(component_id="line_reactor", category="Fuerza", item="Reactor de línea", qty=1, spec=f"3%, {int(i.voltage)} V, corriente compatible con {calc['full_load_current_a']} A", must_have=False, critical_checks=["corriente", "tensión", "temperatura"], risk_note="Mejora robustez de variador/red; validar necesidad según instalación."))
+        if i.needs_brake or _is_hoist(i):
+            req.append(ComponentRequirement(component_id="braking_resistor", category="Fuerza", item="Resistencia de frenado", qty=1, spec="Dimensionar por ciclo de carga, energía de frenado y especificación del VFD", must_have=False, critical_checks=["ohmios", "watts", "ciclo", "ventilación"], risk_note="En izaje no usar genérica sin cálculo térmico y validación del fabricante."))
+    if "plc" in notes or "hmi" in notes or "inteligente" in notes:
+        req.append(ComponentRequirement(component_id="plc_basic", category="Control", item="PLC básico", qty=1, spec="Entradas/salidas suficientes para mando, finales, freno, fallas y reserva", must_have=False, critical_checks=["IO", "tensión", "programación", "backup"], risk_note="Sube ingeniería, pero mejora diagnóstico y expansión."))
+    req.append(ComponentRequirement(component_id="label_package", category="Taller", item="Etiquetado premium", qty=1, spec="Marcadores de cables, borneras, componentes y láminas de tablero", must_have=False, critical_checks=["legibilidad", "durabilidad", "numeración"], risk_note="Ahorra horas de mantenimiento y da presentación profesional."))
+    req.append(ComponentRequirement(component_id="terminal_blocks", category="Cableado", item="Borneras, puentes y marcadores", qty=1, spec="Paquete industrial para control/fuerza con rotulación", critical_checks=["sección", "corriente", "marcado"]))
+    req.append(ComponentRequirement(component_id="wiring_pack", category="Cableado", item="Consumibles de cableado de tablero", qty=1, spec="Canaleta, punteras, etiquetas, cable control, amarras", critical_checks=["orden", "calibre", "colores"]))
+    power_cable_m = max(1, round(i.cable_run_m * 1.18, 1))
+    req.append(ComponentRequirement(component_id="power_cable", category="Cableado", item="Conductor de fuerza", qty=power_cable_m, unit="m", spec=f"{calc['conductor_preliminary']} preliminar, longitud con reserva incluida", critical_checks=["calibre", "temperatura", "caída de tensión", "canalización"]))
+    return req
+
+
+def _alternatives(i: ProjectIntake) -> List[Dict[str, Any]]:
+    profiles = load_starter_profiles()
+    if profiles:
+        return profiles
+    return [
+        {"name": "DOL + contactores de inversión", "fit": "Rápido y robusto para trabajos simples", "initial_cost": "Bajo", "control_quality": 52, "safety_depth": 68, "complexity": 38, "risk": "Mayor golpe mecánico; menor diagnóstico", "sell_when": "Cliente prioriza costo.", "how_it_works": "Conecta motor directo a red con contactores enclavados.", "better_when": "Uso simple y bajo presupuesto.", "price_impact": "Baja costo inicial pero puede subir desgaste."},
+        {"name": "Soft starter + protección reforzada", "fit": "Arranque más suave sin control fino", "initial_cost": "Medio", "control_quality": 70, "safety_depth": 76, "complexity": 58, "risk": "No da control de velocidad", "sell_when": "Se quiere bajar estrés de arranque.", "how_it_works": "Reduce tensión/corriente durante arranque.", "better_when": "Red débil o arranques moderados.", "price_impact": "Costo medio con menor estrés mecánico."},
+        {"name": "Variador + control inteligente", "fit": "Premium para control, rampas y diagnóstico", "initial_cost": "Alto", "control_quality": 94, "safety_depth": 88, "complexity": 76, "risk": "Requiere parametrización", "sell_when": "Guinche crítico o uso frecuente.", "how_it_works": "Controla frecuencia/tensión del motor.", "better_when": "Se quiere control y confiabilidad superior.", "price_impact": "Más caro al inicio, pero reduce paradas y reclamos."},
+    ]
+
+def _recommended(i: ProjectIntake, alternatives: List[Dict[str, Any]]) -> Dict[str, Any]:
+    text = (i.budget_profile + " " + i.user_notes + " " + i.application).lower()
+    if "premium" in text or "variador" in text or i.starts_per_hour >= 30:
+        rec = alternatives[2].copy()
+    elif "econ" in text:
+        rec = alternatives[0].copy()
+    else:
+        rec = alternatives[1].copy() if i.starts_per_hour >= 15 else alternatives[0].copy()
+    rec["why"] = "Seleccionada por equilibrio entre seguridad, tiempo de cotización, control del riesgo y valor comercial defendible."
+    return rec
+
+
+def _agents() -> List[Dict[str, Any]]:
+    return [
+        {"name": "Arquitecto de datos", "mission": "Limpia entrada, detecta faltantes y baja confianza si hay datos flojos.", "output": "Ficha técnica revisable"},
+        {"name": "Ingeniero de fuerza", "mission": "Define rama de potencia, protecciones y componentes críticos.", "output": "Unifilar + requerimientos"},
+        {"name": "Diseñador de control", "mission": "Arma lógica con enclavamientos, finales, paro y freno.", "output": "Ladder conceptual"},
+        {"name": "Normalizador de materiales", "mission": "Convierte pedidos ambiguos en componentes canónicos comprables.", "output": "BOM inteligente"},
+        {"name": "Comprador técnico", "mission": "Compara proveedor, marca, stock, entrega, precio y riesgo.", "output": "Decisiones de precio"},
+        {"name": "Agente RFQ", "mission": "Genera mensaje listo para pedir precios reales y confirmar stock.", "output": "Solicitud a proveedores"},
+        {"name": "Comercial Shark", "mission": "Calcula margen, riesgo, precio piso/recomendado/premium.", "output": "Cotización defendible"},
+        {"name": "Revisor brutal", "mission": "Bloquea certezas falsas y exige validación humana antes de construir.", "output": "Compuertas de seguridad"},
+    ]
+
+
+def _single_line_svg(i: ProjectIntake, calc: Dict[str, Any]) -> str:
+    return f"""
+    <svg viewBox='0 0 1000 520' xmlns='http://www.w3.org/2000/svg' role='img'>
+      <rect width='1000' height='520' fill='#071019'/>
+      <defs><filter id='g'><feGaussianBlur stdDeviation='2.2' result='b'/><feMerge><feMergeNode in='b'/><feMergeNode in='SourceGraphic'/></feMerge></filter></defs>
+      <text x='28' y='42' fill='#55c8ff' font-size='26' font-family='Inter, Arial' font-weight='700'>DIAGRAMA UNIFILAR · {int(i.voltage)} V · {i.phases}F · CONCEPTUAL</text>
+      <g stroke='#bfe6ff' stroke-width='3' fill='none' filter='url(#g)'>
+        <line x1='500' y1='60' x2='500' y2='110'/><circle cx='500' cy='125' r='15'/><line x1='500' y1='140' x2='500' y2='185'/>
+        <rect x='438' y='185' width='124' height='52' rx='8'/><line x1='500' y1='237' x2='500' y2='288'/>
+        <rect x='442' y='288' width='116' height='52' rx='8'/><line x1='500' y1='340' x2='500' y2='385'/>
+        <line x1='280' y1='385' x2='720' y2='385'/>
+        <line x1='340' y1='385' x2='340' y2='440'/><circle cx='340' cy='468' r='30'/>
+        <line x1='650' y1='385' x2='650' y2='430'/><path d='M625 430 h50 M625 450 h50 M625 470 h50'/>
+      </g>
+      <g fill='#dff5ff' font-family='Inter, Arial' font-size='18'>
+        <text x='560' y='130'>Seccionador / MCCB</text><text x='560' y='154'>{calc['breaker_size_a']} A preliminar · kAIC/SCCR por verificar</text>
+        <text x='575' y='220'>Protección motor / sobrecarga</text><text x='575' y='244'>Ajuste preliminar: {calc['overload_setting_a']} A</text>
+        <text x='575' y='323'>Control: {int(i.control_voltage)} V</text>
+        <text x='205' y='472'>M</text><text x='375' y='458'>{i.motor_power_hp:g} HP · {calc['full_load_current_a']} A</text><text x='375' y='484'>{i.application}</text>
+        <text x='700' y='452'>Transformador control</text><text x='700' y='480'>{int(i.voltage)}V → {int(i.control_voltage)}V</text>
+      </g>
+    </svg>
+    """.strip()
+
+
+def _control_svg(i: ProjectIntake) -> str:
+    down = "BAJAR" if i.needs_reversing else "MARCHA"
+    return f"""
+    <svg viewBox='0 0 1000 520' xmlns='http://www.w3.org/2000/svg' role='img'>
+      <rect width='1000' height='520' fill='#071019'/>
+      <text x='28' y='42' fill='#55c8ff' font-size='26' font-family='Inter, Arial' font-weight='700'>DIAGRAMA DE CONTROL · LADDER CONCEPTUAL</text>
+      <g stroke='#d7efff' stroke-width='3' fill='none'>
+        <line x1='80' y1='85' x2='80' y2='470'/><line x1='920' y1='85' x2='920' y2='470'/>
+        <line x1='80' y1='130' x2='920' y2='130'/><line x1='80' y1='215' x2='920' y2='215'/><line x1='80' y1='300' x2='920' y2='300'/><line x1='80' y1='385' x2='920' y2='385'/>
+        <path d='M170 108 v44 M195 108 v44 M280 108 v44 M305 108 v44 M410 108 v44 M435 108 v44'/><circle cx='825' cy='130' r='34'/>
+        <path d='M170 193 v44 M195 193 v44 M320 193 v44 M345 193 v44 M505 193 v44 M530 193 v44'/><circle cx='825' cy='215' r='34'/>
+        <path d='M170 278 v44 M195 278 v44 M320 278 v44 M345 278 v44 M505 278 v44 M530 278 v44'/><circle cx='825' cy='300' r='34'/>
+        <path d='M170 363 v44 M195 363 v44 M390 363 v44 M415 363 v44'/><circle cx='825' cy='385' r='34'/>
+      </g>
+      <g fill='#dff5ff' font-family='Inter, Arial' font-size='17'>
+        <text x='62' y='75'>L1</text><text x='905' y='75'>L2</text>
+        <text x='160' y='100'>STOP</text><text x='260' y='100'>E-STOP</text><text x='390' y='100'>SUBIR</text><text x='807' y='136'>CR1</text>
+        <text x='160' y='185'>CR1</text><text x='300' y='185'>LÍMITE SUP.</text><text x='485' y='185'>ENCL. BAJAR</text><text x='801' y='221'>KM1</text>
+        <text x='160' y='270'>CR2</text><text x='300' y='270'>LÍMITE INF.</text><text x='485' y='270'>ENCL. SUBIR</text><text x='801' y='306'>{down}</text>
+        <text x='160' y='355'>KM1/KM2</text><text x='375' y='355'>FRENO OK</text><text x='805' y='391'>BRK</text>
+      </g>
+    </svg>
+    """.strip()
+
+
+def _panel_svg() -> str:
+    return """
+    <svg viewBox='0 0 1000 520' xmlns='http://www.w3.org/2000/svg' role='img'>
+      <rect width='1000' height='520' fill='#071019'/>
+      <text x='28' y='42' fill='#55c8ff' font-size='26' font-family='Inter, Arial' font-weight='700'>VISTA 3D CONCEPTUAL · TABLERO + MOTOR</text>
+      <g transform='translate(185 82) skewY(-4)'>
+        <rect x='0' y='0' width='300' height='365' rx='20' fill='#17212d' stroke='#77ccff' stroke-width='3'/>
+        <rect x='32' y='42' width='94' height='74' rx='10' fill='#e8eef5'/><rect x='160' y='42' width='94' height='74' rx='10' fill='#e8eef5'/>
+        <rect x='32' y='148' width='222' height='86' rx='10' fill='#0e1821' stroke='#426b86'/>
+        <rect x='50' y='166' width='38' height='52' rx='4' fill='#f4f8fb'/><rect x='105' y='166' width='38' height='52' rx='4' fill='#f4f8fb'/><rect x='160' y='166' width='38' height='52' rx='4' fill='#f4f8fb'/>
+        <rect x='32' y='270' width='222' height='55' rx='8' fill='#0c131b' stroke='#426b86'/><line x1='48' y1='336' x2='245' y2='336' stroke='#ffa533' stroke-width='5'/>
+      </g>
+      <g transform='translate(565 132)'>
+        <ellipse cx='120' cy='120' rx='150' ry='58' fill='#071019' stroke='#16354a'/>
+        <rect x='35' y='55' width='245' height='112' rx='38' fill='#155174' stroke='#8ecaff' stroke-width='3'/>
+        <rect x='278' y='96' width='112' height='30' fill='#aeb8c2'/><circle cx='398' cy='111' r='22' fill='#d5dce3'/>
+        <path d='M60 55 v112 M82 55 v112 M104 55 v112 M126 55 v112 M148 55 v112 M170 55 v112 M192 55 v112 M214 55 v112 M236 55 v112' stroke='#071019' stroke-width='3'/>
+        <text x='45' y='235' fill='#dff5ff' font-family='Inter, Arial' font-size='22'>Motor TEFC · modelo conceptual</text>
+      </g>
+    </svg>
+    """.strip()
+
+
+def _build_budget(i: ProjectIntake, material_cost: float, market_summary: Dict[str, Any]) -> Dict[str, Any]:
+    panel_labor = 180.0 * i.labor_days_panel
+    field_labor = 220.0 * i.labor_days_field
+    engineering = 450.0 + max(0, i.motor_power_hp - 10) * 8
+    transport = 120.0 if i.location_province.lower() not in {"guayas", "pichincha"} else 70.0
+    subtotal = material_cost + panel_labor + field_labor + engineering + transport
+    contingency = subtotal * i.contingency_percent / 100
+    margin = (subtotal + contingency) * i.margin_percent / 100
+    recommended = subtotal + contingency + margin
+    floor = subtotal + contingency + ((subtotal + contingency) * 0.12)
+    premium = recommended * 1.22
+    return {
+        "materials": round(material_cost, 2),
+        "panel_labor": round(panel_labor, 2),
+        "field_labor": round(field_labor, 2),
+        "engineering": round(engineering, 2),
+        "transport_logistics": round(transport, 2),
+        "contingency": round(contingency, 2),
+        "margin": round(margin, 2),
+        "floor_price": round(floor, 2),
+        "recommended_sell_price": round(recommended, 2),
+        "premium_price": round(premium, 2),
+        "price_confidence": "alta" if market_summary.get("priceguard_score_percent", 0) >= 82 and market_summary.get("red_count", 0) == 0 else ("media-alta" if market_summary.get("priceguard_score_percent", 0) >= 70 and market_summary.get("red_count", 0) <= 2 else "media/baja"),
+        "priceguard_status": f"PriceGuard {market_summary.get('priceguard_score_percent', 0)}% · verde {market_summary.get('green_count',0)} · amarillo {market_summary.get('yellow_count',0)} · rojo {market_summary.get('red_count',0)}",
+        "commercial_note": "Cotización defendible con semáforo PriceGuard. Precio final cerrado solo con proveedor confirmado, stock y vigencia.",
+    }
+
+
+def _risks(i: ProjectIntake) -> List[Dict[str, Any]]:
+    return [
+        {"risk": "Cotización con precio no confirmado", "severity": "Alta", "mitigation": "Separar precio estimado, referencial y confirmado; enviar RFQ cuando confianza sea baja."},
+        {"risk": "Movimiento simultáneo subir/bajar", "severity": "Alta", "mitigation": "Enclavamiento eléctrico y mecánico; prueba funcional obligatoria."},
+        {"risk": "Sobre-recorrido de carga", "severity": "Alta", "mitigation": "Finales de carrera superior/inferior y prueba sin carga antes de carga real."},
+        {"risk": "Freno mal seleccionado o mal secuenciado", "severity": "Alta", "mitigation": "Confirmar placa del freno; validar tensión, corriente y lógica de liberación."},
+        {"risk": "SCCR no coordinado", "severity": "Media", "mitigation": "Verificar corriente de cortocircuito disponible y ratings de todos los componentes."},
+        {"risk": "Ambiente severo", "severity": "Media", "mitigation": f"Seleccionar gabinete y componentes según ambiente declarado: {i.environment}."},
+    ]
+
+
+
+def _is_hoist(i: ProjectIntake) -> bool:
+    text = f"{i.application} {i.load_type} {i.project_name}".lower()
+    return any(w in text for w in ["guinche", "winche", "hoist", "izaje", "elevador", "polipasto"])
+
+
+def _consistency_audit(i: ProjectIntake, calc: Dict[str, Any]) -> Dict[str, Any]:
+    checks: List[Dict[str, Any]] = []
+
+    def add(name: str, status: str, severity: str, detail: str, action: str):
+        checks.append({"name": name, "status": status, "severity": severity, "detail": detail, "action": action})
+
+    estimated = _estimate_flc(ProjectIntake(**{**i.model_dump(), "full_load_amps": None}))
+    provided = i.full_load_amps or 0
+    if provided > 0:
+        deviation = abs(provided - estimated) / max(estimated, 0.1) * 100
+        status = "ok" if deviation <= 35 else "revisar"
+        severity = "media" if deviation <= 35 else "alta"
+        add("Coherencia FLA vs potencia", status, severity, f"FLA placa {provided:.1f} A vs estimado {estimated:.1f} A; desviación {deviation:.1f}%.", "Si supera 35%, revisar placa, conexión, tensión y unidades HP/kW.")
+    else:
+        add("Coherencia FLA vs potencia", "pendiente", "alta", f"Sin FLA; estimado {estimated:.1f} A usado solo como referencia.", "Confirmar corriente de placa antes de cerrar protección/material.")
+
+    if _is_hoist(i):
+        add("Arquitectura de izaje", "ok" if (i.needs_brake and i.needs_limit_switches and i.needs_estop) else "bloquear", "crítica", "Aplicación de carga suspendida detectada.", "No liberar construcción sin freno, finales de carrera, paro de emergencia y enclavamientos.")
+    else:
+        add("Arquitectura de seguridad", "ok", "media", "No se detecta izaje; aplicar criterios de la máquina específica.", "Revisar riesgos mecánicos propios del equipo.")
+
+    if calc["voltage_drop_percent"] > 3:
+        add("Caída de tensión", "revisar", "media", f"Caída estimada {calc['voltage_drop_percent']}%.", "Revisar calibre, canalización y longitud real.")
+    else:
+        add("Caída de tensión", "ok", "baja", f"Caída estimada {calc['voltage_drop_percent']}%.", "Mantener verificación con tabla/código local.")
+
+    if i.short_circuit_available_ka and i.short_circuit_available_ka > 0:
+        add("SCCR/kAIC", "dato disponible", "alta", f"Corto disponible declarado: {i.short_circuit_available_ka} kA.", "Seleccionar interruptor/tablero con capacidad superior y coordinación.")
+    else:
+        add("SCCR/kAIC", "pendiente", "alta", "No se declaró corriente de cortocircuito disponible.", "Cotizar con advertencia; no liberar fabricación hasta verificar kAIC/SCCR.")
+
+    blockers = [c for c in checks if c["status"] in {"bloquear"} or (c["severity"] == "crítica" and c["status"] in {"pendiente", "revisar"})]
+    score = max(0, round(100 - len(blockers) * 14 - sum(1 for c in checks if c["status"] == "revisar") * 6, 1))
+    return {"score_percent": score, "checks": checks, "blockers": blockers}
+
+
+def _assumption_ledger(i: ProjectIntake, calc: Dict[str, Any], market_summary: Dict[str, Any]) -> List[Dict[str, Any]]:
+    assumptions = []
+    def add(topic: str, assumption: str, confidence: str, verification: str):
+        assumptions.append({"topic": topic, "assumption": assumption, "confidence": confidence, "verification": verification})
+    if not i.short_circuit_available_ka:
+        add("SCCR/kAIC", "No se conoce corriente de cortocircuito; el breaker se trata como preliminar.", "baja", "Solicitar dato de transformador/red o medir/calcular antes de construir.")
+    if not i.full_load_amps:
+        add("Corriente de motor", f"Se estima FLC = {calc['full_load_current_a']} A desde HP, tensión, fp y eficiencia.", "media-baja", "Confirmar placa real.")
+    add("Precio de materiales", f"Cobertura catálogo {market_summary['coverage_percent']}%; PriceGuard {market_summary.get('priceguard_score_percent',0)}%; verdes {market_summary.get('green_count',0)}, amarillos {market_summary.get('yellow_count',0)}, rojos {market_summary.get('red_count',0)}; RFQ requerido en {market_summary['needs_rfq_count']} ítems.", "según fuente", "Confirmar stock/vigencia; el precio 100% cerrado solo existe con proveedor confirmado.")
+    add("Mano de obra", f"Se asumen {i.labor_days_panel} días tablero y {i.labor_days_field} días campo.", "media", "Ajustar con visita técnica y alcance final.")
+    add("Alcance", i.installation_scope, "media", "Definir exclusiones: obra civil, canalización extra, parada de producción, permisos.")
+    if _is_hoist(i):
+        add("Izaje", "Se trata como equipo crítico por carga suspendida; se exige revisión superior.", "alta", "Probar sin carga, con carga supervisada y firmar checklist.")
+    return assumptions
+
+
+def _release_gates(i: ProjectIntake, quality: Dict[str, Any], consistency: Dict[str, Any], market_summary: Dict[str, Any]) -> Dict[str, Any]:
+    gates = []
+    def gate(name: str, passed: bool, consequence: str, required_action: str):
+        gates.append({"name": name, "passed": passed, "consequence": consequence, "required_action": required_action})
+    gate("Datos críticos", not quality["critical_missing"], "Sin datos críticos no se puede construir ni cerrar precio técnico.", "Completar placa, tensión/fases, aplicación y seguridad.")
+    gate("Coherencia técnica", len(consistency["blockers"]) == 0, "Bloqueadores elevan revisión humana y bajan confianza.", "Resolver auditoría de coherencia.")
+    gate("Mercado/precio", market_summary.get("needs_rfq_count", 99) <= 3 and market_summary.get("priceguard_score_percent", 0) >= 70, "Ítems en rojo o PriceGuard bajo obligan a RFQ antes de precio cerrado.", "Confirmar proveedores/stock y corregir outliers de precio.")
+    gate("SCCR/kAIC", bool(i.short_circuit_available_ka and i.short_circuit_available_ka > 0), "No liberar fabricación sin capacidad interruptiva verificada.", "Solicitar corto disponible o criterio de protección.")
+    gate("Seguridad de izaje", (not _is_hoist(i)) or (i.needs_brake and i.needs_limit_switches and i.needs_estop), "Carga suspendida sin seguridad completa es bloqueo crítico.", "Añadir freno, finales, E-Stop y pruebas.")
+    quote_ready = all(g["passed"] for g in gates[:3])
+    construction_ready = all(g["passed"] for g in gates)
+    return {
+        "quote_ready": quote_ready,
+        "construction_ready": construction_ready,
+        "gates": gates,
+        "verdict": "Lista para cotización piloto" if quote_ready else "No enviar oferta cerrada sin completar compuertas",
+        "construction_verdict": "No liberada para construcción automática" if not construction_ready else "Construcción puede pasar a revisión formal humana",
+    }
+
+
+def _quote_readiness(quality: Dict[str, Any], consistency: Dict[str, Any], market_summary: Dict[str, Any], release: Dict[str, Any]) -> Dict[str, Any]:
+    score = round(quality["score_percent"] * 0.25 + consistency["score_percent"] * 0.24 + float(market_summary["coverage_percent"]) * 0.14 + float(market_summary.get("priceguard_score_percent", 0)) * 0.22 + (100 if release["quote_ready"] else 55) * 0.15, 1)
+    if score >= 92 and release["quote_ready"]:
+        status = "Alta: lista para propuesta piloto revisable"
+    elif score >= 78:
+        status = "Media: propuesta con RFQ/advertencias"
+    else:
+        status = "Baja: solo borrador interno"
+    return {
+        "score_percent": score,
+        "status": status,
+        "seller_message": "Ahorra tiempo porque arma el 80–90% del expediente; el humano valida, no reconstruye.",
+        "do_not_send_if": [g["name"] for g in release["gates"] if not g["passed"] and g["name"] in {"Datos críticos", "Mercado/precio", "Coherencia técnica"}],
+    }
+
+
+def _field_verification_plan(i: ProjectIntake) -> List[Dict[str, Any]]:
+    base = [
+        {"step": "Placa y alimentación", "what": "Foto de placa, tensión entre fases, tierra, frecuencia y FLA.", "why": "Evita comprar bobina/protección equivocada."},
+        {"step": "Ruta física", "what": "Medir distancia real, canalización, temperatura y polvo/humedad.", "why": "Ajusta conductor, gabinete y reserva."},
+        {"step": "Tablero existente", "what": "Fotos internas, espacio, entradas inferiores/superiores, borneras y cableado.", "why": "Reduce sorpresas y horas de montaje."},
+        {"step": "Proveedor", "what": "Confirmar precio, stock, marca, garantía y entrega.", "why": "Convierte precio referencial en precio confirmado."},
+    ]
+    if _is_hoist(i):
+        base += [
+            {"step": "Freno", "what": "Placa/tensión/corriente del freno y lógica de liberación.", "why": "El guinche no se trata como motor común."},
+            {"step": "Finales de carrera", "what": "Ubicación mecánica, accionamiento y redundancia si aplica.", "why": "Evita sobre-recorrido y riesgo de carga."},
+        ]
+    return base
+
+
+def _qa_scorecard(quality: Dict[str, Any], consistency: Dict[str, Any], release: Dict[str, Any], quote: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "data_score": quality["score_percent"],
+        "consistency_score": consistency["score_percent"],
+        "quote_score": quote["score_percent"],
+        "release_gate_passed": release["quote_ready"],
+        "construction_gate_passed": release["construction_ready"],
+        "principle": "Métricas altas no eliminan aprobación humana; reducen corrección y tiempo perdido.",
+    }
+
+
+
+
+def _engineer_review_board(i: ProjectIntake, release: Dict[str, Any], market_summary: Dict[str, Any], quote: Dict[str, Any]) -> Dict[str, Any]:
+    """Simula la mesa de revisión y marca qué pidió cada perfil y cómo se resolvió.
+
+    No representa usuarios reales; es una lista de chequeo de producto basada en perfiles típicos.
+    """
+    construction = "Satisfecho para piloto" if not release["construction_ready"] else "Satisfecho para revisión formal"
+    rfq_ok = market_summary["needs_rfq_count"] <= 3
+    personas = [
+        {"perfil": "Ingeniero junior", "lo_que_exigia": "Guía paso a paso, ejemplos y bloqueo si faltan datos.", "respuesta_v9": "Flujo guiado, modo rápido, semáforo de precisión y compuertas de salida.", "estado": "feliz para piloto"},
+        {"perfil": "Técnico tablerista", "lo_que_exigia": "BOM aterrizado, categorías, chequeos críticos y materiales editables.", "respuesta_v9": "BOM normalizado por categoría, tabla cotizable, CSV/XLSX y notas de riesgo por componente.", "estado": "feliz para piloto"},
+        {"perfil": "Mantenimiento industrial", "lo_que_exigia": "Plan de pruebas, fallas comunes y entrega sin improvisación.", "respuesta_v9": "Checklist de taller/campo, plan de verificación y diagnóstico de fallas típicas.", "estado": "feliz para piloto"},
+        {"perfil": "Diseñador eléctrico", "lo_que_exigia": "Trazabilidad, supuestos, auditoría, compuertas y documentos formales.", "respuesta_v9": "Libro de supuestos, auditoría de coherencia, export PDF, Markdown y bloqueo SCCR/kAIC.", "estado": construction},
+        {"perfil": "Cotizador/compras", "lo_que_exigia": "Precios por confianza, proveedores, RFQ y exportación a Excel.", "respuesta_v9": "Market engine, price confidence, RFQ, CSV/XLSX BOM y fuente/vigencia por línea.", "estado": "feliz para piloto" if rfq_ok else "feliz con advertencia RFQ"},
+        {"perfil": "Seguridad/supervisor", "lo_que_exigia": "No liberar construcción si hay riesgo crítico.", "respuesta_v9": "Construction gate separado de quote gate; aprobación humana obligatoria.", "estado": "feliz: no promete construcción automática"},
+    ]
+    return {
+        "veredicto": "La V9 está lista para prueba piloto cerrada con ingenieros: el humano revisa, no reconstruye.",
+        "quote_score": quote["score_percent"],
+        "personas": personas,
+        "regla_de_venta": "Vender ahorro de tiempo y expediente técnico-comercial trazable, no certificación automática.",
+        "pendiente_realista": "Conectar credenciales reales de proveedores/marketplaces para pasar de precio referencial a precio confirmado masivo.",
+    }
+
+
+def _guided_flow(i: ProjectIntake, quality: Dict[str, Any], market_summary: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "modo_rapido": [
+            "1. Elige tipo de máquina y potencia.",
+            "2. Confirma tensión/fases/FLA o sube placa.",
+            "3. Define seguridad: paro, finales, freno, monitor de fase.",
+            "4. Genera solución y revisa semáforo.",
+            "5. Confirma precios de baja confianza con RFQ.",
+            "6. Exporta propuesta y BOM.",
+        ],
+        "modo_expediente": [
+            "Completa fotos, ambiente, distancia, SCCR/kAIC, alcance y logística.",
+            "Revisa auditoría de coherencia y libro de supuestos.",
+            "Cierra precios confirmados y bloqueadores antes de ofertar fuerte.",
+        ],
+        "next_best_actions": [c["fix"] for c in (quality.get("critical_missing") or quality.get("high_missing") or [])][:5] or ["Enviar RFQ a proveedores y guardar precios confirmados."],
+        "market_status": f"{market_summary['items_with_price']}/{market_summary['total_items']} materiales tienen precio; PriceGuard {market_summary.get('priceguard_score_percent',0)}%; verdes {market_summary.get('green_count',0)}, amarillos {market_summary.get('yellow_count',0)}, rojos {market_summary.get('red_count',0)}; {market_summary['needs_rfq_count']} requieren RFQ.",
+    }
+
+
+def _output_quality_contract(release: Dict[str, Any], quote: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "promesa": "Con pocos datos produce el 80-90% del expediente para revisión, cotización y negociación.",
+        "no_promete": "No certifica construcción ni energización sin responsable humano, campo y normativa local.",
+        "reglas_no_basura": [
+            "Separar dato confirmado, supuesto y pendiente.",
+            "No ocultar baja confianza de precio.",
+            "Bloquear construcción si faltan seguridad, SCCR/kAIC o coherencia crítica.",
+            "Mostrar acciones concretas para cerrar cada pendiente.",
+            "Entregar archivos exportables y trazables.",
+        ],
+        "quote_gate": quote["status"],
+        "construction_gate": release["construction_verdict"],
+    }
+
+def generate_engineering_pack(payload: Dict[str, Any] | ProjectIntake) -> EngineeringPack:
+    i = payload if isinstance(payload, ProjectIntake) else ProjectIntake(**payload)
+    flc = _estimate_flc(i)
+    calculations = {
+        "full_load_current_a": _round(flc, 2),
+        "breaker_size_a": _breaker_size(flc),
+        "overload_setting_a": _overload_setting(flc, i.service_factor),
+        "conductor_preliminary": _conductor_size_awg(flc, i.cable_run_m),
+        "voltage_drop_percent": _voltage_drop_percent(flc, i.voltage, i.cable_run_m, i.phases),
+        "control_transformer_va": max(750, int(i.motor_power_hp * 80)),
+        "starting_current_estimate": f"{round(flc * 6, 1)} A aprox. en arranque directo",
+        "short_circuit_available_ka": i.short_circuit_available_ka or "pendiente",
+        "calculation_basis": "FLA de placa si existe; si no, estimación desde HP, V, fp y eficiencia.",
+        "notice": "Cálculos preliminares para cotización. Para construcción se requiere placa real, tablas/códigos aplicables, temperatura, canalización, coordinación y verificación de campo.",
+    }
+    quality = _data_quality(i)
+    requirements = _build_requirements(i, calculations)
+    decisions = decide_prices(requirements, i)
+    market_summary = summarize_market(decisions)
+    consistency = _consistency_audit(i, calculations)
+    release = _release_gates(i, quality, consistency, market_summary)
+    quote = _quote_readiness(quality, consistency, market_summary, release)
+    assumptions = _assumption_ledger(i, calculations, market_summary)
+    alternatives = _alternatives(i)
+    recommended = _recommended(i, alternatives)
+    budget = _build_budget(i, float(market_summary["materials_cost"]), market_summary)
+    rfq_message = generate_rfq_message(requirements, decisions, i)
+    completeness = min(99.5, round((quality["score_percent"] * 0.30) + (consistency["score_percent"] * 0.24) + (float(market_summary["coverage_percent"]) * 0.24) + (quote["score_percent"] * 0.22), 1))
+    correction_load = "Mínima" if completeness >= 92 and release["quote_ready"] else "Media" if completeness >= 78 else "Alta"
+    construction_release = bool(release["construction_ready"])
+    validation_status = "Apto para prueba piloto comercial revisable" if release["quote_ready"] else "Borrador interno: completar compuertas antes de enviar"
+    review_board = _engineer_review_board(i, release, market_summary, quote)
+    guided_flow = _guided_flow(i, quality, market_summary)
+    output_contract = _output_quality_contract(release, quote)
+
+    pack = EngineeringPack(
+        meta={"product": PRODUCT, "version": VERSION, "generated_at": datetime.now(timezone.utc).isoformat(), "language": "es", "release_type": "pilot release cerrado para mesa de ingenieros"},
+        intake=i.model_dump(),
+        executive_verdict={
+            "headline": "Cotización industrial inteligente: menos datos, más expediente, cero certezas falsas.",
+            "verdict": "El sistema guía la entrada, genera solución, cálculos, BOM normalizado, precios por confianza, RFQ, presupuesto, riesgos, compuertas de calidad, exportables y acciones pendientes para que el ingeniero revise en vez de reconstruir.",
+            "business_pain": "Reduce horas perdidas en cotizaciones de miles de dólares que quizá no se ganen.",
+            "release_gate": release["verdict"],
+        },
+        data_quality=quality,
+        agents=_agents(),
+        calculations=calculations,
+        requirements=[r.model_dump() for r in requirements],
+        alternatives=alternatives,
+        recommended_option=recommended,
+        market={
+            "summary": market_summary,
+            "price_decisions": [d.model_dump() for d in decisions],
+            "supplier_count": len(market_summary["suppliers_used"]),
+            "method": "PriceGuard 9: catálogo interno editable + banda de mercado + fuente + stock + vigencia + proveedor + RFQ. Integraciones externas listas para credenciales reales.",
+            "price_truth_rule": "precio estimado ≠ precio confirmado; todo valor muestra semáforo, fuente, vigencia, stock, banda y acción requerida.",
+            "priceguard_methodology": priceguard_methodology(),
+        },
+        budget=budget,
+        risks=_risks(i),
+        checklists={
+            "datos_minimos": ["Foto de placa", "Tensión/fases medidas", "Distancia real", "Ambiente", "Freno", "Finales de carrera", "Ubicación de entrega", "kAIC/SCCR si se libera construcción"],
+            "cotizacion": ["Confirmar ítems de baja confianza", "Enviar RFQ", "Revisar stock", "Definir vigencia", "Aplicar margen", "Adjuntar exclusiones", "Marcar supuestos"],
+            "taller": ["Continuidad", "Torque/ajuste", "Enclavamientos", "Paro de emergencia", "Finales", "Freno", "Prueba sin carga", "Rotulado"],
+            "campo": ["Bloqueo/etiquetado", "Verificación tensión", "Giro", "Freno", "Prueba con carga supervisada", "Firma de entrega"],
+            "fallas_comunes": ["No arranca: revisar control, E-Stop, térmico y bobina", "Dispara térmico: medir corriente, carga mecánica y ajuste", "Gira al revés: invertir dos fases con procedimiento seguro", "Freno no libera: verificar tensión/rectificador/secuencia", "Final no actúa: probar continuidad y posición mecánica"],
+        },
+        diagrams={
+            "single_line_svg": single_line_cad_svg(i, calculations),
+            "control_ladder_svg": control_ladder_cad_svg(i),
+            "panel_preview_svg": panel_layout_cad_svg(i, [r.model_dump() for r in requirements]),
+            "single_line_legacy_svg": _single_line_svg(i, calculations),
+            "control_ladder_legacy_svg": _control_svg(i),
+            "panel_preview_legacy_svg": _panel_svg(),
+        },
+        statistics={
+            "engineering_completeness_percent": completeness,
+            "market_coverage_percent": market_summary["coverage_percent"],
+            "quote_confidence": budget["price_confidence"],
+            "reviewer_correction_load": correction_load,
+            "time_saved_estimate": "2–6 horas por cotización compleja",
+            "estimated_manual_quote_hours": "4–8 h",
+            "estimated_controlpro_quote_hours": "35–75 min",
+            "commercial_savings_message": "Ahorra horas de búsqueda, normalización de BOM, armado de RFQ, presupuesto y documento para cliente.",
+            "deliverables_ready": 15,
+            "rfq_required_items": market_summary["needs_rfq_count"],
+            "priceguard_score_percent": market_summary.get("priceguard_score_percent", 0),
+            "priceguard_green": market_summary.get("green_count", 0),
+            "priceguard_yellow": market_summary.get("yellow_count", 0),
+            "priceguard_red": market_summary.get("red_count", 0),
+            "priceguard_verdict": market_summary.get("priceguard_verdict", "Revisable"),
+            "locked_price_count": market_summary.get("locked_price_count", 0),
+            "referential_price_count": market_summary.get("referential_price_count", 0),
+            "blocked_price_count": market_summary.get("blocked_price_count", 0),
+            "candidate_offer_audit": market_summary.get("candidate_offer_audit", {}),
+            "price_outliers": market_summary.get("outlier_count", 0),
+            "auto_corrected_prices": market_summary.get("auto_corrected_count", 0),
+            "execution_days_estimate": "2–4 días con materiales disponibles",
+            "quote_readiness_score": quote["score_percent"],
+        },
+        deliverables=[
+            {"name": "Propuesta para cliente", "description": "Resumen comercial con precio piso/recomendado/premium, alcance, vigencia y exclusiones."},
+            {"name": "BOM cotizable", "description": "Materiales normalizados con proveedor, precio, confianza, stock, semáforo PriceGuard y decisión."},
+            {"name": "Reporte PriceGuard", "description": "Semáforos verde/amarillo/rojo, bandas de mercado, outliers, autocorrecciones y acciones RFQ."},
+            {"name": "Mensaje RFQ", "description": "Texto listo para WhatsApp/correo a proveedores."},
+            {"name": "Diagrama unifilar", "description": "SVG conceptual para revisión técnica."},
+            {"name": "Diagrama de control", "description": "Ladder conceptual con enclavamientos y seguridad."},
+            {"name": "Vista 3D conceptual", "description": "Explicación visual del tablero y motor."},
+            {"name": "Semáforo de precisión", "description": "Calidad de datos, coherencia, mercado y compuertas."},
+            {"name": "Libro de supuestos", "description": "Qué se asumió, confianza y cómo verificar."},
+            {"name": "Checklist de cotización", "description": "Pasos para no enviar precio flojo."},
+            {"name": "Checklist de pruebas", "description": "Taller, campo, seguridad y firma."},
+            {"name": "Registro de riesgos", "description": "Riesgos técnicos/comerciales con mitigación."},
+            {"name": "Expediente Markdown", "description": "Archivo exportable para editar o convertir a PDF."},
+            {"name": "Reporte PDF", "description": "Resumen formal para revisión y presentación."},
+            {"name": "BOM CSV/XLSX", "description": "Lista de materiales editable para compras y seguimiento."},
+        ],
+        rfq={"message": rfq_message, "channels_ready": ["WhatsApp manual", "Correo", "WhatsApp Cloud API con credenciales", "SMTP con credenciales"], "note": "La versión piloto genera RFQ listo. El envío automático requiere credenciales reales y aprobación del usuario."},
+        crm={"quote_status": "Borrador técnico-comercial" if not release["quote_ready"] else "Listo para propuesta piloto revisable", "next_action": "Confirmar ítems RFQ y enviar propuesta" if release["quote_ready"] else "Completar compuertas antes de enviar", "win_loss_learning": ["Registrar si se gana o pierde", "Guardar precio competidor si existe", "Actualizar base interna"]},
+        validation={
+            "status": validation_status,
+            "human_approval_required": True,
+            "construction_release": construction_release,
+            "gates": [f"{'OK' if g['passed'] else 'PENDIENTE'} · {g['name']}: {g['required_action']}" for g in release["gates"]],
+        },
+        assumption_ledger=assumptions,
+        consistency_audit=consistency,
+        release_gates=release,
+        quote_readiness=quote,
+        field_verification_plan=_field_verification_plan(i),
+        qa_scorecard=_qa_scorecard(quality, consistency, release, quote),
+        review_board=review_board,
+        guided_flow=guided_flow,
+        output_quality_contract=output_contract,
+        cad_outputs={
+            "level": "CAD-like piloto / Draw.io editable",
+            "single_line_sheet": "E-001",
+            "control_ladder_sheet": "E-002",
+            "panel_layout_sheet": "E-003",
+            "terminal_schedule": terminal_schedule(i),
+            "wire_schedule": wire_schedule(i, calculations),
+            "drawio_available": True,
+            "upgrade_rule": "Antes de fabricar, convertir a CAD final con marcas/modelos reales, numeración congelada, revisión de SCCR/kAIC y firma responsable.",
+        },
+        api_activation=integration_status(),
+        priceguard={"methodology": priceguard_methodology(), "summary": market_summary, "anti_garbage_rule": "Si un precio sale fuera de banda, sin stock, vencido o de fuente débil, se marca amarillo/rojo y no se permite precio cerrado sin RFQ.", "catalog_scope": market_summary.get("catalog_scope"), "confidence_policy": market_summary.get("confidence_policy"), "candidate_offer_audit": market_summary.get("candidate_offer_audit")},
+        starter_intelligence={"profiles": alternatives, "recommended": recommended, "didactic_rule": "Cada arranque explica cómo funciona, cuándo conviene y cómo impacta precio/riesgo."},
+        premium_document_contract={"pdf": "portada + resumen ejecutivo + semáforos + supuestos + presupuesto + BOM + anexos + firmas", "spreadsheet": "BOM editable con semáforo y fuente", "cad": "SVG/Draw.io CAD-like para revisión y formalización"},
+        human_review_notice="ControlPro reduce tiempo, ordena el expediente y baja la carga de corrección; no reemplaza normativa local, verificación de campo, proveedor confirmado ni aprobación humana antes de fabricar o energizar.",
+    )
+    return pack
+
+
+def export_pack_markdown(payload: Dict[str, Any] | ProjectIntake) -> str:
+    pack = generate_engineering_pack(payload).model_dump()
+    lines: List[str] = []
+    lines.append(f"# {pack['meta']['product']} — Expediente técnico-comercial")
+    lines.append("")
+    lines.append(f"**Proyecto:** {pack['intake']['project_name']}")
+    lines.append(f"**Cliente:** {pack['intake']['client_name']}")
+    lines.append(f"**Ubicación:** {pack['intake']['location_city']}, {pack['intake']['location_province']}, {pack['intake']['country']}")
+    lines.append(f"**Generado:** {pack['meta']['generated_at']}")
+    lines.append("")
+    lines.append("## Veredicto ejecutivo")
+    lines.append(pack['executive_verdict']['verdict'])
+    lines.append("")
+    lines.append("## Calidad de datos")
+    lines.append(f"Estado: **{pack['data_quality']['status']}** · Score: **{pack['data_quality']['score_percent']}%**")
+    for c in pack['data_quality']['checks']:
+        lines.append(f"- {'OK' if c['ok'] else 'FALTA'} · **{c['check']}** · impacto {c['impact']} · {c['fix']}")
+    lines.append("")
+    lines.append("## Semáforo de precisión")
+    lines.append(f"Preparación cotización: **{pack['quote_readiness']['status']}** · Score: **{pack['quote_readiness']['score_percent']}%**")
+    lines.append(f"Liberación construcción: **{pack['release_gates']['construction_verdict']}**")
+    lines.append("")
+    lines.append("## Auditoría de coherencia")
+    for c in pack['consistency_audit']['checks']:
+        lines.append(f"- **{c['name']}** · {c['status']} · {c['detail']} · Acción: {c['action']}")
+    lines.append("")
+    lines.append("## Libro de supuestos")
+    for a in pack['assumption_ledger']:
+        lines.append(f"- **{a['topic']}** · {a['assumption']} · Confianza: {a['confidence']} · Verificación: {a['verification']}")
+    lines.append("")
+    lines.append("## Cálculos preliminares")
+    for k, v in pack['calculations'].items():
+        lines.append(f"- **{k}:** {v}")
+    lines.append("")
+    lines.append("## Solución recomendada")
+    lines.append(f"**{pack['recommended_option']['name']}** — {pack['recommended_option']['fit']}")
+    lines.append(pack['recommended_option']['why'])
+    lines.append("")
+    lines.append("## BOM cotizable")
+    for row in pack['market']['price_decisions']:
+        offer = row['selected_offer']
+        if offer:
+            lines.append(f"- **{row['component_id']}** · Cant. {row['qty']} · {offer['brand']} {offer['model']} · {offer['supplier_name']} · ${row['unit_cost']} · confianza {row['confidence_label']} · {row['decision_note']}")
+        else:
+            lines.append(f"- **{row['component_id']}** · Cant. {row['qty']} · ${row['unit_cost']} estimado · requiere RFQ")
+    lines.append("")
+    lines.append("## Presupuesto")
+    for k, v in pack['budget'].items():
+        lines.append(f"- **{k}:** {v}")
+    lines.append("")
+    lines.append("## RFQ listo para enviar")
+    lines.append("```text")
+    lines.append(pack['rfq']['message'])
+    lines.append("```")
+    lines.append("")
+    lines.append("## Salidas CAD-like / taller")
+    lines.append("- E-001 Unifilar CAD-like SVG")
+    lines.append("- E-002 Ladder CAD-like SVG")
+    lines.append("- E-003 Layout de tablero CAD-like SVG")
+    lines.append("- Draw.io editable para formalización")
+    lines.append("- Lista de borneras y lista de cables exportables")
+    lines.append("")
+    lines.append("### Lista preliminar de borneras")
+    for row in pack.get("cad_outputs", {}).get("terminal_schedule", []):
+        lines.append(f"- **{row['terminal']}** · {row['wire']} · {row['from']} → {row['to']} · {row['function']}")
+    lines.append("")
+    lines.append("### Lista preliminar de cables")
+    for row in pack.get("cad_outputs", {}).get("wire_schedule", []):
+        lines.append(f"- **{row['cable']}** · {row['from']} → {row['to']} · {row['conductors']} · {row['size']} · {row['length_m']} m")
+    lines.append("")
+    lines.append("## Riesgos")
+    for r in pack['risks']:
+        lines.append(f"- **{r['risk']}** ({r['severity']}): {r['mitigation']}")
+    lines.append("")
+    lines.append("## Mesa simulada de ingenieros")
+    lines.append(pack["review_board"]["veredicto"])
+    for p in pack["review_board"]["personas"]:
+        lines.append(f"- **{p['perfil']}**: {p['estado']} · {p.get('respuesta_v9', 'Resuelto')}")
+    lines.append("")
+    lines.append("## Próximas acciones guiadas")
+    for n in pack["guided_flow"]["next_best_actions"]:
+        lines.append(f"- {n}")
+    lines.append("")
+    lines.append("## Aviso")
+    lines.append(pack['human_review_notice'])
+    return "\n".join(lines)
+
+
+def export_client_proposal(payload: Dict[str, Any] | ProjectIntake) -> str:
+    pack = generate_engineering_pack(payload).model_dump()
+    b = pack['budget']
+    lines = [
+        "# Propuesta técnica-comercial",
+        "",
+        f"**Proyecto:** {pack['intake']['project_name']}",
+        f"**Cliente:** {pack['intake']['client_name']}",
+        f"**Ubicación:** {pack['intake']['location_city']}, {pack['intake']['location_province']}",
+        "",
+        "## Alcance propuesto",
+        "Diseño, selección preliminar de componentes, armado de expediente técnico, lista de materiales, presupuesto, checklist de pruebas y recomendaciones de instalación para sistema de control industrial.",
+        "",
+        "## Solución recomendada",
+        f"{pack['recommended_option']['name']}: {pack['recommended_option']['fit']}.",
+        "",
+        "## Valores comerciales",
+        f"- Precio piso técnico: ${b['floor_price']:,.2f}",
+        f"- Precio recomendado: ${b['recommended_sell_price']:,.2f}",
+        f"- Opción premium: ${b['premium_price']:,.2f}",
+        "",
+        "## Vigencia y condiciones",
+        "Precio sujeto a confirmación de stock, proveedor, placa real de motor/freno, condiciones de campo y aprobación técnica final.",
+        "",
+        "## Nota de seguridad",
+        pack['human_review_notice'],
+    ]
+    return "\n".join(lines)

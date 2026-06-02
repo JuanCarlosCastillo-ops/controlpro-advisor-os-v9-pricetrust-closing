@@ -1,0 +1,67 @@
+component_id,category,description,brand,model,supplier_id,city,price_usd,stock_status,lead_time_days,confidence,source_type,valid_until,url,notes
+mccb_main,Fuerza,MCCB principal 3P 60A 600V 25kAIC,Schneider,EasyPact CVS 60A 25kA,SUP-001,Guayaquil,145,available,2,0.88,confirmed,2026-08-31,,Precio piloto confirmado; validar curva/SCCR final
+mccb_main,Fuerza,MCCB principal 3P 60A 600V 25kAIC,ABB,Tmax XT1 60A,SUP-003,Cuenca,168,available,4,0.84,reference,2026-08-31,,Opción premium
+mccb_main,Fuerza,MCCB principal 3P 60A 600V 10kAIC,Chint,NXM-63S 60A,SUP-004,Machala,72,available,1,0.7,reference,2026-08-31,,Económico; no usar si SCCR exige más
+mccb_main,Fuerza,MCCB 3P 60A precio sospechoso,Genérico,No verificado,SUP-008,Ecuador,28,unknown,7,0.32,marketplace,2026-07-15,,Outlier bajo para PriceGuard
+contactor_fwd,Fuerza,Contactor AC-3 32A bobina 120VAC,Schneider,LC1D32G7,SUP-001,Guayaquil,82,available,2,0.9,confirmed,2026-08-31,,Subir/adelante
+contactor_fwd,Fuerza,Contactor AC-3 32A bobina 120VAC,ABB,AF38-30-00-11,SUP-003,Cuenca,88,available,4,0.82,reference,2026-08-31,,Verificar bobina exacta
+contactor_fwd,Fuerza,Contactor AC-3 32A bobina 120VAC,Chint,NC1-3210 120V,SUP-004,Machala,43,available,1,0.73,reference,2026-08-31,,Opción económica
+contactor_fwd,Fuerza,Contactor AC-3 32A bobina 120VAC,Siemens,3RT2035-1AP00,SUP-007,Quito,98,available,5,0.84,reference,2026-08-31,,Premium
+contactor_rev,Fuerza,Contactor AC-3 32A bobina 120VAC,Schneider,LC1D32G7,SUP-001,Guayaquil,82,available,2,0.9,confirmed,2026-08-31,,Bajar/reversa
+contactor_rev,Fuerza,Contactor AC-3 32A bobina 120VAC,ABB,AF38-30-00-11,SUP-003,Cuenca,88,available,4,0.82,reference,2026-08-31,,Verificar bobina exacta
+contactor_rev,Fuerza,Contactor AC-3 32A bobina 120VAC,Chint,NC1-3210 120V,SUP-004,Machala,43,available,1,0.73,reference,2026-08-31,,Opción económica
+contactor_rev,Fuerza,Contactor AC-3 32A bobina 120VAC,Siemens,3RT2035-1AP00,SUP-007,Quito,98,available,5,0.84,reference,2026-08-31,,Premium
+mechanical_interlock,Seguridad,Enclavamiento mecánico compatible LC1D/AF/NC1,Schneider,LAD9R1V,SUP-001,Guayaquil,27,available,2,0.88,confirmed,2026-08-31,,Debe coincidir con contactores
+mechanical_interlock,Seguridad,Enclavamiento mecánico compatible ABB,ABB,VM4,SUP-003,Cuenca,31,available,4,0.78,reference,2026-08-31,,Verificar serie AF
+mechanical_interlock,Seguridad,Enclavamiento mecánico Chint,Chint,NC1-Interlock,SUP-004,Machala,16,available,1,0.7,reference,2026-08-31,,Económico
+overload_relay,Fuerza,Relé sobrecarga 24-36A clase 10,Schneider,LRD3357,SUP-001,Guayaquil,66,available,2,0.88,confirmed,2026-08-31,,Rango cubre FLA piloto
+overload_relay,Fuerza,Relé sobrecarga 24-36A,ABB,TF42-32,SUP-003,Cuenca,72,available,4,0.8,reference,2026-08-31,,Validar clase
+overload_relay,Fuerza,Relé térmico 23-32A,Chint,NR2-36,SUP-004,Machala,34,available,1,0.73,reference,2026-08-31,,Confirmar rango exacto
+phase_monitor,Seguridad,Relé monitor de fase 3F 460V,Schneider,RM22TR33,SUP-001,Guayaquil,94,available,2,0.86,confirmed,2026-08-31,,Protección por pérdida/secuencia
+phase_monitor,Seguridad,Monitor fase/secuencia 380-480V,Carlo Gavazzi,DPA51CM44,SUP-007,Quito,118,available,5,0.8,reference,2026-08-31,,Premium
+phase_monitor,Seguridad,Monitor fase 3F,Chint,XJ3-D,SUP-004,Machala,38,available,1,0.7,reference,2026-08-31,,Validar tensión
+control_transformer,Control,Transformador de control 460/120V 2kVA,Hammond,C2F002KLES,SUP-002,Quito,210,available,4,0.84,reference,2026-08-31,,Premium
+control_transformer,Control,Transformador control 460/120V 2kVA,Weg,TR2K-460-120,SUP-003,Cuenca,168,available,4,0.8,reference,2026-08-31,,Referencial
+control_transformer,Control,Transformador control 460/120V 2kVA,Genérico industrial,TC-2KVA,SUP-004,Machala,125,available,1,0.76,confirmed,2026-08-31,,Precio piloto confirmado
+cabinet,Tablero,Gabinete metálico NEMA 12/IP54 600x400x250,Rittal,AX 600x400x250,SUP-007,Quito,245,available,5,0.82,reference,2026-08-31,,Premium
+cabinet,Tablero,Gabinete metálico industrial 600x400x250,Metálico Nacional,MN-604025,SUP-004,Machala,135,available,2,0.82,confirmed,2026-08-31,,Opción local
+cabinet,Tablero,Gabinete metálico 600x400x250,Genérico,GAB-604025,SUP-008,Ecuador,79,unknown,7,0.5,marketplace,2026-08-31,,Verificar calibre/IP
+estop,Seguridad,Paro emergencia 22mm NC acción positiva,Schneider,XB4BS542,SUP-001,Guayaquil,24,available,2,0.88,confirmed,2026-08-31,,Hongo NC
+estop,Seguridad,Paro emergencia 22mm NC,Siemens,3SU1000-1HB20,SUP-007,Quito,28,available,5,0.8,reference,2026-08-31,,Premium
+estop,Seguridad,Paro emergencia 22mm NC,Chint,NP2-BS542,SUP-004,Machala,9,available,1,0.74,reference,2026-08-31,,Económico
+pushbuttons,Control,Botonera subir/bajar/stop + pilotos 22mm,Schneider,XB4 Kit,SUP-001,Guayaquil,72,available,2,0.86,confirmed,2026-08-31,,Incluye accesorios básicos
+pushbuttons,Control,Kit pulsadores y pilotos 22mm,Siemens,3SU Kit,SUP-007,Quito,86,available,5,0.8,reference,2026-08-31,,Premium
+pushbuttons,Control,Pulsadores/pilotos 22mm,Chint,NP2 Kit,SUP-004,Machala,28,available,1,0.75,reference,2026-08-31,,Económico
+limit_switches,Seguridad,Final carrera industrial palanca rodillo IP65,Schneider,XCK-M,SUP-001,Guayaquil,38,available,2,0.86,confirmed,2026-08-31,,Precio unitario
+limit_switches,Seguridad,Final carrera industrial IP65,Telemecanique,XCKP,SUP-003,Cuenca,42,available,4,0.79,reference,2026-08-31,,Precio unitario
+limit_switches,Seguridad,Final carrera industrial,Chint,YBLX-ME,SUP-004,Machala,14,available,1,0.7,reference,2026-08-31,,Verificar IP y mecánica
+brake_rectifier,Control,Rectificador/control de freno 110/120VAC,Kendrion,BR120-2A,SUP-002,Quito,118,quote_needed,4,0.74,reference,2026-08-31,,Confirmar placa de freno
+brake_rectifier,Control,Rectificador freno industrial 110/120VAC,Bonfiglioli,BRE120,SUP-007,Quito,142,available,5,0.78,reference,2026-08-31,,Confirmar corriente
+brake_rectifier,Control,Rectificador freno genérico,Genérico,BR-120,SUP-008,Ecuador,48,unknown,8,0.52,marketplace,2026-08-31,,Solo referencial
+vfd,Fuerza,Variador 25HP 460V 3F heavy duty,Schneider,ATV930D18N4,SUP-002,Quito,1280,quote_needed,6,0.78,reference,2026-08-31,,Validar aplicación de izaje
+vfd,Fuerza,Variador 25HP 460V 3F,ABB,ACS580-01-039A-4,SUP-003,Cuenca,1180,available,5,0.8,reference,2026-08-31,,Confirmar brake chopper
+vfd,Fuerza,Variador 25HP 460V 3F,INVT,GD200A-022G/030P-4,SUP-004,Machala,690,available,3,0.72,reference,2026-08-31,,Económico; validar torque/freno
+vfd,Fuerza,Variador 25HP 460V precio alto,Siemens,G120C,SUP-007,Quito,1860,available,6,0.78,reference,2026-08-31,,Premium; outlier alto
+soft_starter,Fuerza,Soft starter 25HP 460V 45A,Schneider,ATS22D47S6,SUP-002,Quito,820,available,5,0.78,reference,2026-08-31,,Opción intermedia
+soft_starter,Fuerza,Soft starter 25HP 460V,ABB,PSE45,SUP-003,Cuenca,760,available,5,0.77,reference,2026-08-31,,Intermedio
+soft_starter,Fuerza,Soft starter 25HP 460V,Chint,NJRP2-45,SUP-004,Machala,390,available,3,0.69,reference,2026-08-31,,Verificar torque y bypass
+bypass_contactor,Fuerza,Contactor bypass 50A AC-3 bobina 120V,Schneider,LC1D50G7,SUP-001,Guayaquil,118,available,2,0.83,reference,2026-08-31,,Para soft starter
+bypass_contactor,Fuerza,Contactor bypass 50A,ABB,AF52,SUP-003,Cuenca,128,available,4,0.78,reference,2026-08-31,,Para soft starter
+line_reactor,Fuerza,Reactor de línea 3% 460V 25HP,MTE,RL-025HP-460,SUP-002,Quito,245,quote_needed,6,0.72,reference,2026-08-31,,Recomendado con VFD
+line_reactor,Fuerza,Reactor línea 3% 460V,Genérico industrial,LR-25HP-460,SUP-004,Machala,168,available,4,0.68,reference,2026-08-31,,Verificar corriente
+braking_resistor,Fuerza,Resistencia de frenado para VFD 25HP,Danfoss,BR-25HP,SUP-002,Quito,310,quote_needed,6,0.7,reference,2026-08-31,,Dimensionar por ciclo de carga
+braking_resistor,Fuerza,Resistencia frenado 25HP,Genérico industrial,DBR-25HP,SUP-008,Ecuador,185,unknown,9,0.55,marketplace,2026-08-31,,Validar watts/ohmios
+terminal_blocks,Cableado,Paquete borneras/puentes/marcadores 30 puntos,Phoenix Contact,UK Kit 30,SUP-002,Quito,82,available,4,0.8,reference,2026-08-31,,Premium
+terminal_blocks,Cableado,Paquete borneras y marcadores,Wago,TOPJOB Kit,SUP-003,Cuenca,76,available,4,0.78,reference,2026-08-31,,Premium
+terminal_blocks,Cableado,Borneras y marcadores industriales,Genérico,TB-KIT-30,SUP-004,Machala,38,available,1,0.78,confirmed,2026-08-31,,Precio piloto confirmado
+wiring_pack,Cableado,"Canaleta, punteras, etiquetas, cable control",ControlPro Kit,WP-CTRL-01,SUP-005,Base interna,120,available,0,0.86,internal,2026-08-31,,Kit histórico interno
+wiring_pack,Cableado,Consumibles cableado tablero,Genérico,WP-LOCAL,SUP-004,Machala,98,available,1,0.78,confirmed,2026-08-31,,Precio piloto confirmado
+wiring_pack,Cableado,Consumibles premium tablero,Phoenix/Brady,WP-PREMIUM,SUP-007,Quito,185,available,5,0.78,reference,2026-08-31,,Premium
+power_cable,Cableado,Cable cobre THHN #8 AWG metro,Electrocables,THHN-8AWG-CU,SUP-004,Machala,2.45,available,1,0.84,confirmed,2026-08-31,,Precio por metro
+power_cable,Cableado,Cable cobre THHN #8 AWG metro,Cablec,THHN-8AWG,SUP-001,Guayaquil,2.82,available,2,0.82,reference,2026-08-31,,Precio por metro
+power_cable,Cableado,Cable cobre THHN #8 AWG metro,Genérico,THHN-8,SUP-008,Ecuador,1.65,unknown,7,0.52,marketplace,2026-08-31,,Verificar cobre real y norma
+label_package,Taller,"Etiquetas, ferrules y marcadores profesionales",Brady,BMP Kit,SUP-007,Quito,96,available,5,0.76,reference,2026-08-31,,Para entrega premium
+label_package,Taller,Etiquetado tablero básico,Genérico,LABEL-KIT,SUP-004,Machala,32,available,1,0.76,confirmed,2026-08-31,,Precio piloto
+plc_basic,Control,PLC básico 24VDC 8DI/6DO,Siemens,LOGO! 8,SUP-002,Quito,265,available,5,0.8,reference,2026-08-31,,Opción smart básica
+plc_basic,Control,PLC compacto,Schneider,Zelio SR3,SUP-001,Guayaquil,220,available,2,0.78,reference,2026-08-31,,Opción smart
+hmi_basic,Control,HMI básica 4.3 pulgadas,Weintek,MT8071iE,SUP-002,Quito,245,quote_needed,6,0.7,reference,2026-08-31,,Opcional

@@ -1,0 +1,9 @@
+supplier_id,name,city,country,contact,channel,rating,notes
+SUP-001,ElectroIndustrial Guayaquil,Guayaquil,Ecuador,ventas@electroindustrial.example,email,4.6,Proveedor piloto de componentes Schneider/ABB; confirmar stock real por RFQ
+SUP-002,Automatización Andina,Quito,Ecuador,cotizaciones@autoandina.example,email,4.5,Especialista en variadores, soft starters y PLC; catálogo referencial
+SUP-003,Cuenca Control Supply,Cuenca,Ecuador,ventas@cuencacontrol.example,email,4.3,Proveedor regional de tableros y componentes ABB/WEG
+SUP-004,Suministros El Oro,Machala,Ecuador,0980000000,whatsapp,4.1,Proveedor cercano para proyectos en El Oro; validar calidad y kAIC
+SUP-005,Base Interna ControlPro,Base interna,Ecuador,interno,internal,4.0,Precios históricos editables; no equivalen a precio confirmado
+SUP-006,Distribuidor Industrial Loja,Loja,Ecuador,ventas@industrialloja.example,email,4.2,Opciones logísticas para sierra sur y zonas mineras
+SUP-007,Proveedor Premium Quito,Quito,Ecuador,premium@proveedor.example,email,4.8,Marcas premium y mayor garantía; usualmente mayor costo
+SUP-008,Marketplace Referencial,Ecuador,Ecuador,web,marketplace,3.8,Fuente referencial; verificar modelo, bobina, stock, garantía y factura

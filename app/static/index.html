@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ControlPro Advisor OS V9 PriceTrust Closing</title>
+  <link rel="manifest" href="/static/manifest.json" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <img src="/static/assets/brand/controlpro_logo.svg" alt="ControlPro" class="logo" />
+      <p class="version">Advisor OS V9 · PriceTrust Closing</p>
+      <nav>
+        <a href="#dashboard" class="active">Panel central</a>
+        <a href="#intake">Datos</a>
+        <a href="#photos">Fotos</a>
+        <a href="#assembly">3D</a>
+        <a href="#singleline">Unifilar</a>
+        <a href="#control">Control</a>
+        <a href="#cadshop">CAD/Taller</a>
+        <a href="#calculations">Cálculos</a>
+        <a href="#solutions">Soluciones</a>
+        <a href="#bom">BOM</a>
+        <a href="#market">PriceGuard/Mercado</a>
+        <a href="#api-activation">APIs</a>
+        <a href="#rfq">RFQ</a>
+        <a href="#budget">Presupuesto</a>
+        <a href="#statistics">Estadísticas</a>
+        <a href="#validation">Validación</a>
+        <a href="#deliverables">Entregables</a>
+      </nav>
+      <div class="side-card">
+        <span class="pulse"></span>
+        <b>Modo piloto serio</b>
+        <p>PriceGuard: verde, amarillo o rojo. Precio cerrado solo con proveedor confirmado, stock y vigencia.</p>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Cotización industrial inteligente + expediente técnico + mercado</p>
+          <h1>ControlPro Advisor OS V9</h1>
+          <p>Con pocos datos genera un expediente técnico-comercial revisable: solución, BOM, mercado, RFQ, presupuesto, PDF/Excel y compuertas de calidad.</p>
+        </div>
+        <div class="actions">
+          <button id="loadExampleBtn" class="btn ghost">Cargar guinche demo</button>
+          <button id="generateBtn" class="btn primary">Generar expediente</button>
+          <button id="exportBtn" class="btn">Exportar técnico</button>
+          <button id="proposalBtn" class="btn">Propuesta cliente</button>
+          <button id="pdfBtn" class="btn">PDF</button>
+          <button id="xlsxBtn" class="btn">BOM Excel</button>
+          <button id="drawioBtn" class="btn">Draw.io</button>
+          <button id="wireBtn" class="btn">Lista cables</button>
+        </div>
+      </header>
+
+      <section class="workflow">
+        <span>1 Captura datos</span><i></i><span>2 Razona</span><i></i><span>3 Normaliza BOM</span><i></i><span>4 Busca precios</span><i></i><span>5 Valida</span><i></i><span>6 Entrega</span>
+      </section>
+
+
+
+
+
+
+      <section id="pricetrust-dashboard" class="content-grid price-dashboard">
+        <article class="panel">
+          <div class="panel-head"><div><h3>PriceTrust / Confiabilidad de precios</h3><p>Separa catálogo piloto, mercado vivo, precio confirmado y RFQ. No permite vender certeza falsa.</p></div><span class="badge complete">PriceGuard 9</span></div>
+          <div class="stat-grid" id="priceTrustCards"></div>
+          <div id="priceTrustPolicy" class="notice small-notice"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h3>Ahorro comercial estimado</h3><p>La meta es recuperar horas perdidas en cotizaciones que no siempre se ganan.</p></div><span class="badge blue">Ahorro de horas</span></div>
+          <div class="stat-grid" id="savingsCards"></div>
+          <div id="candidateAudit" class="audit-list"></div>
+        </article>
+      </section>
+
+      <section id="quick-mode" class="panel quick-mode">
+        <div class="panel-head"><div><h3>Modo rápido guiado</h3><p>Para cotizar sin perder horas: llena lo mínimo, genera, revisa semáforo y confirma precios débiles por RFQ.</p></div><span class="badge blue">Con poco, hace mucho</span></div>
+        <div class="quick-grid">
+          <button class="quick-chip" data-template="hoist">Guinche / izaje</button>
+          <button class="quick-chip" data-template="pump">Bomba industrial</button>
+          <button class="quick-chip" data-template="compressor">Compresor</button>
+          <button class="quick-chip" data-template="panel">Tablero motor general</button>
+        </div>
+        <div class="assistant-steps" id="guidedSteps">
+          <b>Ruta del asesor:</b> captura datos críticos → normaliza solución → arma BOM → busca precios → marca confianza → genera propuesta.
+        </div>
+      </section>
+
+      <section id="precision" class="content-grid precision-board">
+        <article class="panel">
+          <div class="panel-head"><div><h3>Semáforo de precisión</h3><p>La app no debe inventar certeza: mide entrada, coherencia, seguridad, mercado y salida comercial.</p></div><span class="badge complete">Quality gates</span></div>
+          <div class="stat-grid">
+            <div><small>Calidad de datos</small><b id="qualityScore">--</b></div>
+            <div><small>Preparación de cotización</small><b id="quoteReadiness">--</b></div>
+            <div><small>Liberación construcción</small><b id="constructionGate">Bloqueada</b></div>
+          </div>
+          <div id="auditRows" class="audit-list"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h3>Libro de supuestos</h3><p>Cada supuesto queda visible para que el ingeniero revise rápido y no reconstruya desde cero.</p></div><span class="badge warn">No garbage policy</span></div>
+          <div id="assumptionRows" class="audit-list"></div>
+        </article>
+      </section>
+
+      <section id="dashboard" class="hero-grid">
+        <article class="hero-card wide">
+          <div class="hero-copy">
+            <span class="pill">No es una guía. Es un copiloto de cotización industrial con compuertas de calidad.</span>
+            <h2 id="headline">Convierte datos de campo en una cotización técnica defendible, sin perder horas si el cliente no compra.</h2>
+            <p id="verdict">Carga datos, fotos y criterios; los agentes normalizan la solución, marcan incertidumbre, buscan precios por confianza y entregan el paquete revisable.</p>
+            <div class="kpis">
+              <div><b id="kpiCompleteness">--</b><small>completitud</small></div>
+              <div><b id="kpiMarket">--</b><small>cobertura mercado</small></div>
+              <div><b id="kpiPrice">--</b><small>precio recomendado</small></div>
+              <div><b id="kpiRFQ">--</b><small>ítems RFQ</small></div>
+            </div>
+          </div>
+          <img src="/static/assets/concepts/controlpro_v5_inside.png" alt="Interfaz ControlPro" />
+        </article>
+        <article class="panel compact status-card">
+          <h3>Estado de salida</h3>
+          <div class="ring"><span id="ringMini">94%</span></div>
+          <p id="statusText">Listo para generar expediente.</p>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel span-2" id="intake">
+          <div class="panel-head"><div><h3>1. Datos de entrada guiados</h3><p>La app trabaja bien solo si la entrada está ordenada. Los campos críticos bajan o suben la confianza del expediente.</p></div><span class="badge">Entrada inteligente</span></div>
+          <form id="intakeForm" class="form-grid">
+            <label>Nombre del proyecto <small>Usado en propuesta y RFQ</small><input name="project_name" value="Guinche de izaje — Cotización técnica premium"></label>
+            <label>Cliente <small>Opcional para propuesta</small><input name="client_name" value="Cliente industrial"></label>
+            <label>Ciudad <small>Para proveedores/logística</small><input name="location_city" value="Zaruma"></label>
+            <label>Provincia <small>Para cercanía de proveedores</small><input name="location_province" value="El Oro"></label>
+            <label>País <small>Referencia comercial</small><input name="country" value="Ecuador"></label>
+            <label>Aplicación <small>Guinche, bomba, compresor...</small><input name="application" value="Guinche / winche de izaje"></label>
+            <label>Potencia HP <small>Dato de placa</small><input name="motor_power_hp" type="number" step="0.1" value="25"></label>
+            <label>Voltaje <small>Alimentación real</small><input name="voltage" type="number" value="460"></label>
+            <label>Fases <small>1 o 3</small><select name="phases"><option value="3">Trifásico</option><option value="1">Monofásico</option></select></label>
+            <label>Frecuencia Hz <small>50/60</small><input name="frequency_hz" type="number" value="60"></label>
+            <label>Corriente placa A <small>Clave; si falta baja confianza</small><input name="full_load_amps" type="number" step="0.1" value="30.4"></label>
+            <label>Eficiencia <small>0.90 a 0.96</small><input name="efficiency" type="number" step="0.001" value="0.936"></label>
+            <label>Factor potencia <small>Dato de placa o supuesto</small><input name="power_factor" type="number" step="0.01" value="0.86"></label>
+            <label>Factor servicio <small>Sobrecarga</small><input name="service_factor" type="number" step="0.01" value="1.15"></label>
+            <label>RPM <small>Velocidad nominal</small><input name="rpm" type="number" value="1765"></label>
+            <label>Carcasa <small>TEFC, ODP...</small><input name="enclosure" value="TEFC"></label>
+            <label>Tipo de carga <small>Izaje, bomba...</small><input name="load_type" value="Izaje / guinche"></label>
+            <label>Ciclo trabajo <small>Continuo/intermitente</small><input name="duty_cycle" value="Intermitente"></label>
+            <label>Arranques/hora <small>Impacta solución</small><input name="starts_per_hour" type="number" value="30"></label>
+            <label>Inercia <small>Baja/media/alta</small><input name="inertia" value="Media"></label>
+            <label>Ambiente <small>Polvo, humedad, mina...</small><input name="environment" value="Interior industrial con polvo"></label>
+            <label>Temp. ambiente °C <small>Criterio térmico</small><input name="ambient_temp_c" type="number" value="40"></label>
+            <label>Altitud m <small>Si aplica</small><input name="altitude_m" type="number" value="1000"></label>
+            <label>Área peligrosa <small>Gases/polvo explosivo</small><input name="hazard_area" value="Ninguna declarada"></label>
+            <label>Distancia tablero-motor m <small>Caída de tensión</small><input name="cable_run_m" type="number" value="45"></label>
+            <label>Voltaje control <small>24VDC,120VAC...</small><input name="control_voltage" type="number" value="120"></label>
+            <label>Perfil presupuesto <small>Calidad/costo</small><select name="budget_profile"><option>Profesional</option><option>Premium</option><option>Económico</option></select></label>
+            <label>Velocidad cotización <small>Urgencia</small><select name="quote_speed"><option>Rápida pero segura</option><option>Máxima precisión</option><option>Solo borrador</option></select></label>
+            <label>Calidad preferida <small>Selección proveedor</small><select name="preferred_quality"><option>Industrial confiable</option><option>Premium de marca</option><option>Económica controlada</option></select></label>
+            <label>Días armado tablero <small>Mano de obra</small><input name="labor_days_panel" type="number" step="0.5" value="1.5"></label>
+            <label>Días instalación campo <small>Mano de obra</small><input name="labor_days_field" type="number" step="0.5" value="1.5"></label>
+            <label>Margen % <small>Utilidad</small><input name="margin_percent" type="number" step="1" value="25"></label>
+            <label>Contingencia % <small>Riesgo/material</small><input name="contingency_percent" type="number" step="1" value="8"></label>
+
+            <label>Capacidad izaje ton <small>Si aplica</small><input name="load_capacity_ton" type="number" step="0.1" value="10"></label>
+            <label>Fotos cargadas <small>Placa/sitio/tablero</small><input name="field_photos_count" type="number" value="3"></label>
+            <label>kA corto disponible <small>Si se conoce</small><input name="short_circuit_available_ka" type="number" step="0.1" value=""></label>
+            <label>Días vigencia oferta <small>Control comercial</small><input name="quote_valid_days" type="number" value="7"></label>
+            <label>Alcance instalación <small>Taller, campo o completo</small><select name="installation_scope"><option>Tablero + instalación en campo</option><option>Solo tablero</option><option>Solo diseño/cotización</option></select></label>
+            <label class="wide">Notas <small>Restricciones, situación de campo y criterios comerciales</small><textarea name="user_notes">Reemplazar tablero existente del guinche. Mantener huella de montaje. Considerar crecimiento futuro con variador.</textarea></label>
+            <div class="toggles wide">
+              <label><input type="checkbox" name="needs_reversing" checked> Inversión subir/bajar</label>
+              <label><input type="checkbox" name="needs_brake" checked> Control de freno</label>
+              <label><input type="checkbox" name="needs_limit_switches" checked> Finales de carrera</label>
+              <label><input type="checkbox" name="needs_estop" checked> Paro de emergencia</label>
+              <label><input type="checkbox" name="needs_phase_monitor" checked> Monitor de fase</label>
+            </div>
+          </form>
+        </article>
+
+        <article class="panel" id="photos"><div class="panel-head"><div><h3>2. Fotos y evidencia</h3><p>Previsualiza fotos. En producción se conecta a almacenamiento y OCR/visión para placa.</p></div><span class="badge">Evidencia</span></div><label class="upload-box"><input type="file" id="photoInput" accept="image/*" multiple><span>+ Agregar fotos</span><small>Placa, tablero, ruta de cable, freno, ambiente</small></label><div id="photoStrip" class="photo-strip"><div class="photo-card motor"><span>Motor</span></div><div class="photo-card panelpic"><span>Tablero</span></div><div class="photo-card hoist"><span>Guinche</span></div></div></article>
+
+        <article class="panel assembly-panel" id="assembly"><div class="panel-head"><div><h3>3. Vista 3D conceptual</h3><p>Modelo didáctico dentro de la app para explicar y ordenar tablero/motor.</p></div><span class="badge blue">3D web</span></div><div class="model-stage"><div class="motor3d"><i></i><b></b><em></em><span>Motor TEFC</span></div><div class="cabinet3d"><div class="cab-door"></div><div class="cab-body"><i></i><i></i><b></b><b></b><em></em></div><span>Tablero</span></div><div class="dimension d1">Motor + base</div><div class="dimension d2">Gabinete industrial</div></div></article>
+
+        <article class="panel diagram-panel" id="singleline"><div class="panel-head"><div><h3>4. Unifilar CAD-like</h3><p>Rama de energía con tags, title block, notas de SCCR/kAIC y salida SVG exportable.</p></div><span class="badge">SVG</span></div><div class="diagram-slot" id="singleLineSvg"></div></article>
+        <article class="panel diagram-panel" id="control"><div class="panel-head"><div><h3>5. Ladder CAD-like</h3><p>Rungs numerados, contactos etiquetados, bobinas, cables preliminares y borneras.</p></div><span class="badge">Ladder</span></div><div class="diagram-slot" id="controlSvg"></div></article>
+        <article class="panel diagram-panel" id="panel3d"><div class="panel-head"><div><h3>6. Layout de tablero CAD-like</h3><p>Backplate, riel DIN, canaleta, puerta, borneras y reserva. Exportable como SVG.</p></div><span class="badge">Preview</span></div><div class="diagram-slot" id="panelSvg"></div></article>
+
+        <article class="panel span-2" id="cadshop"><div class="panel-head"><div><h3>7. CAD / Taller</h3><p>Material intermedio para formalizar en CAD: borneras, cables, Draw.io y SVGs. La meta es que el humano revise, no redibuje desde cero.</p></div><span class="badge blue">CAD-like V9</span></div>
+          <div class="cad-actions">
+            <button id="singleSvgBtn" class="btn ghost">Exportar unifilar SVG</button>
+            <button id="controlSvgBtn" class="btn ghost">Exportar ladder SVG</button>
+            <button id="panelSvgBtn" class="btn ghost">Exportar layout SVG</button>
+            <button id="terminalBtn" class="btn ghost">Lista borneras CSV</button>
+          </div>
+          <div class="cad-grid">
+            <div><h4>Lista preliminar de borneras</h4><div class="table-wrap"><table><thead><tr><th>Bornera</th><th>Cable</th><th>Desde</th><th>Hasta</th><th>Función</th></tr></thead><tbody id="terminalRows"></tbody></table></div></div>
+            <div><h4>Lista preliminar de cables</h4><div class="table-wrap"><table><thead><tr><th>Cable</th><th>Desde</th><th>Hasta</th><th>Conductores</th><th>Calibre</th><th>Long. m</th></tr></thead><tbody id="wireRows"></tbody></table></div></div>
+          </div>
+        </article>
+
+        <article class="panel" id="calculations"><div class="panel-head"><div><h3>8. Cálculos</h3><p>Preliminares para cotización y revisión, no liberación de construcción.</p></div><span class="badge complete">Cálculo</span></div><div class="metric-grid" id="calcCards"></div></article>
+        <article class="panel" id="solutions"><div class="panel-head"><div><h3>9. Soluciones comparadas</h3><p>El sistema compara alternativas, no impone una única respuesta.</p></div><span class="badge blue" id="recommendedBadge">Recomendado</span></div><div class="options-grid" id="optionsGrid"></div></article>
+        <article class="panel span-2" id="bom"><div class="panel-head"><div><h3>10. BOM técnico</h3><p>Materiales normalizados: especificación, cantidad y chequeos críticos.</p></div><span class="badge">BOM</span></div><div class="table-wrap"><table><thead><tr><th>Categoría</th><th>Ítem</th><th>Cant.</th><th>Especificación</th><th>Chequeos</th></tr></thead><tbody id="bomRows"></tbody></table></div></article>
+
+        <article class="panel span-2" id="market"><div class="panel-head"><div><h3>11. PriceGuard + mercado y proveedores</h3><p>Semáforo de precios: verde usable, amarillo referencial, rojo bloqueado/RFQ. El sistema evita precios exagerados o sospechosamente bajos.</p></div><span class="badge complete">PriceGuard 9</span></div><div class="market-summary" id="marketSummary"></div><div class="table-wrap"><table><thead><tr><th>Componente</th><th>Proveedor elegido</th><th>Precio y banda</th><th>Fuente</th><th>Semáforo</th><th>Acción requerida</th></tr></thead><tbody id="marketRows"></tbody></table></div></article>
+
+        <article class="panel span-2" id="api-activation"><div class="panel-head"><div><h3>12. Activación de APIs reales</h3><p>Preparado para credenciales reales: Mercado Libre, Google Places, WhatsApp Cloud y SMTP. La app muestra qué falta y no finge datos en vivo.</p></div><span class="badge warn">.env ready</span></div>
+          <div class="api-layout">
+            <div class="api-status" id="apiStatusRows"></div>
+            <div><h4>Plantilla .env</h4><textarea id="envTemplate" readonly></textarea><button id="copyEnvBtn" class="btn ghost">Copiar plantilla .env</button></div>
+          </div>
+        </article>
+
+        <article class="panel span-2" id="rfq"><div class="panel-head"><div><h3>13. RFQ listo para proveedores</h3><p>Cuando no hay precio confirmado, genera mensaje para WhatsApp/correo.</p></div><span class="badge warn">Confirmar stock</span></div><textarea id="rfqMessage" readonly></textarea><button id="copyRfqBtn" class="btn ghost">Copiar RFQ</button></article>
+        <article class="panel" id="budget"><div class="panel-head"><div><h3>14. Presupuesto</h3><p>Materiales, mano de obra, ingeniería, contingencia y margen.</p></div><span class="badge complete">Venta</span></div><div class="budget-layout"><div class="donut"></div><div class="budget-rows" id="budgetRows"></div></div></article>
+        <article class="panel" id="statistics"><div class="panel-head"><div><h3>15. Estadísticas</h3><p>Indican si la propuesta ya está fuerte o necesita más datos.</p></div><span class="badge">Control Tower</span></div><div class="stat-grid" id="statsGrid"></div></article>
+        <article class="panel" id="validation"><div class="panel-head"><div><h3>16. Validación</h3><p>El humano debe verificar, no reconstruir.</p></div><span class="badge warn">Compuerta</span></div><div class="validation-layout"><div class="ring"><span id="ringValue">--</span></div><div><h4 id="reviewerEffort">Pendiente</h4><p id="validationText"></p><ul id="validationGates"></ul><div class="notice">No construir ni energizar sin revisión de campo, normativa y personal calificado.</div></div></div></article>
+        <article class="panel span-2" id="deliverables"><div class="panel-head"><div><h3>17. Entregables</h3><p>Material listo para revisar, vender, imprimir o enviar al cliente.</p></div><span class="badge complete">Paquete final</span></div><div class="deliverable-grid" id="deliverableGrid"></div></article>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
