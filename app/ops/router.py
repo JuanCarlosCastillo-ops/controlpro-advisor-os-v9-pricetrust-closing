@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import hmac
 from pathlib import Path
 from typing import Optional
 
@@ -24,8 +25,11 @@ def get_service() -> OpsService:
 
 
 def _auth(x_teod_api_key: Optional[str] = Header(default=None)) -> None:
-    expected = os.environ.get("TEOD_HUB_API_KEY")
-    if expected and x_teod_api_key != expected:
+    expected = os.environ.get("TEOD_HUB_API_KEY", "").strip()
+    if not expected:
+        raise HTTPException(status_code=503, detail="ops_auth_not_configured")
+    supplied = x_teod_api_key or ""
+    if not hmac.compare_digest(supplied, expected):
         raise HTTPException(status_code=401, detail="invalid_api_key")
 
 
@@ -40,6 +44,7 @@ def ops_health():
         "status": "ok",
         "product": "TEOD Industrial AI Hub V1",
         "persistence": "sqlite-wal",
+        "auth_configured": bool(os.environ.get("TEOD_HUB_API_KEY", "").strip()),
         "human_approval_gate": True,
         "agents": ["intake_triage", "safety_guard", "diagnostic_assistant", "work_planner", "supervisor"],
     }

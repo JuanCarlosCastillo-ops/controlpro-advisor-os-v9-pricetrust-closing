@@ -17,7 +17,9 @@ La IA no autoriza puentes de protección, cambios de ajuste ni energización. To
 V1 usa SQLite + WAL para que funcione sin servicios externos. `TEOD_HUB_DB_PATH` permite mover el archivo a volumen persistente. La capa `OpsStore` aísla persistencia para migrar a Postgres/Supabase sin reescribir agentes ni API.
 
 ## Seguridad de API
-Si se define `TEOD_HUB_API_KEY`, las rutas operativas requieren `X-TEOD-API-Key`. Para un despliegue multiempresa se debe reemplazar este control de piloto por identidad real + RBAC + RLS.
+Las rutas operativas funcionan en modo **fail-closed**: si `TEOD_HUB_API_KEY` no existe, responden 503; si la clave es incorrecta, responden 401. Solo `/ops` y `/api/ops/health` permanecen públicos para cargar la interfaz y comprobar disponibilidad.
+
+La UI solicita la clave al operador y la conserva únicamente en `sessionStorage`, por lo que desaparece al cerrar la sesión/pestaña. Para un despliegue multiempresa se debe reemplazar este control de piloto por identidad real + RBAC + RLS.
 
 ## Alcance bloqueado de V1
 Incluido: activos, incidencias, 5 agentes deterministas, órdenes, aprobación, auditoría, dashboard y caso demo industrial.
@@ -38,3 +40,11 @@ Fuera de V1: ejecución automática sobre PLC, escritura Modbus, compras automá
 
 ## DoD
 V1 se considera cerrada cuando CI pasa, la UI abre, el seed crea el caso, una incidencia genera cinco `agent_runs`, existe exactamente una orden activa por incidente, la orden no puede ejecutarse sin aprobación y el ledger registra cada transición relevante.
+
+
+## Hardening V1.1
+- Acceso operacional bloqueado por defecto.
+- Comparación de clave con `hmac.compare_digest`.
+- Clave del navegador solo en sesión, no en almacenamiento persistente.
+- Endpoint de salud informa si la autenticación está configurada, sin exponer el secreto.
+- Tests negativos para clave ausente e incorrecta.

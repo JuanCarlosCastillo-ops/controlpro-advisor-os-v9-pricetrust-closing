@@ -3,22 +3,45 @@ const $ = (id) => document.getElementById(id);
 const esc = (v='') => String(v).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const fmt = (iso) => iso ? new Date(iso).toLocaleString('es-EC',{dateStyle:'short',timeStyle:'short'}) : '—';
 
+class ApiError extends Error {
+  constructor(status, detail){ super(detail || 'Error'); this.status=status; this.detail=detail; }
+}
+function authKey(){ return sessionStorage.getItem('teod_api_key') || ''; }
+function openAuth(message=''){
+  $('auth-error').textContent=message;
+  if (!$('auth-dialog').open) $('auth-dialog').showModal();
+  setTimeout(()=>$('auth-key').focus(), 50);
+}
+function lockHub(){
+  sessionStorage.removeItem('teod_api_key');
+  state.dashboard=null; state.assets=[]; state.incidents=[]; state.workOrders=[]; state.audit=[];
+  $('system-status').textContent='Bloqueado';
+  openAuth('');
+}
 async function api(path, options={}) {
-  const key = localStorage.getItem('teod_api_key');
   const headers = {'Content-Type':'application/json', ...(options.headers||{})};
+  const key = authKey();
   if (key) headers['X-TEOD-API-Key'] = key;
-  const res = await fetch(path, {...options, headers});
-  if (!res.ok) throw new Error((await res.json().catch(()=>({detail:res.statusText}))).detail || 'Error');
-  return res.json();
+  const res = await fetch(path, {...options, headers, cache:'no-store'});
+  const payload = await res.json().catch(()=>null);
+  if (!res.ok) {
+    const detail = payload?.detail || res.statusText || 'Error';
+    if (res.status === 401) {
+      sessionStorage.removeItem('teod_api_key');
+      openAuth('Clave incorrecta o sesión expirada.');
+    }
+    throw new ApiError(res.status, detail);
+  }
+  return payload;
 }
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
 function badge(value){const v=esc(value||'');return '<span class="badge '+v+'">'+v+'</span>'}
 
 async function refresh(){
-  const [health,dashboard,assets,incidents,orders,audit] = await Promise.all([
-    api('/api/ops/health'), api('/api/ops/dashboard'), api('/api/ops/assets'), api('/api/ops/incidents'), api('/api/ops/work-orders'), api('/api/ops/audit?limit=40')
+  const [dashboard,assets,incidents,orders,audit] = await Promise.all([
+    api('/api/ops/dashboard'), api('/api/ops/assets'), api('/api/ops/incidents'), api('/api/ops/work-orders'), api('/api/ops/audit?limit=40')
   ]);
-  $('system-status').textContent = health.status === 'ok' ? 'Sistema operativo' : 'Revisar sistema';
+  $('system-status').textContent='Sistema operativo';
   Object.assign(state,{dashboard,assets,incidents,workOrders:orders,audit});
   renderAll();
 }
@@ -39,7 +62,7 @@ function table(headers, rows){if(!rows.length)return '<div class="empty">Sin reg
 
 async function approveOrder(id){
   const approver=prompt('Nombre de quien aprueba la orden:'); if(!approver)return;
-  try{await api('/api/ops/work-orders/'+id+'/approve',{method:'POST',body:JSON.stringify({approver,note:'Aprobación desde TEOD Industrial AI Hub'})});toast('Orden aprobada y auditada');await refresh()}catch(e){toast('Error: '+e.message)}
+  try{await api('/api/ops/work-orders/'+id+'/approve',{method:'POST',body:JSON.stringify({approver,note:'Aprobación desde TEOD Industrial AI Hub'})});toast('Orden aprobada y auditada');await refresh()}catch(e){if(e.status!==401)toast('Error: '+e.message)}
 }
 window.approveOrder=approveOrder;
 
@@ -48,13 +71,40 @@ document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click'
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$((btn.dataset.view)+'-view').classList.add('active');
   const titles={dashboard:'Resumen operacional',assets:'Activos industriales',incidents:'Gestión de incidencias',workorders:'Órdenes de trabajo',audit:'Auditoría y trazabilidad'};$('page-title').textContent=titles[btn.dataset.view];
 }));
+$('lock-btn').addEventListener('click', lockHub);
 $('new-incident-btn').addEventListener('click',()=>$('incident-dialog').showModal());
 $('close-dialog').addEventListener('click',()=>$('incident-dialog').close());$('cancel-dialog').addEventListener('click',()=>$('incident-dialog').close());
-$('seed-btn').addEventListener('click',async()=>{try{const r=await api('/api/ops/demo/seed',{method:'POST'});toast(r.seeded?'Caso industrial cargado':'Ya existen activos');await refresh()}catch(e){toast('Error: '+e.message)}});
+$('seed-btn').addEventListener('click',async()=>{try{const r=await api('/api/ops/demo/seed',{method:'POST'});toast(r.seeded?'Caso industrial cargado':'Ya existen activos');await refresh()}catch(e){if(e.status!==401)toast('Error: '+e.message)}});
 $('incident-form').addEventListener('submit',async(e)=>{
   e.preventDefault(); const measurements={};
   if($('incident-temp').value)measurements.temperature_c=Number($('incident-temp').value);if($('incident-current').value)measurements.current_a=Number($('incident-current').value);
   const payload={asset_id:$('incident-asset').value||null,title:$('incident-title').value,description:$('incident-description').value,severity:$('incident-severity').value,source:'web_ui',measurements,attachments:[]};
-  try{await api('/api/ops/incidents',{method:'POST',body:JSON.stringify(payload)});$('incident-dialog').close();$('incident-form').reset();toast('Incidencia analizada por 5 agentes');await refresh()}catch(err){toast('Error: '+err.message)}
+  try{await api('/api/ops/incidents',{method:'POST',body:JSON.stringify(payload)});$('incident-dialog').close();$('incident-form').reset();toast('Incidencia analizada por 5 agentes');await refresh()}catch(err){if(err.status!==401)toast('Error: '+err.message)}
 });
-refresh().catch(e=>{ $('system-status').textContent='Error de conexión'; toast('No se pudo cargar: '+e.message); });
+$('auth-form').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const key=$('auth-key').value.trim();
+  if(!key)return;
+  sessionStorage.setItem('teod_api_key',key);
+  $('auth-error').textContent='Validando…';
+  try{
+    await refresh();
+    $('auth-key').value='';
+    $('auth-error').textContent='';
+    $('auth-dialog').close();
+    toast('Acceso autorizado');
+  }catch(err){
+    sessionStorage.removeItem('teod_api_key');
+    if(err.status!==401)$('auth-error').textContent='No se pudo validar el acceso.';
+  }
+});
+
+async function boot(){
+  try{
+    const health=await api('/api/ops/health');
+    $('system-status').textContent=health.status==='ok'?'Hub disponible':'Revisar sistema';
+  }catch(_){$('system-status').textContent='Sin conexión';}
+  if(!authKey()){openAuth('');return;}
+  try{await refresh()}catch(e){if(e.status!==401)toast('No se pudo cargar: '+e.message)}
+}
+boot();
