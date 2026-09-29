@@ -34,6 +34,7 @@
           <h1 id="page-title">Resumen operacional</h1>
         </div>
         <div class="top-actions">
+          <button id="lock-btn" class="btn ghost">Bloquear</button>
           <button id="seed-btn" class="btn ghost">Cargar caso demo</button>
           <button id="new-incident-btn" class="btn primary">+ Nueva incidencia</button>
         </div>
@@ -91,6 +92,18 @@
       </section>
     </main>
   </div>
+
+  <dialog id="auth-dialog">
+    <form id="auth-form" method="dialog">
+      <div class="dialog-head">
+        <div><p class="eyebrow">ACCESO OPERACIONAL</p><h2>TEOD Industrial AI Hub</h2></div>
+      </div>
+      <p class="auth-copy">Ingresa la clave operacional. Se conserva únicamente durante esta sesión del navegador.</p>
+      <label>Clave de acceso<input id="auth-key" type="password" autocomplete="current-password" required placeholder="••••••••••••••••" /></label>
+      <div id="auth-error" class="auth-error" aria-live="polite"></div>
+      <div class="dialog-actions"><button class="btn primary" type="submit">Entrar al Hub</button></div>
+    </form>
+  </dialog>
 
   <dialog id="incident-dialog">
     <form id="incident-form" method="dialog">
