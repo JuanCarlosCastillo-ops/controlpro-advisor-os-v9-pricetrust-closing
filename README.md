@@ -16,7 +16,7 @@ Esta rama agrega un **vertical slice operacional cerrado** encima del motor téc
 - Orden de trabajo bloqueada en `pending_approval` hasta aprobación humana identificada.
 - Audit ledger para altas, análisis y aprobaciones.
 - SQLite + WAL como persistencia de piloto, aislada detrás de `OpsStore`.
-- `TEOD_HUB_API_KEY` habilita protección simple por header `X-TEOD-API-Key`.
+- `TEOD_HUB_API_KEY` es obligatorio para las rutas operativas; la UI lo solicita y lo conserva solo durante la sesión.
 - `TEOD_HUB_DB_PATH` permite elegir la ubicación del archivo de datos.
 
 La especificación y el lock de alcance están en `docs/TEOD_INDUSTRIAL_AI_HUB_V1.md`.
