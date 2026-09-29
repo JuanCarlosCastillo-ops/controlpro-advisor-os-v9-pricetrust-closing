@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b0d10" />
+  <title>TEOD Industrial AI Hub</title>
+  <link rel="stylesheet" href="/static/ops.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">T</div>
+        <div><strong>TEOD</strong><span>Industrial AI Hub</span></div>
+      </div>
+      <nav>
+        <button class="nav-item active" data-view="dashboard">Resumen</button>
+        <button class="nav-item" data-view="assets">Activos</button>
+        <button class="nav-item" data-view="incidents">Incidencias</button>
+        <button class="nav-item" data-view="workorders">Órdenes</button>
+        <button class="nav-item" data-view="audit">Auditoría</button>
+      </nav>
+      <div class="system-card">
+        <span class="dot"></span>
+        <div><strong id="system-status">Inicializando</strong><small>5 agentes · aprobación humana</small></div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">OPERACIÓN INDUSTRIAL</p>
+          <h1 id="page-title">Resumen operacional</h1>
+        </div>
+        <div class="top-actions">
+          <button id="seed-btn" class="btn ghost">Cargar caso demo</button>
+          <button id="new-incident-btn" class="btn primary">+ Nueva incidencia</button>
+        </div>
+      </header>
+
+      <section id="dashboard-view" class="view active">
+        <div class="metrics">
+          <article class="metric"><span>Activos</span><strong id="m-assets">—</strong><small>registrados</small></article>
+          <article class="metric"><span>Incidencias</span><strong id="m-incidents">—</strong><small>abiertas</small></article>
+          <article class="metric danger"><span>Críticas</span><strong id="m-critical">—</strong><small>requieren prioridad</small></article>
+          <article class="metric warn"><span>Aprobaciones</span><strong id="m-approvals">—</strong><small>pendientes</small></article>
+        </div>
+
+        <div class="grid two">
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">FLUJO ACTIVO</p><h2>Incidencias recientes</h2></div><span class="pill">triage automático</span></div>
+            <div id="recent-incidents" class="list"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">HUMAN-IN-THE-LOOP</p><h2>Órdenes por aprobar</h2></div><span class="pill amber">bloqueadas</span></div>
+            <div id="recent-orders" class="list"></div>
+          </article>
+        </div>
+
+        <article class="panel architecture">
+          <div class="panel-head"><div><p class="eyebrow">ARQUITECTURA V1</p><h2>Cadena de decisión</h2></div><span class="pill green">auditable</span></div>
+          <div class="agent-flow">
+            <div><b>01</b><strong>Ingreso</strong><span>estructura evidencia</span></div>
+            <i>→</i>
+            <div><b>02</b><strong>Safety Guard</strong><span>eleva riesgo</span></div>
+            <i>→</i>
+            <div><b>03</b><strong>Diagnóstico</strong><span>hipótesis + pruebas</span></div>
+            <i>→</i>
+            <div><b>04</b><strong>Work Planner</strong><span>plan seguro</span></div>
+            <i>→</i>
+            <div class="supervisor"><b>05</b><strong>Supervisor</strong><span>gate humano</span></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="assets-view" class="view">
+        <article class="panel"><div class="panel-head"><div><p class="eyebrow">ASSET INTELLIGENCE</p><h2>Inventario técnico</h2></div></div><div id="assets-table" class="table-wrap"></div></article>
+      </section>
+
+      <section id="incidents-view" class="view">
+        <article class="panel"><div class="panel-head"><div><p class="eyebrow">SERVICE DESK</p><h2>Incidencias</h2></div></div><div id="incidents-table" class="table-wrap"></div></article>
+      </section>
+
+      <section id="workorders-view" class="view">
+        <article class="panel"><div class="panel-head"><div><p class="eyebrow">EJECUCIÓN CONTROLADA</p><h2>Órdenes de trabajo</h2></div></div><div id="orders-table" class="table-wrap"></div></article>
+      </section>
+
+      <section id="audit-view" class="view">
+        <article class="panel"><div class="panel-head"><div><p class="eyebrow">TRAZABILIDAD</p><h2>Audit ledger</h2></div></div><div id="audit-list" class="timeline"></div></article>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="incident-dialog">
+    <form id="incident-form" method="dialog">
+      <div class="dialog-head"><div><p class="eyebrow">NUEVA INCIDENCIA</p><h2>Registrar condición</h2></div><button type="button" id="close-dialog" class="icon-btn">×</button></div>
+      <label>Activo<select id="incident-asset"><option value="">Sin asociar</option></select></label>
+      <label>Título<input id="incident-title" required maxlength="180" placeholder="Ej. Contactor K2 con temperatura elevada" /></label>
+      <label>Descripción<textarea id="incident-description" required rows="5" maxlength="4000" placeholder="Describe lo observado sin asumir la causa."></textarea></label>
+      <div class="form-row">
+        <label>Severidad<select id="incident-severity"><option>low</option><option selected>medium</option><option>high</option><option>critical</option></select></label>
+        <label>Temperatura °C<input id="incident-temp" type="number" step="0.1" /></label>
+        <label>Corriente A<input id="incident-current" type="number" step="0.1" /></label>
+      </div>
+      <div class="dialog-actions"><button type="button" id="cancel-dialog" class="btn ghost">Cancelar</button><button class="btn primary" type="submit">Registrar y analizar</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+  <script src="/static/ops.js"></script>
+</body>
+</html>
