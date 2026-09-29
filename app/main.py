@@ -14,6 +14,7 @@ from app.engine.exports import export_bom_csv, export_bom_xlsx, export_pdf_repor
 from app.engine.cad import single_line_cad_svg, control_ladder_cad_svg, panel_layout_cad_svg, terminal_schedule, wire_schedule, drawio_xml
 from app.engine.cad_exports import rows_to_csv
 from app.integrations.config import integration_status, env_template
+from app.ops import ops_router
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
@@ -24,6 +25,7 @@ app = FastAPI(
     version="16.0-marketvision-pro",
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.include_router(ops_router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -65,7 +67,7 @@ def health():
         "language": "es",
         "modules": [
             "datos", "fotos", "3d", "unifilar", "control", "calculos", "soluciones",
-            "BOM", "PriceGuard", "semaforo-precios", "mercado", "proveedores", "APIs", "RFQ", "presupuesto", "CRM", "registro_piloto", "capas_cliente", "validacion", "CAD-like", "Draw.io", "PDF", "Excel", "entregables"
+            "BOM", "PriceGuard", "semaforo-precios", "mercado", "proveedores", "APIs", "RFQ", "presupuesto", "CRM", "registro_piloto", "capas_cliente", "validacion", "CAD-like", "Draw.io", "PDF", "Excel", "entregables", "TEOD-Industrial-AI-Hub"
         ],
         "safety_boundary": "asesor técnico-comercial; requiere aprobación humana antes de construir o energizar",
     }
