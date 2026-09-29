@@ -2,6 +2,39 @@
 
 Copiloto de cotizacion industrial en espanol para motores, bombas, compresores, guinches, bandas y tableros.
 
+
+## TEOD Industrial AI Hub V1
+
+Esta rama agrega un **vertical slice operacional cerrado** encima del motor técnico existente. No intenta resolver toda la industria en V1: cierra un flujo completo y auditable antes de ampliar alcance.
+
+**Flujo:** activo → incidencia → 5 agentes → orden de trabajo → aprobación humana → auditoría.
+
+- UI operacional: `/ops`
+- Activos industriales y ficha técnica.
+- Incidencias con mediciones y severidad.
+- Cinco agentes deterministas: triage, Safety Guard, diagnóstico, Work Planner y Supervisor.
+- Orden de trabajo bloqueada en `pending_approval` hasta aprobación humana identificada.
+- Audit ledger para altas, análisis y aprobaciones.
+- SQLite + WAL como persistencia de piloto, aislada detrás de `OpsStore`.
+- `TEOD_HUB_API_KEY` habilita protección simple por header `X-TEOD-API-Key`.
+- `TEOD_HUB_DB_PATH` permite elegir la ubicación del archivo de datos.
+
+La especificación y el lock de alcance están en `docs/TEOD_INDUSTRIAL_AI_HUB_V1.md`.
+
+### Prueba rápida
+
+1. Inicie la aplicación.
+2. Abra `http://127.0.0.1:8000/ops`.
+3. Pulse **Cargar caso demo**.
+4. Revise la incidencia creada, los cinco agent runs y la orden pendiente.
+5. Apruebe la orden y confirme el evento en **Auditoría**.
+
+### Tests
+
+```bash
+pytest -q
+```
+
 ## Lo nuevo en V16
 
 - Market Ledger historico con mediana/IQR por componente, HP/corriente/tension y fuente.
